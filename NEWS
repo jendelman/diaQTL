@@ -1,0 +1,8 @@
+Changes in 0.60
+* Repository is public
+* Removed option to disable dominance in read_data
+* Removed qqplot and dominance option from set_params
+* Changed reporting of dominance variance to be proportion of total variance
+* Added LODthresh function 
+* Removed two markers from the vignette dataset due to discordance with new reference genome
+* Changed display of R2 results to percent instead of proportion
