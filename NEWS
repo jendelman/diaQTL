@@ -6,3 +6,7 @@ Changes in 0.60
 * Added LODthresh function 
 * Removed two markers from the vignette dataset due to discordance with new reference genome
 * Changed display of R2 results to percent instead of proportion
+* Removed deltaDIC from scan1_summary
+* fitQTL returns h2 and d2 as named vector instead of list
+* Changed sign of phenotype data
+* Changed indiv to id 

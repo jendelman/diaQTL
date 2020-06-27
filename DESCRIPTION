@@ -10,7 +10,7 @@ LazyData: true
 RoxygenNote: 7.1.0
 Roxygen: list(markdown = TRUE)
 Encoding: UTF-8
-Imports: BGLR, ggplot2, methods, coda, Matrix
+Imports: BGLR, ggplot2, methods, coda, Matrix, scam
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 

@@ -4,12 +4,12 @@
 \alias{plot_dosage}
 \title{Plot parental allele dosage}
 \usage{
-plot_dosage(data, indiv, chrom, distance, marker = NULL)
+plot_dosage(data, id, chrom, distance, marker = NULL)
 }
 \arguments{
 \item{data}{Variable inheriting from class \code{\link{diallel_geno}}}
 
-\item{indiv}{Name of individual}
+\item{id}{Name of individual}
 
 \item{chrom}{Name of chromosome}
 
@@ -26,11 +26,11 @@ Plot parental allele dosages across the chromosome for one individual
 \examples{
 \dontrun{
 plot_dosage(data = diallel_example, 
-            indiv = "W15263-8R", 
+            id = "W15263-8R", 
             chrom = 10)
             
 plot_dosage(data = diallel_example, 
-            indiv = "W15263-8R", 
+            id = "W15263-8R", 
             chrom = 10,
             marker = "solcap_snp_c2_25522")
 }
