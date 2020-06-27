@@ -151,10 +151,13 @@ fitQTL <- function(data,trait,marker,params,dominance=FALSE,cofactor=NULL) {
   } else {
     varD <- apply(tcrossprod(data@Z %*% data@geno$D[[k]],dom_b),2,var)
     h2 <- varA/(varA+varD+varE)
-    h2 <- list(Mean=mean(h2),SE=as.numeric(sqrt(var(h2)/effectiveSize(h2))))
+    h2 <- c(mean(h2),as.numeric(sqrt(var(h2)/effectiveSize(h2))))
+    names(h2) <- c("Estimate","SE")
   
     d2 <- varD/(varA+varD+varE) 
-    d2 <- list(Mean=mean(d2),SE=as.numeric(sqrt(var(d2)/effectiveSize(d2))))
+    d2 <- c(mean(d2),as.numeric(sqrt(var(d2)/effectiveSize(d2))))
+    names(d2) <- c("Estimate","SE")
+    
     return(list(R2=ans1$R2,deltaDIC=ans1$DIC-ans0$DIC,h2=h2,d2=d2,effectsA=effectsA,effectsD=effectsD,plotA=plotA,plotD=plotD))
   }
 }

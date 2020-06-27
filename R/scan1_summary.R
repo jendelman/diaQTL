@@ -84,9 +84,9 @@ scan1_summary <- function(scan1_data,
     }
   }
   
-  peaks <- scan1_data[k,-match("position",colnames(scan1_data))]
+  peaks <- scan1_data[k,-6]
   peaks$R2 <- round(peaks$R2,1)
   peaks$LOD <- round(peaks$LOD,1)
-  peaks$deltaDIC <- round(peaks$deltaDIC,1)
+  #peaks$deltaDIC <- round(peaks$deltaDIC,1)
   return(list(peaks=peaks,plot=p))
 }

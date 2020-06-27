@@ -4,30 +4,30 @@
 \alias{dosage}
 \title{Get parental allele dosage estimates}
 \usage{
-dosage(data, marker = NULL, indiv = NULL)
+dosage(data, marker = NULL, id = NULL)
 }
 \arguments{
 \item{data}{Variable inheriting from class \code{\link{diallel_geno}}}
 
 \item{marker}{Name of marker}
 
-\item{indiv}{Name of individual}
+\item{id}{Name of individual}
 }
 \value{
-Matrix of (individuals or markers) x parental alleles
+Matrix of (id or markers) x parental alleles
 }
 \description{
 Get parental allele dosage estimates
 }
 \details{
-Function can be used to get parental allele dosage estimates at a single marker for all individuals (in which case \code{indiv} should be \code{NULL}) or for a single individual for all markers (in which case \code{marker} should be \code{NULL})
+Function can be used to get parental allele dosage estimates at a single marker for all individuals (in which case \code{id} should be \code{NULL}) or for a single individual for all markers (in which case \code{marker} should be \code{NULL})
 }
 \examples{
 \dontrun{
   dosage_example = dosage(data = diallel_example, 
                           marker = "solcap_snp_c2_25522")
   dosage_example = dosage(data = diallel_example, 
-                          indiv = "W15263-8R")
+                          id = "W15263-8R")
 }
 
 }

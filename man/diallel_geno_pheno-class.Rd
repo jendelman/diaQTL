@@ -17,7 +17,7 @@ S4 class with genotype and phenotype data
 
 \item{\code{map}}{data frame with marker,chrom,and position (either bp or cM)}
 
-\item{\code{geno}}{list of length 2. The first element (named "A") is a list of sparse matrices, one for each marker, with dimensions (indiv x alleles), containing the allele dosages, which are the regression variables for additive effects. The second (optional) element (named "D") has the same structure (list of sparse matrices), but each matrix contains the dosage of allele-pairs, which are the regression variables for digenic dominance effects.}
+\item{\code{geno}}{list of length 2. The first element (named "A") is a list of sparse matrices, one for each marker, with dimensions (id x alleles), containing the allele dosages, which are the regression variables for additive effects. The second (optional) element (named "D") has the same structure (list of sparse matrices), but each matrix contains the dosage of allele-pairs, which are the regression variables for digenic dominance effects.}
 
 \item{\code{pheno}}{data frame of phenotypes}
 

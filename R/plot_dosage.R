@@ -3,7 +3,7 @@
 #' Plot parental allele dosages across the chromosome for one individual
 #' 
 #' @param data Variable inheriting from class \code{\link{diallel_geno}}
-#' @param indiv Name of individual
+#' @param id Name of individual
 #' @param chrom Name of chromosome
 #' @param distance Either "cM" for centiMorgans or "bp" for base pairs (depending on position used in the input map)
 #' @param marker Optional, position of marker indicated with dashed line
@@ -13,18 +13,18 @@
 #' @examples
 #' \dontrun{
 #' plot_dosage(data = diallel_example, 
-#'             indiv = "W15263-8R", 
+#'             id = "W15263-8R", 
 #'             chrom = 10)
 #'             
 #' plot_dosage(data = diallel_example, 
-#'             indiv = "W15263-8R", 
+#'             id = "W15263-8R", 
 #'             chrom = 10,
 #'             marker = "solcap_snp_c2_25522")
 #' }
 #' @export
 #' @import ggplot2
 
-plot_dosage <- function(data,indiv,chrom,distance,marker=NULL) {
+plot_dosage <- function(data,id,chrom,distance,marker=NULL) {
   
   ix <- which(data@map[,2] == chrom)
   position <- data@map[ix,3] #x axis values
@@ -38,12 +38,12 @@ plot_dosage <- function(data,indiv,chrom,distance,marker=NULL) {
   xmin <- c(position[1],position[-m] + diff(position)/2)
   xmax <- c(xmin[-1],position[m])
 
-  geno <- dosage(data,indiv=indiv)
+  geno <- dosage(data,id=id)
   geno <- geno[ix,]
   alleles <- colnames(geno)
   tmp <- strsplit(split=".",x=alleles,fixed=T)
   founders <- sapply(tmp,function(x){x[1]})
-  parents <- c(as.character(data@ped[indiv,]$mother),as.character(data@ped[indiv,]$father))
+  parents <- c(as.character(data@ped[id,]$mother),as.character(data@ped[id,]$father))
   iq <- which(founders %in% parents[1])
   plotme <- data.frame(z=as.vector(geno[,iq]),xmin=xmin,xmax=xmax,ymin=rep(0:3,each=m),ymax=rep(1:4,each=m))
   

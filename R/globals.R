@@ -1,9 +1,0 @@
-utils::globalVariables(c("Allele", 
-                         "Mean", 
-                         "SE",
-                         "x",
-                         "z",
-                         "S1codes",
-                         "F1codes",
-                         "ymin",
-                         "ymax"))
