@@ -6,7 +6,7 @@
 #' @param display Logical variable whether to plot the LOD score
 #' @param thresh optional, LOD threshold for plotting
 #' @param chromosome string with chrom name(s) to plot. By default, all chromosomes are plotted
-#' @param distance string with "cM" for centiMorgans or "bp" for basepairs
+#' @param position Either "cM" or "bp"
 #' 
 #' @return List containing 
 #' \describe{
@@ -26,7 +26,7 @@ scan1_summary <- function(scan1_data,
                           display=T,
                           thresh=NULL,
                           chromosome = NULL,
-                          distance = "cM") {
+                          distance) {
   if(!is.null(chromosome)) {
     scan1_data <- scan1_data[scan1_data$chromosome %in% chromosome,]
   }

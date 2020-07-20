@@ -1,3 +1,10 @@
+Changes in 0.62
+* Fixed error with plot_dosage for S1 individuals
+* Removed default option for "distance" argument in plotting
+
+Changes in 0.61
+* Changed "distance" to "position" in plot_dosage and scan1_summary
+
 Changes in 0.60
 * Repository is public
 * Removed option to disable dominance in read_data

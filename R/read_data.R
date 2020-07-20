@@ -47,6 +47,7 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL) {
   }
   
   ped <- read.csv(pedfile,as.is=T)
+  colnames(ped) <- c("id","population","mother","father")
   rownames(ped) <- ped[,1]
   missing <- setdiff(gid,ped$id)
   if(length(missing)>0) {

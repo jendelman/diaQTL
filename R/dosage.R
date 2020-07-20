@@ -32,6 +32,7 @@ dosage <- function(data,marker=NULL,id=NULL) {
   }
   if (!is.null(id)) {
     k <- match(id,attr(data@geno$A,"id"))
+    if (is.na(k)) {stop("Individual not present")}
     ans <- t(sapply(data@geno$A,function(geno){geno[k,]}))
     rownames(ans) <- names(data@geno$A)
     colnames(ans) <- attr(data@geno$A,"alleles")
