@@ -4,12 +4,12 @@
 #' 
 #' @param data Variable of class \code{\link{diallel_geno_pheno}}
 #' @param trait Name of trait
-#' @param params Number of burn-in and total iterations
+#' @param params List containing burnIn and nIter
 #' @param n.permute Number of permutations
 #' @param chrom Names of chromosomes to scan (default is all)
-#' @param dominance Logical variable whether to include digenic dominance
+#' @param dominance Dominance degree (1-4)
 #' @param cofactor Optional name of marker to include as cofactor in the scan
-#' @param n.core Number of cores to use, allows for parallel execution
+#' @param n.core Number of cores for parallel execution (only available from Linux or Mac command line)
 #' 
 #' @return Data frame with maximum LOD and minimum deltaDIC for each iteration
 #' 
@@ -28,10 +28,10 @@
 #' 
 #' @export
 
-scan1_permute <- function(data,trait,params,n.permute=1000,chrom=NULL,dominance=F,cofactor=NULL,n.core=1) {
+scan1_permute <- function(data,trait,params,n.permute=1000,chrom=NULL,dominance=1,cofactor=NULL,n.core=1) {
   LOD <- deltaDIC <- numeric(n.permute)
   for (i in 1:n.permute) {
-    if (i%%10==0) {print(paste("Permutation",i))}
+    if (i%%100==0) {print(paste("Permutation",i))}
     data@pheno[,trait] <- sample(data@pheno[,trait])
     ans <- scan1(data=data,trait=trait,params=params,chrom=chrom,dominance=dominance,cofactor=cofactor,n.core=n.core)
     LOD[i] <- max(ans$LOD,na.rm=T)

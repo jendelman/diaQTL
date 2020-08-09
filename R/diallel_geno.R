@@ -1,9 +1,10 @@
 #' S4 class with genotype data
 #' 
 #' @slot ploidy Either 2 or 4
-#' @slot ped data frame with pedigree information. Variables are id,population,mother,father
-#' @slot map data frame with marker,chrom,and position (either bp or cM)
-#' @slot geno list of length 2. The first element (named "A") is a list of sparse matrices, one for each marker, with dimensions (id x alleles), containing the allele dosages, which are the regression variables for additive effects. The second (optional) element (named "D") has the same structure (list of sparse matrices), but each matrix contains the dosage of allele-pairs, which are the regression variables for digenic dominance effects. 
+#' @slot dominance Integer 1-4 indicating 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance.
+#' @slot X.GCA Incidence matrix for GCA effects
+#' @slot map data frame with marker,chrom, position (cM and/or bp) and bin 
+#' @slot geno list of length equal to the number of marker bins. Each element is a list of length \code{dominance}. The elements in the nested list are sparse matrices with dimensions (id x effects). 
 #' 
 #' @export
-diallel_geno <- setClass("diallel_geno",slots=c(ploidy="integer",ped="data.frame",map="data.frame",geno="list"))
+diallel_geno <- setClass("diallel_geno",slots=c(ploidy="integer",dominance="integer",X.GCA="Matrix",map="data.frame",geno="list"))

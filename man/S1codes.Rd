@@ -11,6 +11,6 @@ character vector
 data(S1codes)
 }
 \description{
-Character vector with the 35 possible tetraploid genotypes for a S1 population. Alleles are denoted 1,2,3,4.
+Character vector with the 35 possible tetraploid genotypes for a S1 population. Haplotypes are denoted 1,2,3,4.
 }
 \keyword{datasets}

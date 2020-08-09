@@ -17,20 +17,20 @@ knitr::opts_chunk$set(echo = TRUE,collapse=FALSE,comment="##",fig.width=5,fig.he
 The example data set is a 3x3 half-diallel population in potato. In other words, three founders were crossed in all three pairwise combinations. Three input files are needed to run the QTL analysis: (1) pedigree file, (2) genotype file, (3) phenotype file. 
 
 ### 1) Pedigree file
-The pedigree file has four columns: id, population, mother, and father. In the linear model, the mean of each population is estimated as a fixed effect. This allows control over whether reciprocal crosses are assumed to have the same mean (label as one population) or different means (label as separate populations).
+The pedigree file has three columns: id, mother, and father. 
 ```{r}
 pedcsv <- system.file("vignette_data", "potato_ped.csv", package = "diaQTL")
 ped <- read.csv(pedcsv, as.is = T)
 head(ped)
-table(ped$population)
+table(apply(ped[,2:3],1,paste,collapse=" x "))
 ```
 
 ### 2) Genotype file
-The first three columns of the genotype file contain the marker name, chromosome, and position in either cM or bp. Subsequent columns contain the genotype probabilities for each individual. The position column in the potato dataset is cM.
+The first 3 or 4 columns of the genotype file contain the map, with columns for marker name, chromosome, and the position in cM and/or bp (plotting features in the pacakage can use either map position). Subsequent columns contain the genotype probabilities for each individual. 
 ```{r}
 genocsv <- system.file( "vignette_data", "potato_geno.csv", package = "diaQTL" )
 geno <- read.csv( genocsv, as.is = T, check.names = F )
-geno[1:5,1:3]
+geno[1:5,1:4]
 ```
 Genotype probabilities are encoded as strings, following the format exported by the PolyOrigin software:
 ```{r}
@@ -57,107 +57,90 @@ hist(pheno$tuber_shape,main="",xlab="Tuber shape")
 Tuber shape in this data set is defined as -log(L/W - 1), where L/W is the average length/width ratio of tubers weighing 6-10 ounces (170-285g). Higher values correspond to rounder tubers.
 
 ## Read the data
-After installing and attaching the package, use `read_data` to read in all three files. If there are fixed effects in the phenotype input file, they need to be specified as well (see reference manual).
-```{r eval=TRUE, echo=TRUE}
-diallel_example <- read_data( genofile = genocsv,
-                              ploidy = 4,
-                              pedfile = pedcsv,
-                              phenofile = phenocsv)
-```
-```{r eval=TRUE, echo=FALSE}
-saved_example <- system.file( "vignette_data", "vignette_data.rda", package = "diaQTL" )
-load(saved_example)
+After installing and attaching the package, use `read_data` to read in all three files. (If there are fixed effects in the phenotype input file, they need to be specified as well; consult the reference manual.) The parameter `dominance = 2` is used to indicate that only digenic dominance will be modeled. (Higher order dominance effects can be included if desired; consult the manual). By default, markers with the same map position in cM (using whatever numerical precision is present in the input map) are binned to reduce the computing time. The parameter `n.core = 2` is used to enable multicore processing via forking, but this only works from the command line on Linux or MacOS/UNIX systems.
+```{r}
+data <- read_data(genofile = genocsv,
+                  ploidy = 4,
+                  pedfile = pedcsv,
+                  phenofile = phenocsv, 
+                  dominance = 2,
+                  n.core = 2)
 ```
 
 ## Setting parameters
-diaQTL uses Bayesian regression methods from R package BGLR, which are based on Markov Chain Monte Carlo (MCMC). The function `set_params` is used to determine the total number of iterations (`nIter`) and the number that should be discarded as burn-in. Consult the reference manual on how to change the tolerance parameters if needed. Because MCMC is a stochastic process, the results will not be the same each time.
+diaQTL uses Bayesian regression methods from R package BGLR, which are based on Markov Chain Monte Carlo (MCMC). The function `set_params` is used to determine the total number of iterations (`nIter`) and the number that should be discarded as burn-in (`burnIn`). Consult the reference manual on how to change the tolerance parameters if needed. Because MCMC is a stochastic process, the results will not be the same each time.
 ```{r}
-params <- set_params( diallel_example, trait = "tuber_shape" )
+params <- set_params( data, trait = "tuber_shape" )
 params
 ```
 
 ## Single QTL scan
-The `scan1` function performs a single QTL scan by regression of the phenotypes on the genotype probabilities. By default, dominance is not incuded in the scan because it takes longer. However, there may be traits where dominance is needed for QTL detection, or dominance could lead to refinement of the QTL position. It is also possible to restrict the QTL scan to a subset of chromosomes, or to use multiple cores for faster execution on Linux or UNIX (including MacOS) systems. See the reference manual for these options.
-```{r eval=TRUE, echo=TRUE}
-scan1_example <- scan1( data = diallel_example,
-                      trait = "tuber_shape",
-                      params = params )
+The `scan1` function performs a single QTL scan by regression of the phenotypes on the genotype probabilities. By default, dominance is not incuded in the scan because it takes longer. However, there may be traits where dominance is needed for QTL detection or to refine the QTL position. It is also possible to restrict the QTL scan to a subset of chromosomes. Consult the reference manual for these options.
+```{r}
+scan1_example <- scan1( data = data,
+                        trait = "tuber_shape",
+                        params = params, 
+                        n.core = 2)
 ```
 
 ## Detection threshold
-The function `LODthresh` can be used to estimate the LOD threshold corresponding to a genome-wide false positive rate of 0.05. This function uses a curve fit to simulated datasets with no QTL. The genome size for the potato dataset can be estimated from the input map.
+The function `LODthresh` can be used to estimate the LOD threshold corresponding to a genome-wide false positive rate of 0.05. This function uses a curve fit to simulated datasets with no QTL, which produces results similar to a permutation test (which is also available via the function `scan1_permute`). The genome size for the potato dataset can be estimated from the genetic map.
 ```{r }
-potato.genome <- sum(tapply(geno$position,geno$chromosome,max))/100 #Morgans 
-threshold <- LODthresh(genome.size=potato.genome,num.parents=3,ploidy=4)
-cat(threshold)  #print threshold to standard output
+sum(tapply(data@map$cM,data@map$chrom,max))/100 #Morgans 
+LODthresh(genome.size=12.2,num.parents=3,ploidy=4) #threshold
 ```
-Another option is to perform a permutation test with `scan1_permute`, which is computationally intensive.
-```{r eval=FALSE, echo=TRUE}
-scan1_permute_example <- scan1_permute( data = diallel_example, 
-                                   trait = "tuber_shape", 
-                                   n.permute = 1000, 
-                                   params = params, 
-                                   n.core = 4 )
-```
-The result from `scan1_permute` is a data frame with the LOD score for each permutation, which can be used to determine the threshold for $\alpha = 0.05$:
-```{r eval=TRUE}
-alpha <- 0.05
-quantile( scan1_permute_example$LOD, probs = 1-alpha )
-```
-The result is very similar to the threshold from the `LODthresh` function.
 
 ## Results
 The `scan1_summary` function returns the marker with the highest LOD score on each chromosome and a plot of the LOD profile. 
-```{r }
-ans1 <- scan1_summary(scan1_example,thresh=threshold)
+```{r}
+ans1 <- scan1_summary(scan1_example,thresh=6.7,position="bp")
 ans1$peaks
 ans1$plot
-
 ```
 
-The results show there is a QTL on chromosome 10 that explains $R^{2} = 38\%$ of the variance. The gene underlying this QTL is most likely *StOVP20* (Wu et al. 2018; doi.org/10.1038/s41467-018-07216-8). The most significant marker is "solcap_snp_c2_255222", which can be passed to the `fitQTL` function to get the estimated parental allele effects, as both a table (`effectsA`) and barplot (`plotA`). Use the `dominance=T` option to include dominance effects, which are returned as `effectsD` (table) and `plotD` (heatmap). To improve the precision of the results, the number of MCMC iterations is increased compared to that used for `scan1`.
+The results show there is a QTL at 49 Mb on chromosome 10 that explains $R^{2} = 36\%$ of the variance. This matches the location of the classical round locus in potato, which was recently identified as the gene *StOVP20* (Wu et al. 2018; doi.org/10.1038/s41467-018-07216-8). The most significant marker is "solcap_snp_c2_255222", which can be passed to the `fitQTL` function to get the estimated haplotype effects, as both a table (`effectsA`) and barplot (`plotA`). Use the parameter `dominance = 2` to include digenic dominance effects, which are returned as `effectsD` (table) and `plotD` (heatmap). To improve the precision of the results, the number of MCMC iterations is increased compared to that used for `scan1`.
 ```{r}
-fit1 <- fitQTL( data = diallel_example, 
-                       trait = "tuber_shape", 
-                       params = list(burnIn=100,nIter=3000), 
-                       marker = "solcap_snp_c2_25522")
+fit1 <- fitQTL( data = data, 
+                trait = "tuber_shape", 
+                params = list(burnIn=100,nIter=3000), 
+                marker = "solcap_snp_c2_25522")
 
 #With dominance
-fit2 <- fitQTL( data = diallel_example, 
-                       trait = "tuber_shape", 
-                       params = list(burnIn=100,nIter=3000), 
-                       marker = "solcap_snp_c2_25522",
-                       dominance = T)
+fit2 <- fitQTL( data = data, 
+                trait = "tuber_shape", 
+                params = list(burnIn=100,nIter=3000), 
+                marker = "solcap_snp_c2_25522",
+                dominance = 2)
 
 #Compare DIC for additive vs. dominance model
 print(data.frame(Add=round(fit1$deltaDIC,0),Dom=round(fit2$deltaDIC,0)),row.names=F)
 ```
 
-Because the dominance model has more parameters, a penalized measure of goodness-of-fit is needed to determine whether it is superior to the additive model. `fitQTL` returns the Deviance Information Criterion (DIC) for the QTL model relative to the null model (no QTL) as deltaDIC. Lower DIC values are better, so the dominance model is selected in this case. The amounts of additive and dominance variance relative to the total variance are returned as $h^2$ and $d^2$, respectively. In this case, the dominance variance is about half the additive variance.
+Because the dominance model has more parameters, a penalized measure of goodness-of-fit is needed to determine whether it is superior to the additive model. `fitQTL` returns the Deviance Information Criterion (DIC) for the QTL model relative to the baseline model (no QTL) as deltaDIC. Lower DIC values are better, so the dominance model is selected in this case. The amounts of additive and dominance variance relative to the total variance are returned as $h^2$ and $d^2$, respectively. 
 ```{r}
 data.frame(h2=round(fit2$h,2),d2=round(fit2$d2,2))
 fit2$plotA
 fit2$plotD
 ```
 
-The largest effect allele is present on homolog 4 of W6511-1R. The function `dosage` can be used to extract the allele dosage of the parental alleles at this locus.
+The largest effect corresponds to haplotype W6511-1R.4. The function `haplotypes` can be used to extract the dosage of this haplotype across the population.
 ```{r}
-roundQTL <- dosage( data = diallel_example, 
-                    marker = "solcap_snp_c2_25522")
-hist(roundQTL[,"W6511-1R.4"],main="",xlab="Allele Dosage")
-which(roundQTL[,"W6511-1R.4"] > 1.5)
+haplos <- haplotypes( data = data, 
+                      marker = "solcap_snp_c2_25522")
+hist(haplos[,"W6511-1R.4"],main="",xlab="Dosage")
+which(haplos[,"W6511-1R.4"] > 1.8)
 ```
 
-The result shows there are three individuals with two copies of the W6511-1R.4 allele, which is possible due to "double reduction." This occurs when a quadrivalent forms in meiosis I and sister chromatid fragments migrate to the same pole in meiosis II. The function `plot_dosage` can be used to visualize the pattern of recombination between parental homologs.
+The result shows there are three individuals with two copies of the W6511-1R.4 haplotype, which is possible due to "double reduction." This occurs when a quadrivalent forms in meiosis I and sister chromatid fragments migrate to the same pole in meiosis II. The function `haplo_plot` can be used to visualize the pattern of recombination between parental haplotypes.
 ```{r}
-plot_dosage( data = diallel_example, 
-             id = "W15268-53R", 
-             chrom = 10,
-             distance = "cM",
-             marker = "solcap_snp_c2_25522" )
+haplo_plot( data = data, 
+            id = "W15268-53R", 
+            chrom = 10,
+            position = "bp",
+            marker = "solcap_snp_c2_25522" )
 ```
 
-The dark blue segment indicates two copies of the W6511-1R.4 allele, and the dashed vertical line shows the position of the round QTL.
+The dark blue segment indicates two copies of the W6511-1R.4 haplotype, and the dashed vertical line shows the position of the QTL at 49 Mb.
 
 ## Multiple QTL mapping
-In the absence of epistasis, multiple QTL on different chromosomes can be detected adequately with  `scan1`. If there is epistasis, or if the QTL are on the same chromosome, other methods are needed. At present, the only option available in `diaQTL` is to conduct a second analysis with `scan1` using the most significant marker from the first scan as a cofactor. Consult the reference manual for more details.
+In the absence of epistasis, multiple QTL on different chromosomes can be detected adequately with `scan1`. If there is epistasis, or if the QTL are on the same chromosome, other methods are needed. At present, the only option available in `diaQTL` is to conduct a second analysis with `scan1` using the most significant marker from the first scan as a cofactor. Consult the reference manual for more details.

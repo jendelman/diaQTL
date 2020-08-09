@@ -2,20 +2,18 @@
 #' 
 #' Performs a linear regression for each position in the map. 
 #' 
-#' For non-binary traits, R2 is the proportion of variance explained by the regression. 
-#' For binary traits, R2 is the squared phi correlation.
-#' LOD score is the difference 
-#' between the log-likelihood of the model with QTL and the null model
+#' For non-binary traits, R2 is the proportion of variance explained by the regression. For binary traits, R2 is the squared phi correlation.
+#' LOD score is the difference between the log-likelihood of the model with QTL and the null model
 #' (no QTL); higher values are better. deltaDIC is the difference between the DIC of the model with QTL minus
-#' the DIC of the null model; lower values are better. 
+#' the DIC of the null model; lower values are better. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. Parameter \code{params} can be estimated using \code{\link{set_params}}.
 
 #' @param data Variable of class \code{\link{diallel_geno_pheno}}
 #' @param trait Name of trait
-#' @param params List containing burnIn and nIter, use set_params function to estimate it
+#' @param params List containing burnIn and nIter
+#' @param dominance Dominance degree (1-4). See Details.
 #' @param chrom Names of chromosomes to scan (default is all)
-#' @param dominance Logical variable whether to include digenic dominance effects
 #' @param cofactor Optional name of marker to include as cofactor in the scan
-#' @param n.core Number of cores to use for parallel execution by forking (do not use with GUI)
+#' @param n.core Number of cores for parallel execution (only available from Linux or Mac command line)
 #' 
 #' @return Data frame containing the map, LOD, R2 and deltaDIC results. 
 #' 
@@ -33,19 +31,18 @@
 #' @export
 #' @importFrom BGLR BGLR
 #' @importFrom stats model.matrix
-#' @importFrom parallel mcmapply
+#' @importFrom parallel mclapply
 
-scan1 <- function(data,trait,params,chrom=NULL,dominance=F,cofactor=NULL,n.core=1) {
+scan1 <- function(data,trait,params,dominance=1,chrom=NULL,cofactor=NULL,n.core=1) {
   
   stopifnot(inherits(data,"diallel_geno_pheno"))
   stopifnot(trait %in% colnames(data@pheno))
-  stopifnot(cofactor %in% names(data@geno$A))
-  if (is.null(data@geno$D) & dominance) {
-    stop("Dominance was FALSE in read_data")
+  if (dominance > data@dominance) {
+    stop("Dominance degree cannot exceed value used with read_data.")
   }
-
+  
   if (is.null(chrom)) {
-    chrom <- unique(data@map[,2])
+    chrom <- unique(data@map$chrom)
   }
   n.chrom <- length(chrom)
 
@@ -58,26 +55,21 @@ scan1 <- function(data,trait,params,chrom=NULL,dominance=F,cofactor=NULL,n.core=
   params <- list(response=response,nIter=params$nIter,burnIn=params$burnIn)
   
   if (!is.null(cofactor)) {
-    Xcof <- data@Z%*%data@geno$A[[cofactor]]
+    stopifnot(cofactor %in% data@map$marker)
+    Xcof <- data@Z%*%data@geno[[get_bin(cofactor,data@map)]][[1]]
   } else {
     Xcof <- NULL
   }
 
   #no marker model
-  ans0 <- qtl1(y=y,X=data@X,Z=data@Z,params=params,Xcof=Xcof)
+  ans0 <- qtl1(y=y,X=data@X,Z=data@Z,params=params,Xcof=Xcof,X.GCA=data@X.GCA)
   
-  fit <- NULL
-  for (i in 1:n.chrom) {
-    cat(paste("Chromosome",chrom[i],"\n"))
-    ix <- which(data@map[,2]==chrom[i])
-    m <- length(ix)
-    
-    if (dominance) {
-      ans1 <- mcmapply(FUN=qtl1,genoA=data@geno$A[ix],genoD=data@geno$D[ix],MoreArgs=list(y=y,X=data@X,Z=data@Z,Xcof=Xcof,params=params),SIMPLIFY=FALSE,mc.cores=n.core)
-    } else {
-      ans1 <- mcmapply(FUN=qtl1,genoA=data@geno$A[ix],MoreArgs=list(y=y,X=data@X,Z=data@Z,Xcof=Xcof,params=params),SIMPLIFY=FALSE,mc.cores=n.core)
-    }
-    fit <- rbind(fit,data.frame(data@map[ix,],LOD=as.numeric(sapply(ans1,function(x){x$LL})-ans0$LL)/log(10),R2=as.numeric(sapply(ans1,function(x){x$R2})),deltaDIC=as.numeric(sapply(ans1,function(x){x$DIC})-ans0$DIC),stringsAsFactors = F))
-  }
+  bin.names <- names(data@geno)
+  map <- data@map[(data@map$chrom %in% chrom) & (data@map$marker %in% bin.names),1:(ncol(data@map)-1)]
+  
+  #with marker
+  ans <- mclapply(X=map$marker,FUN=function(k,y,data,Xcof,params,dominance){qtl1(y=y,X=data@X,Z=data@Z,Xcof=Xcof,params=params,geno=data@geno[[k]][1:dominance])},y=y,data=data,Xcof=Xcof,params=params,dominance=dominance,mc.cores = n.core)
+  
+  fit <- data.frame(map,LOD=as.numeric(sapply(ans,function(x){x$LL})-ans0$LL)/log(10),R2=as.numeric(sapply(ans,function(x){x$R2})),deltaDIC=as.numeric(sapply(ans,function(x){x$DIC})-ans0$DIC),stringsAsFactors = F)
   return(fit)
 }

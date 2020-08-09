@@ -10,7 +10,7 @@ scan1_permute(
   params,
   n.permute = 1000,
   chrom = NULL,
-  dominance = F,
+  dominance = 1,
   cofactor = NULL,
   n.core = 1
 )
@@ -20,17 +20,17 @@ scan1_permute(
 
 \item{trait}{Name of trait}
 
-\item{params}{Number of burn-in and total iterations}
+\item{params}{List containing burnIn and nIter}
 
 \item{n.permute}{Number of permutations}
 
 \item{chrom}{Names of chromosomes to scan (default is all)}
 
-\item{dominance}{Logical variable whether to include digenic dominance}
+\item{dominance}{Dominance degree (1-4)}
 
 \item{cofactor}{Optional name of marker to include as cofactor in the scan}
 
-\item{n.core}{Number of cores to use, allows for parallel execution}
+\item{n.core}{Number of cores for parallel execution (only available from Linux or Mac command line)}
 }
 \value{
 Data frame with maximum LOD and minimum deltaDIC for each iteration

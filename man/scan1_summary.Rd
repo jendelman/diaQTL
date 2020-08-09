@@ -4,24 +4,16 @@
 \alias{scan1_summary}
 \title{Summary of scan1 result}
 \usage{
-scan1_summary(
-  scan1_data,
-  display = T,
-  thresh = NULL,
-  chromosome = NULL,
-  distance = "cM"
-)
+scan1_summary(scan1_data, thresh = NULL, chrom = NULL, position)
 }
 \arguments{
 \item{scan1_data}{output from scan1}
 
-\item{display}{Logical variable whether to plot the LOD score}
-
 \item{thresh}{optional, LOD threshold for plotting}
 
-\item{chromosome}{string with chrom name(s) to plot. By default, all chromosomes are plotted}
+\item{chrom}{optional, subset of chromosomes to plot}
 
-\item{distance}{string with "cM" for centiMorgans or "bp" for basepairs}
+\item{position}{Either "cM" or "bp"}
 }
 \value{
 List containing
@@ -36,7 +28,7 @@ Summary of scan1 result
 \examples{
 \dontrun{
   scan1_summary( scan1_example )
-  scan1_summary( scan1_example, chromosome = "10" )
-  scan1_summary( scan1_example, chromosome = c( "10", "12" ) ) 
+  scan1_summary( scan1_example, chrom = "10" )
+  scan1_summary( scan1_example, chrom = c( "10", "12" ) ) 
   }
 }

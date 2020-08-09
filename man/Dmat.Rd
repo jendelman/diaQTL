@@ -2,31 +2,30 @@
 % Please edit documentation in R/Dmat.R
 \name{Dmat}
 \alias{Dmat}
-\title{D matrix}
+\title{Dominance matrix}
 \usage{
-Dmat(data, chrom = NULL, exclude.marker = NULL)
+Dmat(data, chrom = NULL, dominance = 2)
 }
 \arguments{
 \item{data}{Variable inheriting from class \code{\link{diallel_geno}}}
 
-\item{chrom}{Only use markers from these chromosomes}
+\item{chrom}{Optional, vector of chromosome names to include}
 
-\item{exclude.marker}{Markers to exclude}
+\item{dominance}{Either 2, 3, or 4}
 }
 \value{
-Digenic dominance relationship matrix
+Dominance relationship matrix
 }
 \description{
 Calculates the dominance (D) relationship matrix from founder genotype probabilities
 }
 \details{
-Dominance relationships are calculated from kinship coefficients of order 4 (Gallais 2003). An entire chromosome or specific markers can be excluded.
+Parameter \code{dominance} refers to 2 = digenic, 3 = trigenic, 4 = quadrigenic (Gallais 2003).  Can specify to use only a subset of the chromosomes (by default, all chromosomes are used). Calculated based on the marker bins.
 }
 \examples{
 \dontrun{
-  Dmat_example = Dmat(data = diallel_example)
-  Dmat_example = Dmat(data = diallel_example, chrom=c(10,11)) #leave chromosome 12 out
-  Dmat_example = Dmat(data = diallel_example, exclude.marker = "solcap_snp_c2_25522")
+  Dmat_example = Dmat(data = diallel_example, dominance=2) #digenic dominance
+  Dmat_example = Dmat(data = diallel_example, dominance=3) #trigenic dominance
 }
 
 

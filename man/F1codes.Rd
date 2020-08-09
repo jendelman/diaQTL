@@ -11,6 +11,6 @@ character vector
 data(F1codes)
 }
 \description{
-Character vector with the 100 possible tetraploid genotypes for a F1 population. Maternal alleles are denoted 1,2,3,4 and paternal alleles 5,6,7,8.
+Character vector with the 100 possible tetraploid genotypes for a F1 population. Maternal haplotypes are denoted 1,2,3,4 and paternal haplotypes 5,6,7,8.
 }
 \keyword{datasets}
