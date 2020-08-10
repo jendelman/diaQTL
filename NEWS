@@ -1,3 +1,6 @@
+Changes in 0.71
+* Fixed documentation for set_params
+
 Changes in 0.70
 * Changed terminology from allele to haplotype
 * Added function haplo_switch
