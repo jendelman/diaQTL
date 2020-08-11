@@ -1,3 +1,28 @@
+Changes in 0.71
+* Fixed documentation for set_params
+
+Changes in 0.70
+* Changed terminology from allele to haplotype
+* Added function haplo_switch
+* Changed name of dosage to haplotypes
+* Changed name of plot_dosage to haplo_plot
+* Added marker binning to reduce run time
+* Both cM and bp positions can be used
+* Added trigenic and quadrigenic dominance
+* Added parallel execution in read_data
+* Changed linear model
+* Removed "population" from pedigree input file
+
+Changes in 0.63
+* Fixed error with peak position units in scan1_summary
+
+Changes in 0.62
+* Fixed error with plot_dosage for S1 individuals
+* Removed default option for "distance" argument in plotting
+
+Changes in 0.61
+* Changed "distance" to "position" in plot_dosage and scan1_summary
+
 Changes in 0.60
 * Repository is public
 * Removed option to disable dominance in read_data

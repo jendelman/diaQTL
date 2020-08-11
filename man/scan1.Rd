@@ -8,8 +8,8 @@ scan1(
   data,
   trait,
   params,
+  dominance = 1,
   chrom = NULL,
-  dominance = F,
   cofactor = NULL,
   n.core = 1
 )
@@ -19,15 +19,15 @@ scan1(
 
 \item{trait}{Name of trait}
 
-\item{params}{List containing burnIn and nIter, use set_params function to estimate it}
+\item{params}{List containing burnIn and nIter}
+
+\item{dominance}{Dominance degree (1-4). See Details.}
 
 \item{chrom}{Names of chromosomes to scan (default is all)}
 
-\item{dominance}{Logical variable whether to include digenic dominance effects}
-
 \item{cofactor}{Optional name of marker to include as cofactor in the scan}
 
-\item{n.core}{Number of cores to use for parallel execution by forking (do not use with GUI)}
+\item{n.core}{Number of cores for parallel execution (only available from Linux or Mac command line)}
 }
 \value{
 Data frame containing the map, LOD, R2 and deltaDIC results.
@@ -36,12 +36,10 @@ Data frame containing the map, LOD, R2 and deltaDIC results.
 Performs a linear regression for each position in the map.
 }
 \details{
-For non-binary traits, R2 is the proportion of variance explained by the regression.
-For binary traits, R2 is the squared phi correlation.
-LOD score is the difference
-between the log-likelihood of the model with QTL and the null model
+For non-binary traits, R2 is the proportion of variance explained by the regression. For binary traits, R2 is the squared phi correlation.
+LOD score is the difference between the log-likelihood of the model with QTL and the null model
 (no QTL); higher values are better. deltaDIC is the difference between the DIC of the model with QTL minus
-the DIC of the null model; lower values are better.
+the DIC of the null model; lower values are better. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. Parameter \code{params} can be estimated using \code{\link{set_params}}.
 }
 \examples{
 \dontrun{

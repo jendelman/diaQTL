@@ -4,14 +4,12 @@
 \alias{Amat}
 \title{A matrix}
 \usage{
-Amat(data, chrom = NULL, exclude.marker = NULL)
+Amat(data, chrom = NULL)
 }
 \arguments{
 \item{data}{Variable inheriting from class \code{\link{diallel_geno}}}
 
-\item{chrom}{Only use markers from these chromosomes}
-
-\item{exclude.marker}{Markers to exclude}
+\item{chrom}{Optional, vector of chromosome names to include}
 }
 \value{
 A matrix
@@ -20,13 +18,12 @@ A matrix
 Calculates the additive (A) relationship matrix from founder genotype probabilities
 }
 \details{
-Additive relationships are calculated from kinship coefficients of order 2 (Gallais 2003). Can be subset to one or more chromosomes (which is useful for the leave-one-chromosome-out kinship method), or specific markers can be excluded after QTL detection.
+Additive relationships are calculated from kinship coefficients of order 2 (Gallais 2003). Can specify to use only a subset of the chromosomes (by default, all chromosomes are used). Calculated based on the marker bins.
 }
 \examples{
 \dontrun{
   Amat_example = Amat(data = diallel_example)
   Amat_example = Amat(data = diallel_example, chrom=c(1:11)) #leave chromosome 12 out
-  Amat_example = Amat(data = diallel_example, exclude.marker = "solcap_snp_c2_25522")
 }
 
 }

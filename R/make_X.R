@@ -1,24 +1,84 @@
-#' @importFrom utils combn
+#' @importFrom arrangements combinations
 #' 
 make_X <- function(ped,ploidy,dominance) {
-  # Xadd is used to map genotype probabilities for each F1 population to additive founder effects
   # ped is data frame with variables id,mother,father
-  # Xadd has dimensions nind x (ploidy*nf) x (# F1 genotype states), where nf = number of founders and nind is number of individuals in the population
-  # alleles have .1, .2, etc. appended to founder name
-  # Xdom is used to map genotype probabilities for each population to digenic dominance founder effects
-  # Xdom has dimensions nind x (# possible digenic effects) x (# F1 genotype states)
+  # X1 is used to map genotype probabilities for each F1 population to additive founder effects
+  # X1 has dimensions nind x (ploidy*nf) x (# F1 genotype states), where nf = number of founders and nind is number of individuals in the population
+  # X2 is used to map genotype probabilities for each population to digenic dominance founder effects
+  # X2 has dimensions nind x (# possible digenic effects) x (# F1 genotype states)
+  # X3 and X4 are for trigenic and quadrigenic effects
+  # haplotypes have .1, .2, etc. appended to founder name
   
-  founders <- as.character(unique(c(ped$mother,ped$father)))
+  founders <- sort(unique(c(ped$mother,ped$father)))
+  crosses <- unique(apply(ped[,2:3],1,function(x){x <- sort(match(x,founders))
+                                                  paste(x,collapse="x")}))
+  n.cross <- length(crosses)
   nf <- length(founders)
   nind <- nrow(ped)
-  alleles <- as.character(1:(ploidy*nf))
-  n.add <- length(alleles)
+  haplotypes <- as.character(1:(ploidy*nf))
+  n1 <- length(haplotypes)
   
-  digen <- apply(combn(alleles,2),2,paste,collapse="+")
-  digen <- c(apply(cbind(alleles,alleles),1,paste,collapse="+"),digen)
-  n.dom <- length(digen)
+  X <- vector("list",length=dominance)
+  for (q in 1:dominance) {
+    X[[q]] <- vector("list",length=nind)
+  }
+  
+  if (dominance > 1) {
+    #digenic
+    
+    #uniparental terms
+    gen2 <- character(0)
+    for (p1 in 1:nf) {
+      gen2 <- c(gen2,apply(combinations(x=4*(p1-1)+1:4,k=2,replace=T),1,paste,collapse="+"))
+    }
+    
+    #biparental terms
+    for (i in 1:n.cross) {
+      p1 <- as.integer(substr(crosses[i],1,1))
+      p2 <- as.integer(substr(crosses[i],3,3))
+      if (p1!=p2) {
+        gen2 <- c(gen2,apply(expand.grid(x=4*(p1-1)+1:4,y=4*(p2-1)+1:4),1,paste,collapse="+"))
+      }
+    }
+    n2 <- length(gen2)
+  }
+
+  if (dominance > 2) {
+    #trigenic = digenic from one parent plus monogenic from the other
+    gen3 <- character(0)
+    for (i in 1:n.cross) {
+      p1 <- as.integer(substr(crosses[i],1,1))
+      p2 <- as.integer(substr(crosses[i],3,3))
+      
+      p1.di <- combinations(x=4*(p1-1)+1:4,k=2,replace=T)
+      tmp <- as.matrix(expand.grid(x=1:10,y=4*(p2-1)+1:4))
+      gen3 <- c(gen3,apply(tmp,1,function(z){paste(sort(c(p1.di[z[1],],z[2])),collapse="+")}))
+
+      if (p1!=p2) {
+        p2.di <- combinations(x=4*(p2-1)+1:4,k=2,replace=T)
+        tmp <- as.matrix(expand.grid(x=1:10,y=4*(p1-1)+1:4))
+        gen3 <- c(gen3,apply(tmp,1,function(z){paste(sort(c(p2.di[z[1],],z[2])),collapse="+")}))
+      }
+    }
+    n3 <- length(gen3)
+  }
+  
+  if (dominance > 3) {
+    #quadrigenic = digenic from both parents
+    gen4 <- character(0)
+    for (i in 1:n.cross) {
+      p1 <- as.integer(substr(crosses[i],1,1))
+      p2 <- as.integer(substr(crosses[i],3,3))
+    
+      p1.di <- combinations(x=4*(p1-1)+1:4,k=2,replace=T)
+      p2.di <- combinations(x=4*(p2-1)+1:4,k=2,replace=T)
+      tmp <- as.matrix(expand.grid(x=1:10,y=1:10))
+      gen4 <- c(gen4,apply(tmp,1,function(z){paste(sort(c(p1.di[z[1],],p2.di[z[2],])),collapse="+")}))
+    }
+    n4 <- length(gen4)
+  }
+  
   n.state <- ifelse(ploidy==2,4,100)
-  
   if (ploidy==2) {
     S1code <- rbind(c(1,1,2),c(1,2,2))
     F1code.mom <- c(1,1,2,2)
@@ -31,16 +91,10 @@ make_X <- function(ped,ploidy,dominance) {
     F1code.mom <- sapply(tmp,function(x){as.integer(x[1:2])})
     F1code.dad <- sapply(tmp,function(x){as.integer(x[3:4])})
   }
-  
-  Xadd <- vector("list",length=nind) #dim1 = alleles, dim2 = genotype states
-  if (dominance) {
-    Xdom <- vector("list",length=nind) #dim1 = allele.pairs, dim2 = genotype states
-  } else {
-    Xdom <- NULL 
-  }
-  
+
   mom <- match(ped$mother,founders)
   dad <- match(ped$father,founders)
+  i=1
   for (i in 1:nind) {
     km <- (mom[i]-1)*ploidy
     kd <- (dad[i]-1)*ploidy
@@ -64,33 +118,58 @@ make_X <- function(ped,ploidy,dominance) {
     tmp <- lapply(x,table)
     names(tmp) <- NULL
     tmp2 <- unlist(tmp)
-    ix <- match(names(tmp2),alleles)
-    Xadd[[i]] <- sparseMatrix(i=ix,j=rep(1:length(tmp),times=sapply(tmp,length)),x=as.integer(tmp2),dims=c(n.add,n.state))
-    if (dominance) {
+    ix <- match(names(tmp2),haplotypes)
+    X[[1]][[i]] <- sparseMatrix(i=ix,j=rep(1:length(tmp),times=sapply(tmp,length)),x=as.integer(tmp2),dims=c(n1,n.state))
+    
+    if (dominance > 1) {
+      #digenic
       genocode2 <- apply(genocode,2,function(x){
-          y <- combn(x,2)
-          apply(y,2,function(z){paste(sort(z),collapse="+")})
+        y <- combinations(x,2,replace=F)
+        apply(y,1,function(z){paste(sort(z),collapse="+")})
         })
       if (ploidy==2) {
         genocode2 <- matrix(genocode2,nrow=1)
-      }
+      } 
       x <- split(genocode2,col(genocode2))  #matrix to vector coercion is columnwise
       tmp <- lapply(x,table)
       names(tmp) <- NULL
       tmp2 <- unlist(tmp)
-      ix <- match(names(tmp2),digen)
-      Xdom[[i]] <- sparseMatrix(i=ix,j=rep(1:length(tmp),times=sapply(tmp,length)),x=as.integer(tmp2),dims=c(n.dom,n.state))
+      ix <- match(names(tmp2),gen2)
+      X[[2]][[i]] <- sparseMatrix(i=ix,j=rep(1:length(tmp),times=sapply(tmp,length)),x=as.integer(tmp2),dims=c(n2,n.state))
+    }
+    
+    if (dominance > 2) {
+      #trigenic
+      genocode3 <- apply(genocode,2,function(x){
+        y <- combinations(x,3,replace=F)
+        apply(y,1,function(z){paste(sort(z),collapse="+")})
+      })
+      x <- split(genocode3,col(genocode3))  #matrix to vector coercion is columnwise
+      tmp <- lapply(x,table)
+      names(tmp) <- NULL
+      tmp2 <- unlist(tmp)
+      ix <- match(names(tmp2),gen3)
+      X[[3]][[i]] <- sparseMatrix(i=ix,j=rep(1:length(tmp),times=sapply(tmp,length)),x=as.integer(tmp2),dims=c(n3,n.state))
+    }
+    
+    if (dominance > 3) {
+      #quadrigenic
+      genocode4 <- apply(genocode,2,function(x){
+        paste(sort(x),collapse="+")
+      })
+      ix <- match(genocode4,gen4)
+      X[[4]][[i]] <- sparseMatrix(i=ix,j=1:length(ix),x=rep(1,length(ix)),dims=c(n4,n.state))
     }
   }
   
   tmp <- expand.grid(1:ploidy,founders,stringsAsFactors = F)
-  alleles <- apply(cbind(tmp[,2],tmp[,1]),1,paste,collapse=".")
-  attr(Xadd,"alleles") <- alleles
+  haplotypes <- apply(cbind(tmp[,2],tmp[,1]),1,paste,collapse=".")
+  attr(X,"haplotypes") <- haplotypes
   
-  if (dominance) {
-    digen <- apply(combn(alleles,2),2,paste,collapse="+")
-    digen <- c(apply(cbind(alleles,alleles),1,paste,collapse="+"),digen)
-    attr(Xdom,"allele.pairs") <- digen
+  if (dominance > 1) {
+    digen <- apply(combinations(haplotypes,2,replace=T),1,paste,collapse="+")
+    attr(X,"haplotype.pairs") <- digen
   }
-  return(list(A=Xadd,D=Xdom))
+  
+  return(X)
 }

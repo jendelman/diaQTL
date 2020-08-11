@@ -2,11 +2,10 @@
 #' 
 #' Calculates the additive (A) relationship matrix from founder genotype probabilities
 #' 
-#' Additive relationships are calculated from kinship coefficients of order 2 (Gallais 2003). Can be subset to one or more chromosomes (which is useful for the leave-one-chromosome-out kinship method), or specific markers can be excluded after QTL detection.
+#' Additive relationships are calculated from kinship coefficients of order 2 (Gallais 2003). Can specify to use only a subset of the chromosomes (by default, all chromosomes are used). Calculated based on the marker bins.
 #' 
 #' @param data Variable inheriting from class \code{\link{diallel_geno}}
-#' @param chrom Only use markers from these chromosomes
-#' @param exclude.marker Markers to exclude
+#' @param chrom Optional, vector of chromosome names to include
 #' 
 #' @return A matrix
 #' 
@@ -16,28 +15,25 @@
 #' \dontrun{
 #'   Amat_example = Amat(data = diallel_example)
 #'   Amat_example = Amat(data = diallel_example, chrom=c(1:11)) #leave chromosome 12 out
-#'   Amat_example = Amat(data = diallel_example, exclude.marker = "solcap_snp_c2_25522")
 #' }
 #' 
 #' @export
-Amat <- function(data,chrom=NULL,exclude.marker=NULL) {
+Amat <- function(data,chrom=NULL) {
   stopifnot(inherits(data,"diallel_geno"))
   if (is.null(chrom)) {
-    chrom <- unique(data@map[,2])
+    chrom <- unique(data@map$chrom)
   }
-  stopifnot(all(chrom %in% data@map[,2]))
-  stopifnot(all(exclude.marker %in% data@map[,1]))
+  stopifnot(all(chrom %in% data@map$chrom))
+  bin.names <- names(data@geno)
+  map <- data@map[data@map$marker %in% bin.names & data@map$chrom %in% chrom,]
+  m <- nrow(map)
   
-  ix <- which(data@map[,1] %in% exclude.marker | !(data@map[,2] %in% chrom)) #exclude
-  m <- nrow(data@map) 
-  m2 <- m-length(ix)
-  
-  n <- nrow(data@ped)
-  Ka <- matrix(0,nrow=n,ncol=n)
-  colnames(Ka) <- rownames(Ka) <- attr(data@geno$A,"id")
-  
-  for (i in setdiff(1:m,ix)) {
-    Ka <- Ka + as.matrix(tcrossprod(data@geno$A[[i]]))/(data@ploidy^2)
+  id <- attr(data@geno,"id")
+  n <- length(id)
+  K <- matrix(0,nrow=n,ncol=n)
+  colnames(K) <- rownames(K) <- id
+  for (i in map$marker) {
+    K <- K + as.matrix(tcrossprod(data@geno[[i]][[1]]))/(data@ploidy^2)
   }
-  return(A=data@ploidy*Ka/m2)
+  return(data@ploidy*K/m)
 }

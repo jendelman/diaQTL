@@ -2,13 +2,17 @@
 #' 
 #' Reads genotype, pedigree, and phenotype data files 
 #' 
-#' First three columns of the genotype file are marker, chromosome, and position. Columns 4 through (n+4) correspond to the n individuals of the population. The genotype information for each marker x individual combination is a string with the format "state|state|state...=>prob|prob|prob...", where "state" refers to the genotype state and "prob" is the genotype probability in decimal format. Only states with nonzero probabilities need to be listed. The encoding for the states in tetraploids is described in the documentation for the F1codes and S1codes datasets that come with the package. For diploids, there are 4 F1 genotype codes, 1,2,3,4, which correspond to allele combinations 1-3,1-4,2-3,2-4, respectively; the S1 genotype codes 1,2,3 correspond to 1-1,1-2,2-2, respectively. For the phenotype file, first column is id, followed by traits, and then any fixed effects. Pass a character vector for the function argument "fixed" to specify whether each effect is a factor or numeric covariate. The number of traits is deduced based on the number of columns. Binary traits must be coded "N"/"Y" and are converted to 0/1 internally for analysis by probit regression. 
+#' The first 3 or 4 columns of the genotype file are the map (marker, chrom, bp and/or cM), followed by the members of the population. The genotype information for each marker x individual combination is a string with the format "state|state|state...=>prob|prob|prob...", where "state" refers to the genotype state and "prob" is the genotype probability in decimal format. Only states with nonzero probabilities need to be listed. The encoding for the states in tetraploids is described in the documentation for the F1codes and S1codes datasets that come with the package. For diploids, there are 4 F1 genotype codes, 1,2,3,4, which correspond to haplotype combinations 1-3,1-4,2-3,2-4, respectively; the S1 genotype codes 1,2,3 correspond to 1-1,1-2,2-2, respectively. For the phenotype file, first column is id, followed by traits, and then any fixed effects. Pass a character vector for the function argument "fixed" to specify whether each effect is a factor or numeric covariate. The number of traits is deduced based on the number of columns. Binary traits must be coded N/Y and are converted to 0/1 internally for analysis by probit regression. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance.
 #'
 #' @param genofile File with map and genotype probabilities 
-#' @param ploidy Allowable values are 2 or 4
-#' @param pedfile File with pedigree information (four column format: id,population,mother,father)
+#' @param ploidy Either 2 or 4
+#' @param pedfile File with pedigree information (id,mother,father)
 #' @param phenofile File with phenotype data (optional)
 #' @param fixed If there are fixed effects, this is a character vector of "factor" or "numeric"
+#' @param bin.markers TRUE/FALSE whether to bin markers with the same cM position
+#' @param dominance Dominance degree (1-4). See Details.
+#' @param n.core Number of cores for parallel execution (only available from Linux or Mac command line)
+
 #' 
 #' @return Variable of class \code{\link{diallel_geno}} if phenofile is NULL, otherwise \code{\link{diallel_geno_pheno}}
 #' 
@@ -35,113 +39,123 @@
 #' @import Matrix
 #' @importFrom utils read.csv
 #' @importFrom methods new
+#' @importFrom parallel mclapply
 #' 
-read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL) {
+read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.markers=T,dominance=2,n.core=1) {
   
-  dominance = TRUE
+  if ((dominance > 2) & (ploidy==2)) {
+    stop("Only digenic dominance exists for diploids.")
+  }
+  
   data <- read.csv(genofile,as.is=T,check.names=F)
-  gid <- colnames(data)[-(1:3)]
-  dupe <- which(duplicated(gid))
+  cM <- grep("cM",colnames(data))
+  bp <- grep("bp",colnames(data))
+  if ((length(cM)>0) & (length(bp)>0)) {
+    map <- data[,c(1:2,cM,bp)]
+  }
+  if ((length(cM)>0) & (length(bp)==0)) {
+    map <- data[,c(1:2,cM)]
+  }
+  if ((length(cM)==0) & (length(bp)>0)) {
+    map <- data[,c(1:2,bp)]
+  }
+  if ((length(cM)==0) & (length(bp)==0)) {
+    stop("Invalid map position. Must be cM and/or bp.")
+  }
+  colnames(map) <- c("marker","chrom",colnames(map)[-(1:2)])
+  chroms <- unique(map$chrom)
+  n.chrom <- length(chroms)
+  m <- nrow(map)
+  if ((length(cM)>0) & bin.markers) {
+    tmp <- apply(map[,c("chrom","cM")],1,paste,collapse="_")
+    bins <- unique(tmp)
+    map$bin <- match(tmp,bins)
+    n.bin <- length(bins)
+    bin.ix <- match(1:n.bin,map$bin)
+    bin.names <- map$marker[bin.ix]
+  } else {
+    map$bin <- 1:m
+    n.bin <- m
+    bin.ix <- 1:m
+    bin.names <- map$marker[bin.ix]
+  }
+  first.chrom.marker <- map$marker[match(chroms,map$chrom)]
+  
+  id <- colnames(data)[-(1:max(cM,bp))]
+  dupe <- which(duplicated(id))
   if (length(dupe) > 0) {
     stop("Duplicate names in genotype file.")
   }
   
   ped <- read.csv(pedfile,as.is=T)
+  colnames(ped) <- c("id","mother","father")
   rownames(ped) <- ped[,1]
-  missing <- setdiff(gid,ped$id)
+  missing <- setdiff(id,ped$id)
   if(length(missing)>0) {
     stop("Not all genotyped individuals are in the pedigree file.")
   }
-  n.gid <- length(gid)
-  cat(paste("N =",n.gid,"individuals with pedigree and genotype information \n"))
-  ped <- ped[which(ped$id %in% gid),]
-  ped <- ped[match(gid,ped$id),]
+  cat(paste("N =",length(id),"individuals with pedigree and genotype information \n"))
+  ped <- ped[which(ped$id %in% id),]
+  ped <- ped[match(id,ped$id),]
+  
+  #GCA
+  parents <- sort(unique(c(ped$mother,ped$father)))
+  tmp <- data.frame(mother=factor(ped$mother,levels=parents,ordered=T),father=factor(ped$father,levels=parents,ordered=T))
+  X.GCA <- sparse.model.matrix(~mother-1,tmp)/2 + sparse.model.matrix(~father-1,tmp)/2
+  rownames(X.GCA) <- ped$id
+  colnames(X.GCA) <- gsub(pattern="mother",replacement="",colnames(X.GCA))
   
   if (!is.null(phenofile)) {
     pheno <- read.csv(phenofile,check.names=F)
     pheno[,1] <- as.character(pheno[,1])
-    missing2 <- setdiff(pheno[,1],gid)
+    missing2 <- setdiff(pheno[,1],id)
     if(length(missing2)>0) {
       stop("Not all phenotyped individuals are in the genotype file")
     }
-    
-    n2 <- length(intersect(gid,pheno[,1]))
+    n2 <- length(intersect(id,pheno[,1]))
     cat(paste("N =",n2,"individuals with phenotype and genotype data \n"))
   }
   
   cat("Preparing genotype data...\n")
-  genoX <- make_X(ped,ploidy=ploidy,dominance=dominance)
-  
-  map <- data[,1:3]
-  chroms <- unique(map[,2])
-  n.chrom <- length(chroms)
-  first.chrom.marker <- match(chroms,map[,2])
-  m <- nrow(map)
-  n <- ncol(data)-3
+  genoX <- make_X(ped,ploidy,dominance)
   n.state <- ifelse(ploidy==2,4,100)
   
-  genoA <- vector("list",length=m) #dim1 = id, dim2 = alleles
-  names(genoA) <- map[,1]
-  attr(genoA,"alleles") <- attr(genoX$A,"alleles")
-  attr(genoA,"id") <- gid
-  if (dominance) {
-    genoD <- vector("list",length=m) #dim1 = id, dim2 = alleles
-    names(genoD) <- map[,1]
-    attr(genoD,"allele.pairs") <- attr(genoX$D,"allele.pairs")
-    attr(genoD,"id") <- gid
-  } else {
-    genoD <- NULL
-  }
-  
-  for (j in 1:m) {
-    if (j %in% first.chrom.marker) {
-      cat(paste("Chromosome",map[j,2],"\n"))
-    }
-    tmp <- unlist(lapply(data[j,3+1:n],strsplit,split="=>",fixed=T),recursive = F)
+  f1 <- function(j,data,genoX,id,ploidy,dominance) {
+    tmp <- unlist(lapply(data[j,id],strsplit,split="=>",fixed=T),recursive = F)
     tmp2 <- lapply(tmp,strsplit,split="|",fixed=T)
     states <- lapply(tmp2,function(x){as.integer(x[[1]])})
-    ind <- rep(1:n,sapply(states,length))
     genoprob <- lapply(tmp2,function(x){y<-as.numeric(x[[2]])
-    y/sum(y)})
-    tmp3 <- mapply(FUN=function(u,v,w){
-      tcrossprod(u[,v],t(w))
-    },genoX$A,states,genoprob)
-    if(class(tmp3)=="matrix"){ # in case of all probs=1
-      tmp3 = split(tmp3, rep(1:ncol(tmp3), each = nrow(tmp3)))
-    }
-    genoA[[j]] <- Matrix(t(sapply(tmp3,function(x){as.vector(x)})),sparse=TRUE)
+        y/sum(y)})
     
-    if (dominance) {
-      tmp3 <- mapply(FUN=function(u,v,w){
-        tcrossprod(u[,v],t(w))
-      },genoX$D,states,genoprob)
+    geno <- vector("list",length=dominance)
+    for (q in 1:dominance) {
+      tmp3 <- mapply(FUN=function(u,v,w){tcrossprod(u[,v],t(w))},u=genoX[[q]],v=states,w=genoprob)
       if(class(tmp3)=="matrix"){ # in case of all probs=1
         tmp3 = split(tmp3, rep(1:ncol(tmp3), each = nrow(tmp3)))
       }
-      genoD[[j]] <- Matrix(t(sapply(tmp3,function(x){as.vector(x)})),sparse=TRUE)
+      geno[[q]] <- Matrix(t(sapply(tmp3,function(x){as.vector(x)})),sparse=TRUE)
     }
+    return(geno)
   }
   
-  data <- new(Class="diallel_geno",ploidy=as.integer(ploidy),ped=ped,map=map,geno=list(A=genoA,D=genoD))
-  rm(list=c("genoA","genoD","ped","map"))
-  tmp <- gc(verbose=FALSE)
+  geno <- mclapply(X=bin.ix,FUN=f1,data=data,genoX=genoX,id=id,ploidy=ploidy,dominance=dominance,mc.cores=n.core)
+  
+  names(geno) <- bin.names
+  attr(geno,"id") <- id
+  attr(geno,"haplotypes") <- attr(genoX,"haplotypes")
+  if (dominance > 1) {
+    attr(geno,"haplotype.pairs") <- attr(genoX,"haplotype.pairs")
+  }
+
+  data <- new(Class="diallel_geno",ploidy=as.integer(ploidy),dominance=as.integer(dominance),X.GCA=X.GCA,map=map,geno=geno)
   
   if (is.null(phenofile)) {
     return(data)
   } else {
-    crossID <- data.frame(x=factor(data@ped$population))
-    if(length(levels(crossID$x))==1){
-      Xped <- sparse.model.matrix(~1,data=crossID)
-    }else{
-      Xped <- sparse.model.matrix(~x,data=crossID)
-    }
-    rownames(Xped) <- gid
-    colnames(Xped) <- levels(crossID$x)
-    
-    pheno[,1] <- factor(pheno[,1],levels=gid)
+    pheno[,1] <- factor(pheno[,1],levels=id)
     Z <- sparse.model.matrix(~id-1,data=pheno)
-    colnames(Z) <- gid
-    X <- Z%*%Xped
+    colnames(Z) <- id
+    X <- sparse.model.matrix(~1,data=pheno)
     
     colp <- colnames(pheno)
     n.fixed <- length(fixed)

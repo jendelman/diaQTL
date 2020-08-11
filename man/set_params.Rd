@@ -28,10 +28,7 @@ List containing
 Determine parameters for scan1
 }
 \details{
-The burn-in and total number of iterations are determined using the
-Raftery and Lewis diagnostic from R package \code{coda}, based on a 95\% probability
-that the estimated median of the additive effects
-is between the quantiles (0.5-tol) to (0.5+tol). For greater precision, decrease the \code{tol} parameter.
+The burn-in and total number of iterations are determined using the Raftery and Lewis diagnostic from R package \code{coda}, based on a 95\% probability that the estimated median of the additive effects is between the quantiles (0.5-tol) to (0.5+tol). For greater precision, decrease the \code{tol} parameter.
 }
 \examples{
 \dontrun{

@@ -13,11 +13,13 @@ S4 class with genotype and phenotype data
 \describe{
 \item{\code{ploidy}}{Either 2 or 4}
 
-\item{\code{ped}}{data frame with pedigree information. Variables are id,population,mother,father}
+\item{\code{dominance}}{Integer 1-4 indicating 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance.}
 
-\item{\code{map}}{data frame with marker,chrom,and position (either bp or cM)}
+\item{\code{X.GCA}}{Incidence matrix for GCA effects}
 
-\item{\code{geno}}{list of length 2. The first element (named "A") is a list of sparse matrices, one for each marker, with dimensions (id x alleles), containing the allele dosages, which are the regression variables for additive effects. The second (optional) element (named "D") has the same structure (list of sparse matrices), but each matrix contains the dosage of allele-pairs, which are the regression variables for digenic dominance effects.}
+\item{\code{map}}{data frame with marker,chrom, position (cM and/or bp) and bin}
+
+\item{\code{geno}}{list of length equal to the number of marker bins. Each element is a list of length ploidy corresponding to additive, digenic, trigenic, and quadrigenic effects. The elements in the nested list are sparse matrices with dimensions (id x effects).}
 
 \item{\code{pheno}}{data frame of phenotypes}
 

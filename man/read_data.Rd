@@ -4,18 +4,33 @@
 \alias{read_data}
 \title{Read data files}
 \usage{
-read_data(genofile, ploidy = 4, pedfile, phenofile = NULL, fixed = NULL)
+read_data(
+  genofile,
+  ploidy = 4,
+  pedfile,
+  phenofile = NULL,
+  fixed = NULL,
+  bin.markers = T,
+  dominance = 2,
+  n.core = 1
+)
 }
 \arguments{
 \item{genofile}{File with map and genotype probabilities}
 
-\item{ploidy}{Allowable values are 2 or 4}
+\item{ploidy}{Either 2 or 4}
 
-\item{pedfile}{File with pedigree information (four column format: id,population,mother,father)}
+\item{pedfile}{File with pedigree information (id,mother,father)}
 
 \item{phenofile}{File with phenotype data (optional)}
 
 \item{fixed}{If there are fixed effects, this is a character vector of "factor" or "numeric"}
+
+\item{bin.markers}{TRUE/FALSE whether to bin markers with the same cM position}
+
+\item{dominance}{Dominance degree (1-4). See Details.}
+
+\item{n.core}{Number of cores for parallel execution (only available from Linux or Mac command line)}
 }
 \value{
 Variable of class \code{\link{diallel_geno}} if phenofile is NULL, otherwise \code{\link{diallel_geno_pheno}}
@@ -24,7 +39,7 @@ Variable of class \code{\link{diallel_geno}} if phenofile is NULL, otherwise \co
 Reads genotype, pedigree, and phenotype data files
 }
 \details{
-First three columns of the genotype file are marker, chromosome, and position. Columns 4 through (n+4) correspond to the n individuals of the population. The genotype information for each marker x individual combination is a string with the format "state|state|state...=>prob|prob|prob...", where "state" refers to the genotype state and "prob" is the genotype probability in decimal format. Only states with nonzero probabilities need to be listed. The encoding for the states in tetraploids is described in the documentation for the F1codes and S1codes datasets that come with the package. For diploids, there are 4 F1 genotype codes, 1,2,3,4, which correspond to allele combinations 1-3,1-4,2-3,2-4, respectively; the S1 genotype codes 1,2,3 correspond to 1-1,1-2,2-2, respectively. For the phenotype file, first column is id, followed by traits, and then any fixed effects. Pass a character vector for the function argument "fixed" to specify whether each effect is a factor or numeric covariate. The number of traits is deduced based on the number of columns. Binary traits must be coded "N"/"Y" and are converted to 0/1 internally for analysis by probit regression.
+The first 3 or 4 columns of the genotype file are the map (marker, chrom, bp and/or cM), followed by the members of the population. The genotype information for each marker x individual combination is a string with the format "state|state|state...=>prob|prob|prob...", where "state" refers to the genotype state and "prob" is the genotype probability in decimal format. Only states with nonzero probabilities need to be listed. The encoding for the states in tetraploids is described in the documentation for the F1codes and S1codes datasets that come with the package. For diploids, there are 4 F1 genotype codes, 1,2,3,4, which correspond to haplotype combinations 1-3,1-4,2-3,2-4, respectively; the S1 genotype codes 1,2,3 correspond to 1-1,1-2,2-2, respectively. For the phenotype file, first column is id, followed by traits, and then any fixed effects. Pass a character vector for the function argument "fixed" to specify whether each effect is a factor or numeric covariate. The number of traits is deduced based on the number of columns. Binary traits must be coded N/Y and are converted to 0/1 internally for analysis by probit regression. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance.
 }
 \examples{
 \dontrun{
