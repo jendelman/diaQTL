@@ -1,3 +1,6 @@
+Changes in 0.72
+* Corrected error introduced in v0.71
+
 Changes in 0.71
 * Fixed documentation for set_params
 

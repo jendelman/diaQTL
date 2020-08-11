@@ -4,12 +4,14 @@
 \alias{set_params}
 \title{Determine parameters for scan1}
 \usage{
-set_params(data, trait, tol = 0.1, burnIn = 50, nIter = 1000)
+set_params(data, trait, dominance = 1, tol = 0.1, burnIn = 50, nIter = 1000)
 }
 \arguments{
 \item{data}{Variable of class \code{\link{diallel_geno_pheno}}}
 
 \item{trait}{Name of trait}
+
+\item{dominance}{Dominance degree (1-4). See Details.}
 
 \item{tol}{tolerance for estimating the median}
 
@@ -28,7 +30,7 @@ List containing
 Determine parameters for scan1
 }
 \details{
-The burn-in and total number of iterations are determined using the Raftery and Lewis diagnostic from R package \code{coda}, based on a 95\% probability that the estimated median of the additive effects is between the quantiles (0.5-tol) to (0.5+tol). For greater precision, decrease the \code{tol} parameter.
+Determines the burn-in and total number of iterations using the Raftery and Lewis diagnostic from R package \code{coda}, based on a 95\% probability that the estimated median of the additive effects is between the quantiles (0.5-tol) to (0.5+tol). For greater precision, decrease the \code{tol} parameter. Parameter \code{dominance} specifies which genetic model (1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance) to use when determining the number of iterations, but this information is not returned and must be independently specified when calling functions such as \code{\link{scan1}} or \code{\link{fitQTL}}.
 }
 \examples{
 \dontrun{

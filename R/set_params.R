@@ -2,10 +2,11 @@
 #' 
 #' Determine parameters for scan1
 #' 
-#' The burn-in and total number of iterations are determined using the Raftery and Lewis diagnostic from R package \code{coda}, based on a 95% probability that the estimated median of the additive effects is between the quantiles (0.5-tol) to (0.5+tol). For greater precision, decrease the \code{tol} parameter. 
+#' Determines the burn-in and total number of iterations using the Raftery and Lewis diagnostic from R package \code{coda}, based on a 95% probability that the estimated median of the additive effects is between the quantiles (0.5-tol) to (0.5+tol). For greater precision, decrease the \code{tol} parameter. Parameter \code{dominance} specifies which genetic model (1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance) to use when determining the number of iterations, but this information is not returned and must be independently specified when calling functions such as \code{\link{scan1}} or \code{\link{fitQTL}}. 
 #' 
 #' @param data Variable of class \code{\link{diallel_geno_pheno}}
 #' @param trait Name of trait
+#' @param dominance Dominance degree (1-4). See Details.
 #' @param tol tolerance for estimating the median
 #' @param burnIn initial value for burnIn parameter
 #' @param nIter initial value for nIter parameter
@@ -27,7 +28,7 @@
 #' @importFrom BGLR readBinMat
 #' @importFrom stats quantile
 
-set_params <- function(data,trait,tol=0.1,burnIn=50,nIter=1000) {
+set_params <- function(data,trait,dominance=1,tol=0.1,burnIn=50,nIter=1000) {
   
   stopifnot(inherits(data,"diallel_geno_pheno"))
   stopifnot(trait %in% colnames(data@pheno))
