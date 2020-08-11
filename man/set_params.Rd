@@ -4,7 +4,7 @@
 \alias{set_params}
 \title{Determine parameters for scan1}
 \usage{
-set_params(data, trait, tol = 0.1, burnIn = 50, nIter = 1000)
+set_params(data, trait, tol = 0.1, dominance = 1, burnIn = 50, nIter = 1000)
 }
 \arguments{
 \item{data}{Variable of class \code{\link{diallel_geno_pheno}}}
@@ -12,6 +12,8 @@ set_params(data, trait, tol = 0.1, burnIn = 50, nIter = 1000)
 \item{trait}{Name of trait}
 
 \item{tol}{tolerance for estimating the median}
+  
+\item{dominance}{dominance degree (1-4)}
 
 \item{burnIn}{initial value for burnIn parameter}
 
