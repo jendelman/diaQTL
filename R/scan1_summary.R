@@ -24,7 +24,7 @@
 scan1_summary <- function(scan1_data,
                           thresh=NULL,
                           chrom = NULL,
-                          position) {
+                          position = "cM") {
   stopifnot(position %in% colnames(scan1_data))
   
   if(!is.null(chrom)) {
