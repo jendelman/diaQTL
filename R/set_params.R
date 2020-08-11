@@ -9,6 +9,7 @@
 #' @param tol tolerance for estimating the median
 #' @param burnIn initial value for burnIn parameter
 #' @param nIter initial value for nIter parameter
+#' @param dominance dominance degree (1-4)
 #' 
 #' @return List containing 
 #' \describe{
@@ -27,7 +28,7 @@
 #' @importFrom BGLR readBinMat
 #' @importFrom stats quantile
 
-set_params <- function(data,trait,tol=0.1,burnIn=50,nIter=1000) {
+set_params <- function(data,trait,tol=0.1,dominance=1,burnIn=50,nIter=1000) {
   
   stopifnot(inherits(data,"diallel_geno_pheno"))
   stopifnot(trait %in% colnames(data@pheno))
