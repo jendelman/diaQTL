@@ -44,7 +44,6 @@ scan1 <- function(data,trait,params,dominance=1,chrom=NULL,cofactor=NULL,n.core=
   if (is.null(chrom)) {
     chrom <- unique(data@map$chrom)
   }
-  n.chrom <- length(chrom)
 
   y <- data@pheno[,trait]
   if (inherits(y,"factor")) {
@@ -64,12 +63,11 @@ scan1 <- function(data,trait,params,dominance=1,chrom=NULL,cofactor=NULL,n.core=
   #no marker model
   ans0 <- qtl1(y=y,X=data@X,Z=data@Z,params=params,Xcof=Xcof,X.GCA=data@X.GCA)
   
-  bin.names <- names(data@geno)
-  map <- data@map[(data@map$chrom %in% chrom) & (data@map$marker %in% bin.names),1:(ncol(data@map)-1)]
-  
   #with marker
-  ans <- mclapply(X=map$marker,FUN=function(k,y,data,Xcof,params,dominance){qtl1(y=y,X=data@X,Z=data@Z,Xcof=Xcof,params=params,geno=data@geno[[k]][1:dominance])},y=y,data=data,Xcof=Xcof,params=params,dominance=dominance,mc.cores = n.core)
+  map <- data@map[data@map$chrom %in% chrom,]
+  bins <- get_bin(map$marker,map)
+  ans <- mclapply(X=unique(bins),FUN=function(k,y,data,Xcof,params,dominance){qtl1(y=y,X=data@X,Z=data@Z,Xcof=Xcof,params=params,geno=data@geno[[k]][1:dominance])},y=y,data=data,Xcof=Xcof,params=params,dominance=dominance,mc.cores = n.core)
   
-  fit <- data.frame(map,LOD=as.numeric(sapply(ans,function(x){x$LL})-ans0$LL)/log(10),R2=as.numeric(sapply(ans,function(x){x$R2})),deltaDIC=as.numeric(sapply(ans,function(x){x$DIC})-ans0$DIC),stringsAsFactors = F)
-  return(fit)
+  fit <- data.frame(LOD=as.numeric(sapply(ans,function(x){x$LL})-ans0$LL)/log(10),R2=as.numeric(sapply(ans,function(x){x$R2})),deltaDIC=as.numeric(sapply(ans,function(x){x$DIC})-ans0$DIC))
+  return(data.frame(map[,1:(ncol(map)-1)],fit[match(bins,unique(bins)),],stringsAsFactors = F))
 }

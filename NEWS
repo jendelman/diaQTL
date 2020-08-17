@@ -1,3 +1,8 @@
+Changes in 0.74
+* scan1 output now includes all markers, not just bins
+* Added function haplo_freq
+* Changed name of haplotypes function to haplo_get
+
 Changes in 0.73
 * Corrected error with names for digenic effects
 

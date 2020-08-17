@@ -101,9 +101,15 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.ma
   #GCA
   parents <- sort(unique(c(ped$mother,ped$father)))
   tmp <- data.frame(mother=factor(ped$mother,levels=parents,ordered=T),father=factor(ped$father,levels=parents,ordered=T))
-  X.GCA <- sparse.model.matrix(~mother-1,tmp)/2 + sparse.model.matrix(~father-1,tmp)/2
+  if (length(parents)==1) {
+    X.GCA <- Matrix(1,nrow=nrow(tmp),ncol=1)
+    colnames(X.GCA) <- parents
+  } else {
+    X.GCA <- sparse.model.matrix(~mother-1,tmp)/2 + sparse.model.matrix(~father-1,tmp)/2
+    colnames(X.GCA) <- gsub(pattern="mother",replacement="",colnames(X.GCA))
+  }
   rownames(X.GCA) <- ped$id
-  colnames(X.GCA) <- gsub(pattern="mother",replacement="",colnames(X.GCA))
+  
   
   if (!is.null(phenofile)) {
     pheno <- read.csv(phenofile,check.names=F)
