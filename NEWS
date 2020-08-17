@@ -1,3 +1,8 @@
+Changes in 0.75
+* Can now include multiple markers in haplo_plot
+* Fixed labeling error in fitQTL plot for diploids
+* Fixed error with dominance effects for diploids
+
 Changes in 0.74
 * scan1 output now includes all markers, not just bins
 * Added function haplo_freq

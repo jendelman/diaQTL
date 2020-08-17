@@ -42,7 +42,7 @@
 #' @importFrom parallel mclapply
 #' 
 read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.markers=T,dominance=2,n.core=1) {
-  
+  stopifnot(ploidy %in% c(2,4))
   if ((dominance > 2) & (ploidy==2)) {
     stop("Only digenic dominance exists for diploids.")
   }
@@ -88,6 +88,9 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.ma
   }
   
   ped <- read.csv(pedfile,as.is=T)
+  if (ncol(ped) > 3) {
+    stop("Pedigree file should have 3 columns: id,mother,father")
+  }
   colnames(ped) <- c("id","mother","father")
   rownames(ped) <- ped[,1]
   missing <- setdiff(id,ped$id)

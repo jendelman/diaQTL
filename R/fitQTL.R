@@ -96,17 +96,16 @@ fitQTL <- function(data,params,dominance=1,trait,marker,cofactor=NULL) {
   tmp <- strsplit(split=".",x=effectsA$Haplotype,fixed=T)
   founders <- sapply(tmp,function(x){x[1]})
   plotme <- data.frame(effectsA,founders=factor(founders))
-  plotme$Haplotype <- 1:data@ploidy
+  plotme$Haplotype <- rep(1:data@ploidy,length(levels(plotme$founders)))
   plotA <- ggplot(data=plotme,aes(x=Haplotype,y=Mean,fill=founders)) + 
     labs(title = paste("Trait:", trait),
          subtitle = paste("Marker:", marker)) + 
     theme_bw() + 
-    xlab("Haplotype") + 
+    scale_x_continuous(name="Haplotype",labels=1:data@ploidy,breaks=1:data@ploidy) +
     geom_bar(stat="identity",position="dodge",colour="black") + 
     ylab("Additive Effect") + 
     scale_fill_viridis_d(name="")+
-    theme(text = element_text(size=13),
-          axis.ticks.x=element_blank()) + 
+    theme(text = element_text(size=13)) + 
     facet_grid(.~founders,scales = "free_x") +
     geom_errorbar(aes(ymax=Mean+1.96*SE, ymin = Mean-1.96*SE, width = 0.2))
 
@@ -121,7 +120,7 @@ fitQTL <- function(data,params,dominance=1,trait,marker,cofactor=NULL) {
 
     #plot of dominance effects
     plotme <- data.frame(x=c(effectsD$Haplotype1,effectsD$Haplotype2),y=c(effectsD$Haplotype2,effectsD$Haplotype1),z=rep(effectsD$Mean,2)) #construct symmetric matrix
-    plotme <- plotme[-which(duplicated(plotme[,1:2])),] #remove duplication of diagonals
+    plotme <- plotme[!duplicated(plotme[,1:2]),] #remove duplication of diagonals
     plotD <- ggplot(data=plotme,aes(x=x,y=y,fill=z)) +
       geom_tile() +
       scale_fill_viridis_c(name="Dominance\nEffect") +
