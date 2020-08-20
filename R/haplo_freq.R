@@ -36,7 +36,7 @@ haplo_freq <- function(data,haplotypes,dosage,position,chrom=NULL) {
   n.haplo <- length(haplotypes)
   out <- NULL
   for (i in 1:n.haplo) {
-    out <- rbind(out,data.frame(marker=map$marker,haplo=haplotypes[i],freq=sapply(ans,function(x){sum(x[,haplotypes[i]]>dosage)})/n,stringsAsFactors = F))
+    out <- rbind(out,data.frame(marker=map$marker,haplo=haplotypes[i],freq=sapply(ans,function(x){sum(x[,haplotypes[i]]>dosage)})/(data@ploidy*n),stringsAsFactors = F))
   }
   out$haplo <- factor(out$haplo)
 
@@ -68,7 +68,7 @@ haplo_freq <- function(data,haplotypes,dosage,position,chrom=NULL) {
       theme_bw() +
       scale_x_continuous(name="Chromosome",breaks=breaks,labels=chrom) +
       scale_colour_manual(values=c("#21908c","#440154"))+
-      geom_hline(yintercept=0,linetype=2,col="gray30") +
+      geom_hline(yintercept=0,linetype=2,col="gray30") + ylim(0,NA) + 
       theme(text = element_text(size=13),panel.grid = element_blank(),legend.position = "none")
     for (q in 1:n.haplo) {
       for (i in chrom){

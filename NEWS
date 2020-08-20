@@ -1,3 +1,6 @@
+Changes in 0.76
+* Adjusted frequency in haplo_freq by ploidy
+
 Changes in 0.75
 * Can now include multiple markers in haplo_plot
 * Fixed labeling error in fitQTL plot for diploids
