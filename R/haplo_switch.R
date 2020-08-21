@@ -29,7 +29,7 @@ haplo_switch <- function(data,marker,haplotype,position,jump=0.8) {
   x0 <- map[match(marker,map$marker),position]
   result <- data.frame(id=id,dosage=numeric(n),left.marker=as.character(rep(NA,n)),left.pos=as.numeric(rep(NA,n)),right.marker=as.character(rep(NA,n)),right.pos=as.numeric(rep(NA,n)),stringsAsFactors = F)
   for (j in 1:n) {
-    y <- haplotypes(data=data,id=id[j])
+    y <- haplo_get(data=data,id=id[j])
     y <- y[map$marker,haplotype]
     y2 <- abs(y-y[marker])
     result$dosage[j] <- y[marker]

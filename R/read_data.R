@@ -2,7 +2,7 @@
 #' 
 #' Reads genotype, pedigree, and phenotype data files 
 #' 
-#' The first 3 or 4 columns of the genotype file are the map (marker, chrom, bp and/or cM), followed by the members of the population. The genotype information for each marker x individual combination is a string with the format "state|state|state...=>prob|prob|prob...", where "state" refers to the genotype state and "prob" is the genotype probability in decimal format. Only states with nonzero probabilities need to be listed. The encoding for the states in tetraploids is described in the documentation for the F1codes and S1codes datasets that come with the package. For diploids, there are 4 F1 genotype codes, 1,2,3,4, which correspond to haplotype combinations 1-3,1-4,2-3,2-4, respectively; the S1 genotype codes 1,2,3 correspond to 1-1,1-2,2-2, respectively. For the phenotype file, first column is id, followed by traits, and then any fixed effects. Pass a character vector for the function argument "fixed" to specify whether each effect is a factor or numeric covariate. The number of traits is deduced based on the number of columns. Binary traits must be coded N/Y and are converted to 0/1 internally for analysis by probit regression. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance.
+#' The first 3 or 4 columns of the genotype file are the map (marker, chrom, bp and/or cM), followed by the members of the population. The genotype information for each marker x individual combination is a string with the format "state|state|state...=>prob|prob|prob...", where "state" refers to the genotype state and "prob" is the genotype probability in decimal format. Only states with nonzero probabilities need to be listed. The encoding for the states in tetraploids is described in the documentation for the F1codes and S1codes datasets that come with the package. For diploids, there are 4 F1 genotype codes, 1,2,3,4, which correspond to haplotype combinations 1-3,1-4,2-3,2-4, respectively; the S1 genotype codes 1,2,3 correspond to 1-1,1-2,2-2, respectively. For the phenotype file, first column is id, followed by traits, and then any fixed effects. Pass a character vector for the function argument "fixed" to specify whether each effect is a factor or numeric covariate. The number of traits is deduced based on the number of columns. Binary traits must be coded N/Y and are converted to 0/1 internally for analysis by probit regression. Missing data in the phenotype file should be coded as NA. The parameter \code{dominance} specifies the maximum value of dominance that can be used in subsequent analysis: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. For maximum flexibility, use dominance = 4, but more memory is required. This will allow you to use any value of dominance (from 1 to 4) in functions such as \code{\link{scan1}} and \code{\link{fitQTL}}. 
 #'
 #' @param genofile File with map and genotype probabilities 
 #' @param ploidy Either 2 or 4
@@ -10,7 +10,7 @@
 #' @param phenofile File with phenotype data (optional)
 #' @param fixed If there are fixed effects, this is a character vector of "factor" or "numeric"
 #' @param bin.markers TRUE/FALSE whether to bin markers with the same cM position
-#' @param dominance Dominance degree (1-4). See Details.
+#' @param dominance Maximum value of dominance that will be used for analysis (1-4). See Details.
 #' @param n.core Number of cores for parallel execution (only available from Linux or Mac command line)
 
 #' 
@@ -42,7 +42,7 @@
 #' @importFrom parallel mclapply
 #' 
 read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.markers=T,dominance=2,n.core=1) {
-  
+  stopifnot(ploidy %in% c(2,4))
   if ((dominance > 2) & (ploidy==2)) {
     stop("Only digenic dominance exists for diploids.")
   }
@@ -88,6 +88,9 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.ma
   }
   
   ped <- read.csv(pedfile,as.is=T)
+  if (ncol(ped) > 3) {
+    stop("Pedigree file should have 3 columns: id,mother,father")
+  }
   colnames(ped) <- c("id","mother","father")
   rownames(ped) <- ped[,1]
   missing <- setdiff(id,ped$id)
@@ -101,9 +104,15 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.ma
   #GCA
   parents <- sort(unique(c(ped$mother,ped$father)))
   tmp <- data.frame(mother=factor(ped$mother,levels=parents,ordered=T),father=factor(ped$father,levels=parents,ordered=T))
-  X.GCA <- sparse.model.matrix(~mother-1,tmp)/2 + sparse.model.matrix(~father-1,tmp)/2
+  if (length(parents)==1) {
+    X.GCA <- Matrix(1,nrow=nrow(tmp),ncol=1)
+    colnames(X.GCA) <- parents
+  } else {
+    X.GCA <- sparse.model.matrix(~mother-1,tmp)/2 + sparse.model.matrix(~father-1,tmp)/2
+    colnames(X.GCA) <- gsub(pattern="mother",replacement="",colnames(X.GCA))
+  }
   rownames(X.GCA) <- ped$id
-  colnames(X.GCA) <- gsub(pattern="mother",replacement="",colnames(X.GCA))
+  
   
   if (!is.null(phenofile)) {
     pheno <- read.csv(phenofile,check.names=F)

@@ -25,19 +25,21 @@ make_X <- function(ped,ploidy,dominance) {
   
   if (dominance > 1) {
     #digenic
-    
-    #uniparental terms
     gen2 <- character(0)
-    for (p1 in 1:nf) {
-      gen2 <- c(gen2,apply(combinations(x=4*(p1-1)+1:4,k=2,replace=T),1,paste,collapse="+"))
+    
+    if (ploidy==4) {
+      #uniparental terms
+      for (p1 in 1:nf) {
+        gen2 <- c(gen2,apply(combinations(x=ploidy*(p1-1)+1:ploidy,k=2,replace=T),1,paste,collapse="+"))
+      }
     }
     
     #biparental terms
     for (i in 1:n.cross) {
       p1 <- as.integer(substr(crosses[i],1,1))
       p2 <- as.integer(substr(crosses[i],3,3))
-      if (p1!=p2) {
-        gen2 <- c(gen2,apply(expand.grid(x=4*(p1-1)+1:4,y=4*(p2-1)+1:4),1,paste,collapse="+"))
+      if ((p1!=p2) | (ploidy==2)) {
+        gen2 <- c(gen2,apply(expand.grid(x=ploidy*(p1-1)+1:ploidy,y=ploidy*(p2-1)+1:ploidy),1,paste,collapse="+"))
       }
     }
     n2 <- length(gen2)
@@ -50,13 +52,13 @@ make_X <- function(ped,ploidy,dominance) {
       p1 <- as.integer(substr(crosses[i],1,1))
       p2 <- as.integer(substr(crosses[i],3,3))
       
-      p1.di <- combinations(x=4*(p1-1)+1:4,k=2,replace=T)
-      tmp <- as.matrix(expand.grid(x=1:10,y=4*(p2-1)+1:4))
+      p1.di <- combinations(x=ploidy*(p1-1)+1:ploidy,k=2,replace=T)
+      tmp <- as.matrix(expand.grid(x=1:10,y=ploidy*(p2-1)+1:ploidy))
       gen3 <- c(gen3,apply(tmp,1,function(z){paste(sort(c(p1.di[z[1],],z[2])),collapse="+")}))
 
       if (p1!=p2) {
-        p2.di <- combinations(x=4*(p2-1)+1:4,k=2,replace=T)
-        tmp <- as.matrix(expand.grid(x=1:10,y=4*(p1-1)+1:4))
+        p2.di <- combinations(x=ploidy*(p2-1)+1:ploidy,k=2,replace=T)
+        tmp <- as.matrix(expand.grid(x=1:10,y=ploidy*(p1-1)+1:ploidy))
         gen3 <- c(gen3,apply(tmp,1,function(z){paste(sort(c(p2.di[z[1],],z[2])),collapse="+")}))
       }
     }
@@ -70,8 +72,8 @@ make_X <- function(ped,ploidy,dominance) {
       p1 <- as.integer(substr(crosses[i],1,1))
       p2 <- as.integer(substr(crosses[i],3,3))
     
-      p1.di <- combinations(x=4*(p1-1)+1:4,k=2,replace=T)
-      p2.di <- combinations(x=4*(p2-1)+1:4,k=2,replace=T)
+      p1.di <- combinations(x=ploidy*(p1-1)+1:ploidy,k=2,replace=T)
+      p2.di <- combinations(x=ploidy*(p2-1)+1:ploidy,k=2,replace=T)
       tmp <- as.matrix(expand.grid(x=1:10,y=1:10))
       gen4 <- c(gen4,apply(tmp,1,function(z){paste(sort(c(p1.di[z[1],],p2.di[z[2],])),collapse="+")}))
     }
@@ -167,9 +169,25 @@ make_X <- function(ped,ploidy,dominance) {
   attr(X,"haplotypes") <- haplotypes
   
   if (dominance > 1) {
-    digen <- apply(combinations(haplotypes,2,replace=T),1,paste,collapse="+")
-    attr(X,"haplotype.pairs") <- digen
+    
+    gen2 <- character(0)
+    if (ploidy==4) {
+      #uniparental terms
+      for (p1 in 1:nf) {
+        gen2 <- c(gen2,apply(combinations(x=haplotypes[ploidy*(p1-1)+1:ploidy],k=2,replace=T),1,paste,collapse="+"))
+      }
+    }
+    
+    #biparental terms
+    for (i in 1:n.cross) {
+      p1 <- as.integer(substr(crosses[i],1,1))
+      p2 <- as.integer(substr(crosses[i],3,3))
+      if ((p1!=p2) | (ploidy==2)) {
+        gen2 <- c(gen2,apply(expand.grid(x=haplotypes[ploidy*(p1-1)+1:ploidy],y=haplotypes[ploidy*(p2-1)+1:ploidy]),1,paste,collapse="+"))
+      }
+    }
+    attr(X,"haplotype.pairs") <- gen2
   }
-  
+
   return(X)
 }

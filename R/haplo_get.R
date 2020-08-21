@@ -12,15 +12,15 @@
 #' 
 #' @examples
 #' \dontrun{
-#'   haplo_example = haplotypes(data = diallel_example, 
+#'   haplo_example = haplo_get(data = diallel_example, 
 #'                           marker = "solcap_snp_c2_25522")
-#'   haplo_example = haplotypes(data = diallel_example, 
+#'   haplo_example = haplo_get(data = diallel_example, 
 #'                           id = "W15263-8R")
 #' }
 #' 
 #' @export
 
-haplotypes <- function(data,marker=NULL,id=NULL) {
+haplo_get <- function(data,marker=NULL,id=NULL) {
   stopifnot(inherits(data,"diallel_geno"))
   stopifnot(is.null(marker)|is.null(id))
   stopifnot(!is.null(marker)|!is.null(id))

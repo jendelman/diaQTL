@@ -4,7 +4,7 @@
 \alias{haplo_plot}
 \title{Plot parental haplotype dosage}
 \usage{
-haplo_plot(data, id, chrom, position, marker = NULL)
+haplo_plot(data, id, chrom, position, markers = NULL)
 }
 \arguments{
 \item{data}{Variable inheriting from class \code{\link{diallel_geno}}}
@@ -15,7 +15,7 @@ haplo_plot(data, id, chrom, position, marker = NULL)
 
 \item{position}{Either "cM" or "bp"}
 
-\item{marker}{Optional, marker to indicate with dashed line}
+\item{markers}{Optional, markers to indicate with dashed line}
 }
 \value{
 ggplot object

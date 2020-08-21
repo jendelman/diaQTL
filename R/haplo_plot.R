@@ -8,7 +8,7 @@
 #' @param id Name of individual
 #' @param chrom Name of chromosome
 #' @param position Either "cM" or "bp"
-#' @param marker Optional, marker to indicate with dashed line
+#' @param markers Optional, markers to indicate with dashed line
 #' 
 #' @return ggplot object 
 #' 
@@ -26,13 +26,14 @@
 #' @export
 #' @import ggplot2
 
-haplo_plot <- function(data,id,chrom,position,marker=NULL) {
+haplo_plot <- function(data,id,chrom,position,markers=NULL) {
   stopifnot(inherits(data,"diallel_geno"))
   stopifnot(position %in% colnames(data@map))
   stopifnot(chrom %in% data@map$chrom)
+  features <-  markers
   
   marks <- data@map$marker[data@map$chrom %in% chrom]
-  geno <- haplotypes(data,id=id)
+  geno <- haplo_get(data,id=id)
   if (position=="bp") {
     x <- data@map[data@map$marker %in% marks,"bp"] #x axis values
     x <- x/1e6
@@ -52,22 +53,28 @@ haplo_plot <- function(data,id,chrom,position,marker=NULL) {
   parents <- unique(colnames(data@X.GCA)[data@X.GCA[id,] > 0])
   n.par <- length(parents)
   iq <- which(founders %in% parents[1])
-  plotme <- data.frame(z=as.vector(geno[,iq]),xmin=xmin,xmax=xmax,ymin=rep(0:3,each=m),ymax=rep(1:4,each=m))
+  y1 <- 0:(data@ploidy-1)
+  plotme <- data.frame(z=as.vector(geno[,iq]),xmin=xmin,xmax=xmax,ymin=rep(y1,each=m),ymax=rep(y1+1,each=m))
   
   if (n.par==2) {
     #F1
+    y2 <- y1+data@ploidy
     iq <- which(founders %in% parents[2])
-    plotme <- rbind(plotme,data.frame(z=as.vector(geno[,iq]),xmin=xmin,xmax=xmax,ymin=rep(4:7,each=m),ymax=rep(5:8,each=m)))
+    plotme <- rbind(plotme,data.frame(z=as.vector(geno[,iq]),xmin=xmin,xmax=xmax,ymin=rep(y2,each=m),ymax=rep(y2+1,each=m)))
   }
-  p <- ggplot(data=plotme) + geom_rect(aes(fill=z,xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax)) + theme_bw() + scale_fill_distiller(name="Dosage",palette="Blues",direction=1) + scale_y_continuous(name="",labels=haplotypes[which(founders %in% parents)],breaks=(1:(4*n.par))-0.5) + xlab(x.label)
-  if (!is.null(marker)) {
-    p <- p + labs(title = id,subtitle = paste("Marker:", marker))
-    if (position=="cM") {
-      marker <- get_bin(marker=marker,map=data@map)
+  
+  p <- ggplot(data=plotme) + geom_rect(aes(fill=z,xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax)) + theme_bw() + scale_fill_distiller(name="Dosage",palette="Blues",direction=1) + scale_y_continuous(name="",labels=haplotypes[which(founders %in% parents)],breaks=(1:(data@ploidy*n.par))-0.5) + xlab(x.label) + geom_hline(yintercept=0:(data@ploidy*n.par),color="gray30")
+  if (!is.null(features)) {
+    p <- p + labs(title = id,subtitle = paste(c("Markers:",features),collapse=" "))
+    for (q in 1:length(features)) {
+      marker <- features[q]
+      if (position=="cM") {
+        marker <- get_bin(marker=marker,map=data@map)
+      }
+      stopifnot(marker %in% marks)
+      k <- match(marker,marks)
+      p <- p + geom_vline(xintercept=x[k],linetype=2)
     }
-    stopifnot(marker %in% marks)
-    k <- match(marker,marks)
-    p <- p + geom_vline(xintercept=x[k],linetype=2)
   } else {
     p <- p + labs(title=id)
   }
