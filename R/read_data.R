@@ -19,9 +19,9 @@
 #' @examples
 #' \dontrun{
 #'   ## Get the location of raw csv files examples
-#'   genocsv = system.file( "tutorial", "potato_geno.csv", package = "diaQTL" )
-#'   pedcsv = system.file( "tutorial", "potato_ped.csv", package = "diaQTL" )
-#'   phenocsv = system.file( "tutorial", "potato_pheno.csv", package = "diaQTL" )
+#'   genocsv = system.file( "vignette_data", "potato_geno.csv", package = "diaQTL" )
+#'   pedcsv = system.file( "vignette_data", "potato_ped.csv", package = "diaQTL" )
+#'   phenocsv = system.file( "vignette_data", "potato_pheno.csv", package = "diaQTL" )
 #'   
 #'   ## Check their location in the system
 #'   print(genocsv)

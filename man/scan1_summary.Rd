@@ -4,7 +4,7 @@
 \alias{scan1_summary}
 \title{Summary of scan1 result}
 \usage{
-scan1_summary(scan1_data, thresh = NULL, chrom = NULL, position)
+scan1_summary(scan1_data, thresh = NULL, chrom = NULL, position = "cM")
 }
 \arguments{
 \item{scan1_data}{output from scan1}
