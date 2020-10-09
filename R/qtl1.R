@@ -12,16 +12,16 @@ qtl1 <- function(y,X,Z,params,geno=NULL,Xcof=NULL,X.GCA=NULL) {
   if (!is.null(geno)) {
     g <- length(geno)
     X1 <- Z %*% geno[[1]]
-    model <- paste(model,"add=list(X=X1,model='BayesC',saveEffects=TRUE)",sep=",")
+    model <- paste(model,"a=list(X=X1,model='BayesC',saveEffects=TRUE)",sep=",")
     if (g>1) {
       X2 <- Z %*% geno[[2]]
-      model <- paste(model,"dom=list(X=X2,model='BayesC',saveEffects=TRUE)",sep=",")
+      model <- paste(model,"d=list(X=X2,model='BayesC',saveEffects=TRUE)",sep=",")
       if (g>2) {
         X3 <- Z %*% geno[[3]]
-        model <- paste(model,"d3=list(X=X3,model='BayesC',saveEffects=TRUE)",sep=",")
+        model <- paste(model,"t=list(X=X3,model='BayesC',saveEffects=TRUE)",sep=",")
         if (g>3) {
           X4 <- Z %*% geno[[4]]
-          model <- paste(model,"d4=list(X=X4,model='BayesC',saveEffects=TRUE)",sep=",")
+          model <- paste(model,"q=list(X=X4,model='BayesC',saveEffects=TRUE)",sep=",")
         }
       }
     }
@@ -31,7 +31,9 @@ qtl1 <- function(y,X,Z,params,geno=NULL,Xcof=NULL,X.GCA=NULL) {
   }
   model <- paste(model,"))",sep="")
   
+  setwd("tmp")
   ans <- eval(parse(text=model))
+  setwd("..")
 
   ix <- which(!is.na(y))
   if (params$response=="ordinal") {

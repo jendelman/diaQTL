@@ -50,7 +50,7 @@ set_params <- function(data,trait,dominance=1,tol=0.1,burnIn=50,nIter=1000) {
   for (i in 1:n.chrom) {
     k <- data@map$marker[match(chrom[i],data@map[,2])] #first marker for each chromosome
     ans <- qtl1(y=y,X=data@X,params=params,Z=data@Z,geno=data@geno[[k]][1:dominance])  
-    tmp <- mcmc(readBinMat('ETA_add_b.bin'))
+    tmp <- mcmc(readBinMat("tmp/ETA_a_b.bin"))
     raftans <- rbind(raftans,raftery.diag(tmp,q=0.5,r=tol)$resmatrix[,1:2])
   }
   

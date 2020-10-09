@@ -1,8 +1,8 @@
 ---
-title: "diaQTL Vignette: Potato Example"
+title: "diaQTL Vignette"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{diaQTL Tutorial}
+  %\VignetteIndexEntry{diaQTL Vignette}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
@@ -13,11 +13,13 @@ library(rmarkdown)
 knitr::opts_chunk$set(echo = TRUE,collapse=FALSE,comment="##",fig.width=5,fig.height=5)
 ```
 
+The example data set is a 3x3 half-diallel population in potato. In other words, three founders were crossed in all three pairwise combinations. 
+
 ## Structure of the input files
-The example data set is a 3x3 half-diallel population in potato. In other words, three founders were crossed in all three pairwise combinations. Three input files are needed to run the QTL analysis: (1) pedigree file, (2) genotype file, (3) phenotype file. 
+Three input files are needed for QTL analysis: (1) pedigree file, (2) genotype file, (3) phenotype file. In most situations, the PolyOrigin software will be used prior to running diaQTL. The diaQTL function `read_polyancestry` can be used to generate the pedigree and genotype input files from the PolyOrigin output file. 
 
 ### 1) Pedigree file
-The pedigree file has three columns: id, mother, and father. 
+The pedigree file has three columns: id, parent1, and parent2 (maternal effects are not modeled). 
 ```{r}
 pedcsv <- system.file("vignette_data", "potato_ped.csv", package = "diaQTL")
 ped <- read.csv(pedcsv, as.is = T)
@@ -93,12 +95,12 @@ LODthresh(genome.size=12.2,num.parents=3,ploidy=4) #threshold
 ## Results
 The `scan1_summary` function returns the marker with the highest LOD score on each chromosome and a plot of the LOD profile. 
 ```{r}
-ans1 <- scan1_summary(scan1_example,thresh=6.7,position="bp")
+ans1 <- scan1_summary(scan1_example,thresh=6.8,position="bp")
 ans1$peaks
 ans1$plot
 ```
 
-The results show there is a QTL at 49 Mb on chromosome 10 that explains $R^{2} = 36\%$ of the variance. This matches the location of the classical round locus in potato, which was recently identified as the gene *StOVP20* (Wu et al. 2018; doi.org/10.1038/s41467-018-07216-8). The most significant marker is "solcap_snp_c2_255222", which can be passed to the `fitQTL` function to get the estimated haplotype effects, as both a table (`effectsA`) and barplot (`plotA`). Use the parameter `dominance = 2` to include digenic dominance effects, which are returned as `effectsD` (table) and `plotD` (heatmap). To improve the precision of the results, the number of MCMC iterations is increased compared to that used for `scan1`.
+The results show there is a QTL at 49 Mb on chromosome 10 that explains $R^{2} = 36\%$ of the variance. This matches the location of the classical round locus in potato, which was recently identified as the gene *StOVP20* (Wu et al. 2018; doi.org/10.1038/s41467-018-07216-8). The most significant marker is "solcap_snp_c2_255222", which can be passed to the `fitQTL` function to get the estimated haplotype effects, as both a table (`effects`) and barplot (`plots`). Use the parameter `dominance = 2` to include digenic dominance effects. To improve the precision of the results, the number of MCMC iterations is increased compared to that used for `scan1`.
 ```{r}
 fit1 <- fitQTL( data = data, 
                 trait = "tuber_shape", 
@@ -116,16 +118,16 @@ fit2 <- fitQTL( data = data,
 print(data.frame(Add=round(fit1$deltaDIC,0),Dom=round(fit2$deltaDIC,0)),row.names=F)
 ```
 
-Because the dominance model has more parameters, a penalized measure of goodness-of-fit is needed to determine whether it is superior to the additive model. `fitQTL` returns the Deviance Information Criterion (DIC) for the QTL model relative to the baseline model (no QTL) as deltaDIC. Lower DIC values are better, so the dominance model is selected in this case. The amounts of additive and dominance variance relative to the total variance are returned as $h^2$ and $d^2$, respectively. 
+Because the dominance model has more parameters, a penalized measure of goodness-of-fit is needed to determine whether it is superior to the additive model. `fitQTL` returns the Deviance Information Criterion (DIC) for the QTL model relative to the baseline model (no QTL) as deltaDIC. Lower DIC values are better, so the dominance model is selected in this case. The proportion of variance due to additive effects ($h^2$), as well as for higher order effects when included (e.g., $d^2$ for digenic dominance), is returned in `var`. 
 ```{r}
-data.frame(h2=round(fit2$h,2),d2=round(fit2$d2,2))
-fit2$plotA
-fit2$plotD
+fit2$var
+fit2$plots$add
+fit2$plots$dom
 ```
 
-The largest effect corresponds to haplotype W6511-1R.4. The function `haplotypes` can be used to extract the dosage of this haplotype across the population.
+The largest effect corresponds to haplotype W6511-1R.4. The function `haplo_get` can be used to extract the dosage of this haplotype across the population.
 ```{r}
-haplos <- haplotypes( data = data, 
+haplos <- haplo_get( data = data, 
                       marker = "solcap_snp_c2_25522")
 hist(haplos[,"W6511-1R.4"],main="",xlab="Dosage")
 which(haplos[,"W6511-1R.4"] > 1.8)

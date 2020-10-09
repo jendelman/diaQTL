@@ -2,17 +2,16 @@
 #' 
 #' Reads genotype, pedigree, and phenotype data files 
 #' 
-#' The first 3 or 4 columns of the genotype file are the map (marker, chrom, bp and/or cM), followed by the members of the population. The genotype information for each marker x individual combination is a string with the format "state|state|state...=>prob|prob|prob...", where "state" refers to the genotype state and "prob" is the genotype probability in decimal format. Only states with nonzero probabilities need to be listed. The encoding for the states in tetraploids is described in the documentation for the F1codes and S1codes datasets that come with the package. For diploids, there are 4 F1 genotype codes, 1,2,3,4, which correspond to haplotype combinations 1-3,1-4,2-3,2-4, respectively; the S1 genotype codes 1,2,3 correspond to 1-1,1-2,2-2, respectively. For the phenotype file, first column is id, followed by traits, and then any fixed effects. Pass a character vector for the function argument "fixed" to specify whether each effect is a factor or numeric covariate. The number of traits is deduced based on the number of columns. Binary traits must be coded N/Y and are converted to 0/1 internally for analysis by probit regression. Missing data in the phenotype file should be coded as NA. The parameter \code{dominance} specifies the maximum value of dominance that can be used in subsequent analysis: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. For maximum flexibility, use dominance = 4, but more memory is required. This will allow you to use any value of dominance (from 1 to 4) in functions such as \code{\link{scan1}} and \code{\link{fitQTL}}. 
+#' Genotype and pedigree input files can be created from PolyOrigin output using \code{\link{read_polyancestry}}. The first 3 or 4 columns of the genotype file are the map (marker, chrom, bp and/or cM), followed by the members of the population. The genotype data for each marker x individual combination is a string with the format "state|state|state...=>prob|prob|prob...", where "state" refers to the genotype state and "prob" is the genotype probability in decimal format. Only states with nonzero probabilities need to be listed. The encoding for the states in tetraploids is described in the documentation for the F1codes and S1codes datasets that come with the package. For diploids, there are 4 F1 genotype codes, 1,2,3,4, which correspond to haplotype combinations 1-3,1-4,2-3,2-4, respectively; the S1 genotype codes 1,2,3 correspond to 1-1,1-2,2-2, respectively. For the phenotype file, first column is id, followed by traits, and then any fixed effects. Pass a character vector for the function argument "fixed" to specify whether each effect is a factor or numeric covariate. The number of traits is deduced based on the number of columns. Binary traits must be coded N/Y and are converted to 0/1 internally for analysis by probit regression. Missing data in the phenotype file should be coded as NA. The parameter \code{dominance} specifies the maximum value of dominance that can be used in subsequent analysis: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. For maximum flexibility, use dominance = 4, but more memory is required. This will allow you to use any value of dominance (from 1 to 4) in functions such as \code{\link{scan1}} and \code{\link{fitQTL}}. Output files from the BGLR package are stored in a folder named 'tmp' in the current directory.
 #'
 #' @param genofile File with map and genotype probabilities 
 #' @param ploidy Either 2 or 4
-#' @param pedfile File with pedigree information (id,mother,father)
+#' @param pedfile File with pedigree data (id,parent1,parent2)
 #' @param phenofile File with phenotype data (optional)
 #' @param fixed If there are fixed effects, this is a character vector of "factor" or "numeric"
 #' @param bin.markers TRUE/FALSE whether to bin markers with the same cM position
 #' @param dominance Maximum value of dominance that will be used for analysis (1-4). See Details.
-#' @param n.core Number of cores for parallel execution (only available from Linux or Mac command line)
-
+#' @param n.core Number of cores for parallel execution (only available for UNIX/Linux/MacOS command line)
 #' 
 #' @return Variable of class \code{\link{diallel_geno}} if phenofile is NULL, otherwise \code{\link{diallel_geno_pheno}}
 #' 
@@ -45,6 +44,13 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.ma
   stopifnot(ploidy %in% c(2,4))
   if ((dominance > 2) & (ploidy==2)) {
     stop("Only digenic dominance exists for diploids.")
+  }
+
+  ans <- try(setwd("tmp"),silent=T)
+  if (inherits(ans,"try-error")) {
+    system(command="mkdir tmp")
+  } else {
+    setwd("..")
   }
   
   data <- read.csv(genofile,as.is=T,check.names=F)
@@ -89,41 +95,36 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.ma
   
   ped <- read.csv(pedfile,as.is=T)
   if (ncol(ped) > 3) {
-    stop("Pedigree file should have 3 columns: id,mother,father")
+    stop("Pedigree file should have 3 columns: id,parent1,parent2")
   }
-  colnames(ped) <- c("id","mother","father")
+  colnames(ped) <- c("id","parent1","parent2")
   rownames(ped) <- ped[,1]
-  missing <- setdiff(id,ped$id)
-  if(length(missing)>0) {
-    stop("Not all genotyped individuals are in the pedigree file.")
-  }
-  cat(paste("N =",length(id),"individuals with pedigree and genotype information \n"))
-  ped <- ped[which(ped$id %in% id),]
+  id <- intersect(id,ped$id)
+  cat(paste(length(id),"individuals with pedigree and genotype data \n"))
+
+  if (!is.null(phenofile)) {
+    pheno <- read.csv(phenofile,check.names=F)
+    pheno[,1] <- as.character(pheno[,1])
+    pheno <- pheno[pheno[,1] %in% id,]
+    id <- intersect(id,pheno[,1])
+    cat(paste(length(id),"individuals with pedigree, genotype and phenotype data \n"))
+  } 
+  
   ped <- ped[match(id,ped$id),]
+  data <- data[,c(1:max(cM,bp),match(id,colnames(data)))]
   
   #GCA
-  parents <- sort(unique(c(ped$mother,ped$father)))
-  tmp <- data.frame(mother=factor(ped$mother,levels=parents,ordered=T),father=factor(ped$father,levels=parents,ordered=T))
+  parents <- sort(unique(c(ped$parent1,ped$parent2)))
+  tmp <- data.frame(parent1=factor(ped$parent1,levels=parents,ordered=T),parent2=factor(ped$parent2,levels=parents,ordered=T))
   if (length(parents)==1) {
     X.GCA <- Matrix(1,nrow=nrow(tmp),ncol=1)
     colnames(X.GCA) <- parents
   } else {
-    X.GCA <- sparse.model.matrix(~mother-1,tmp)/2 + sparse.model.matrix(~father-1,tmp)/2
-    colnames(X.GCA) <- gsub(pattern="mother",replacement="",colnames(X.GCA))
+    X.GCA <- sparse.model.matrix(~parent1-1,tmp)/2 + sparse.model.matrix(~parent2-1,tmp)/2
+    colnames(X.GCA) <- gsub(pattern="parent1",replacement="",colnames(X.GCA))
   }
   rownames(X.GCA) <- ped$id
   
-  
-  if (!is.null(phenofile)) {
-    pheno <- read.csv(phenofile,check.names=F)
-    pheno[,1] <- as.character(pheno[,1])
-    missing2 <- setdiff(pheno[,1],id)
-    if(length(missing2)>0) {
-      stop("Not all phenotyped individuals are in the genotype file")
-    }
-    n2 <- length(intersect(id,pheno[,1]))
-    cat(paste("N =",n2,"individuals with phenotype and genotype data \n"))
-  }
   
   cat("Preparing genotype data...\n")
   genoX <- make_X(ped,ploidy,dominance)
@@ -153,7 +154,7 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.ma
   attr(geno,"id") <- id
   attr(geno,"haplotypes") <- attr(genoX,"haplotypes")
   if (dominance > 1) {
-    attr(geno,"haplotype.pairs") <- attr(genoX,"haplotype.pairs")
+    attr(geno,"diplotypes") <- attr(genoX,"diplotypes")
   }
 
   data <- new(Class="diallel_geno",ploidy=as.integer(ploidy),dominance=as.integer(dominance),X.GCA=X.GCA,map=map,geno=geno)

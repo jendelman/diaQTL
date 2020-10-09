@@ -20,7 +20,7 @@ read_data(
 
 \item{ploidy}{Either 2 or 4}
 
-\item{pedfile}{File with pedigree information (id,mother,father)}
+\item{pedfile}{File with pedigree data (id,parent1,parent2)}
 
 \item{phenofile}{File with phenotype data (optional)}
 
@@ -30,7 +30,7 @@ read_data(
 
 \item{dominance}{Maximum value of dominance that will be used for analysis (1-4). See Details.}
 
-\item{n.core}{Number of cores for parallel execution (only available from Linux or Mac command line)}
+\item{n.core}{Number of cores for parallel execution (only available for UNIX/Linux/MacOS command line)}
 }
 \value{
 Variable of class \code{\link{diallel_geno}} if phenofile is NULL, otherwise \code{\link{diallel_geno_pheno}}
@@ -39,7 +39,7 @@ Variable of class \code{\link{diallel_geno}} if phenofile is NULL, otherwise \co
 Reads genotype, pedigree, and phenotype data files
 }
 \details{
-The first 3 or 4 columns of the genotype file are the map (marker, chrom, bp and/or cM), followed by the members of the population. The genotype information for each marker x individual combination is a string with the format "state|state|state...=>prob|prob|prob...", where "state" refers to the genotype state and "prob" is the genotype probability in decimal format. Only states with nonzero probabilities need to be listed. The encoding for the states in tetraploids is described in the documentation for the F1codes and S1codes datasets that come with the package. For diploids, there are 4 F1 genotype codes, 1,2,3,4, which correspond to haplotype combinations 1-3,1-4,2-3,2-4, respectively; the S1 genotype codes 1,2,3 correspond to 1-1,1-2,2-2, respectively. For the phenotype file, first column is id, followed by traits, and then any fixed effects. Pass a character vector for the function argument "fixed" to specify whether each effect is a factor or numeric covariate. The number of traits is deduced based on the number of columns. Binary traits must be coded N/Y and are converted to 0/1 internally for analysis by probit regression. Missing data in the phenotype file should be coded as NA. The parameter \code{dominance} specifies the maximum value of dominance that can be used in subsequent analysis: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. For maximum flexibility, use dominance = 4, but more memory is required. This will allow you to use any value of dominance (from 1 to 4) in functions such as \code{\link{scan1}} and \code{\link{fitQTL}}.
+Genotype and pedigree input files can be created from PolyOrigin output using \code{\link{read_polyancestry}}. The first 3 or 4 columns of the genotype file are the map (marker, chrom, bp and/or cM), followed by the members of the population. The genotype data for each marker x individual combination is a string with the format "state|state|state...=>prob|prob|prob...", where "state" refers to the genotype state and "prob" is the genotype probability in decimal format. Only states with nonzero probabilities need to be listed. The encoding for the states in tetraploids is described in the documentation for the F1codes and S1codes datasets that come with the package. For diploids, there are 4 F1 genotype codes, 1,2,3,4, which correspond to haplotype combinations 1-3,1-4,2-3,2-4, respectively; the S1 genotype codes 1,2,3 correspond to 1-1,1-2,2-2, respectively. For the phenotype file, first column is id, followed by traits, and then any fixed effects. Pass a character vector for the function argument "fixed" to specify whether each effect is a factor or numeric covariate. The number of traits is deduced based on the number of columns. Binary traits must be coded N/Y and are converted to 0/1 internally for analysis by probit regression. Missing data in the phenotype file should be coded as NA. The parameter \code{dominance} specifies the maximum value of dominance that can be used in subsequent analysis: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. For maximum flexibility, use dominance = 4, but more memory is required. This will allow you to use any value of dominance (from 1 to 4) in functions such as \code{\link{scan1}} and \code{\link{fitQTL}}. Output files from the BGLR package are stored in a folder named 'tmp' in the current directory.
 }
 \examples{
 \dontrun{
