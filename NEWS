@@ -1,3 +1,10 @@
+Changes in 0.77
+* Changed terminology from "haplotype.pairs" to "diplotypes"
+* Added functions to get and plot diplotype dosage
+* Added function to create input files from PolyOrigin output file
+* Changed formatting of output for fitQTL
+* BGLR output files now put in tmp directory
+
 Changes in 0.76
 * Adjusted frequency in haplo_freq by ploidy
 

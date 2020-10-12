@@ -1,7 +1,7 @@
 #' @importFrom arrangements combinations
 #' 
 make_X <- function(ped,ploidy,dominance) {
-  # ped is data frame with variables id,mother,father
+  # ped is data frame with variables id,parent1,parent2
   # X1 is used to map genotype probabilities for each F1 population to additive founder effects
   # X1 has dimensions nind x (ploidy*nf) x (# F1 genotype states), where nf = number of founders and nind is number of individuals in the population
   # X2 is used to map genotype probabilities for each population to digenic dominance founder effects
@@ -9,7 +9,7 @@ make_X <- function(ped,ploidy,dominance) {
   # X3 and X4 are for trigenic and quadrigenic effects
   # haplotypes have .1, .2, etc. appended to founder name
   
-  founders <- sort(unique(c(ped$mother,ped$father)))
+  founders <- sort(unique(c(ped$parent1,ped$parent2)))
   crosses <- unique(apply(ped[,2:3],1,function(x){x <- sort(match(x,founders))
                                                   paste(x,collapse="x")}))
   n.cross <- length(crosses)
@@ -94,8 +94,8 @@ make_X <- function(ped,ploidy,dominance) {
     F1code.dad <- sapply(tmp,function(x){as.integer(x[3:4])})
   }
 
-  mom <- match(ped$mother,founders)
-  dad <- match(ped$father,founders)
+  mom <- match(ped$parent1,founders)
+  dad <- match(ped$parent2,founders)
   i=1
   for (i in 1:nind) {
     km <- (mom[i]-1)*ploidy
@@ -186,7 +186,7 @@ make_X <- function(ped,ploidy,dominance) {
         gen2 <- c(gen2,apply(expand.grid(x=haplotypes[ploidy*(p1-1)+1:ploidy],y=haplotypes[ploidy*(p2-1)+1:ploidy]),1,paste,collapse="+"))
       }
     }
-    attr(X,"haplotype.pairs") <- gen2
+    attr(X,"diplotypes") <- gen2
   }
 
   return(X)

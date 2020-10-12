@@ -24,22 +24,16 @@ List containing
 \describe{
 \item{R2}{Coefficient of determination}
 \item{deltaDIC}{Deviance Information Criterion relative to null model}
-\item{h2}{Mean and SE for proportion of variance due to additive effects}
-\item{effectsA}{Mean and SE of the additive effects for parental haplotypes}
-\item{plotA}{ggplot object for additive effects}
-}
-If dominance > 1, the list also contains
-\describe{
-\item{d2}{Mean and SE for proportion of variance due to dominance (all orders)}
-\item{effectsD}{Mean and SE of the digenic dominance effects}
-\item{plotD}{ggplot object for digenic dominance effects}
+\item{var}{Matrix with proportion of variance for additive (= heritability) and higher order effects}
+\item{effects}{List of matrices containing the additive and higher order effects}
+\item{plots}{List of ggplot objects for the effects}
 }
 }
 \description{
 Fit a single QTL model
 }
 \details{
-Standard errors of the posterior mean estimates are calculated by dividing the SD of the Markov Chain by the square root of the effective number of iterations, which is calculated by function \code{effectiveSize} in R package \code{coda}. The error bars on the plot of additive effects correspond to +/- 1.96*SE (95 percent confidence interval). For binary traits, R2 = the squared phi correlation. The additive and dominance variances are reported as a proportion of the total variance: h2=Va/(Va+Vd+Vresid) and d2=Vd/(Va+Vd+Vresid). Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance.
+Standard errors of the posterior mean estimates are calculated by dividing the SD of the Markov Chain by the square root of the effective number of iterations, which is calculated by function \code{effectiveSize} in R package \code{coda}. The error bars on the plot of additive effects correspond to +/- 1.96*SE (95 percent confidence interval). For binary traits, R2 = the squared phi correlation. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance.
 }
 \examples{
 \dontrun{
