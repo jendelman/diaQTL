@@ -36,8 +36,8 @@ make_X <- function(ped,ploidy,dominance) {
     
     #biparental terms
     for (i in 1:n.cross) {
-      p1 <- as.integer(substr(crosses[i],1,1))
-      p2 <- as.integer(substr(crosses[i],3,3))
+      p1 <- as.integer(strsplit(crosses[i],"x")[[1]][1])
+      p2 <- as.integer(strsplit(crosses[i],"x")[[1]][2])
       if ((p1!=p2) | (ploidy==2)) {
         gen2 <- c(gen2,apply(expand.grid(x=ploidy*(p1-1)+1:ploidy,y=ploidy*(p2-1)+1:ploidy),1,paste,collapse="+"))
       }
@@ -49,8 +49,8 @@ make_X <- function(ped,ploidy,dominance) {
     #trigenic = digenic from one parent plus monogenic from the other
     gen3 <- character(0)
     for (i in 1:n.cross) {
-      p1 <- as.integer(substr(crosses[i],1,1))
-      p2 <- as.integer(substr(crosses[i],3,3))
+      p1 <- as.integer(strsplit(crosses[i],"x")[[1]][1])
+      p2 <- as.integer(strsplit(crosses[i],"x")[[1]][2])
       
       p1.di <- combinations(x=ploidy*(p1-1)+1:ploidy,k=2,replace=T)
       tmp <- as.matrix(expand.grid(x=1:10,y=ploidy*(p2-1)+1:ploidy))
@@ -69,8 +69,8 @@ make_X <- function(ped,ploidy,dominance) {
     #quadrigenic = digenic from both parents
     gen4 <- character(0)
     for (i in 1:n.cross) {
-      p1 <- as.integer(substr(crosses[i],1,1))
-      p2 <- as.integer(substr(crosses[i],3,3))
+      p1 <- as.integer(strsplit(crosses[i],"x")[[1]][1])
+      p2 <- as.integer(strsplit(crosses[i],"x")[[1]][2])
     
       p1.di <- combinations(x=ploidy*(p1-1)+1:ploidy,k=2,replace=T)
       p2.di <- combinations(x=ploidy*(p2-1)+1:ploidy,k=2,replace=T)
@@ -180,8 +180,8 @@ make_X <- function(ped,ploidy,dominance) {
     
     #biparental terms
     for (i in 1:n.cross) {
-      p1 <- as.integer(substr(crosses[i],1,1))
-      p2 <- as.integer(substr(crosses[i],3,3))
+      p1 <- as.integer(strsplit(crosses[i],"x")[[1]][1])
+      p2 <- as.integer(strsplit(crosses[i],"x")[[1]][2])
       if ((p1!=p2) | (ploidy==2)) {
         gen2 <- c(gen2,apply(expand.grid(x=haplotypes[ploidy*(p1-1)+1:ploidy],y=haplotypes[ploidy*(p2-1)+1:ploidy]),1,paste,collapse="+"))
       }
