@@ -140,7 +140,7 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.ma
     geno <- vector("list",length=dominance)
     for (q in 1:dominance) {
       tmp3 <- mapply(FUN=function(u,v,w){tcrossprod(u[,v],t(w))},u=genoX[[q]],v=states,w=genoprob)
-      if(class(tmp3)=="matrix"){ # in case of all probs=1
+      if(is.matrix(tmp3)){ # in case of all probs=1
         tmp3 = split(tmp3, rep(1:ncol(tmp3), each = nrow(tmp3)))
       }
       geno[[q]] <- Matrix(t(sapply(tmp3,function(x){as.vector(x)})),sparse=TRUE)
