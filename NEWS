@@ -1,3 +1,8 @@
+Changes in 0.78
+* Fixed bug in read_polyancestry
+* explicitly set stringsAsFactors = T when reading phenofile
+* Fixed tmp directory issue
+
 Changes in 0.77
 * Changed terminology from "haplotype.pairs" to "diplotypes"
 * Added functions to get and plot diplotype dosage

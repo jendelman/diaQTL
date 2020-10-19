@@ -51,6 +51,6 @@ read_polyancestry <- function(filename,remove.outliers=TRUE) {
     writeLines(text=paste(x[keep],collapse=","),con=out)
   }
   close(out)
-  close(filename)
+  close(con)
   return(NULL)
 }

@@ -46,13 +46,6 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.ma
     stop("Only digenic dominance exists for diploids.")
   }
 
-  ans <- try(setwd("tmp"),silent=T)
-  if (inherits(ans,"try-error")) {
-    system(command="mkdir tmp")
-  } else {
-    setwd("..")
-  }
-  
   data <- read.csv(genofile,as.is=T,check.names=F)
   cM <- grep("cM",colnames(data))
   bp <- grep("bp",colnames(data))
@@ -103,7 +96,7 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.ma
   cat(paste(length(id),"individuals with pedigree and genotype data \n"))
 
   if (!is.null(phenofile)) {
-    pheno <- read.csv(phenofile,check.names=F)
+    pheno <- read.csv(phenofile,check.names=F,stringsAsFactors = T)
     pheno[,1] <- as.character(pheno[,1])
     pheno <- pheno[pheno[,1] %in% id,]
     id <- intersect(id,pheno[,1])

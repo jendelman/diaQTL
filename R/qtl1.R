@@ -31,7 +31,11 @@ qtl1 <- function(y,X,Z,params,geno=NULL,Xcof=NULL,X.GCA=NULL) {
   }
   model <- paste(model,"))",sep="")
   
-  setwd("tmp")
+  ans <- try(setwd("tmp"),silent=T)
+  if (inherits(ans,"try-error")) {
+    system(command="mkdir tmp")
+    setwd("tmp")
+  } 
   ans <- eval(parse(text=model))
   setwd("..")
 
