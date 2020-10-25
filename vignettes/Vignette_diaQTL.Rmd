@@ -100,7 +100,7 @@ ans1$peaks
 ans1$plot
 ```
 
-The results show there is a QTL at 49 Mb on chromosome 10 that explains $R^{2} = 36\%$ of the variance. This matches the location of the classical round locus in potato, which was recently identified as the gene *StOVP20* (Wu et al. 2018; doi.org/10.1038/s41467-018-07216-8). The most significant marker is solcap_snp_c2_25522, which can be passed to the `fitQTL` function to get the estimated haplotype effects, as both a table (`effects`) and barplot (`plots`). Use the parameter `dominance = 2` to include digenic dominance effects. To estimate a 90% Bayesian credible interval (CI) for the effects, the number of MCMC iterations is increased based on the output from `set_params`.
+The results show there is a QTL at 49 Mb on chromosome 10 that explains $R^{2} = 34\%$ of the variance. This matches the location of the classical round locus in potato, which was recently identified as the gene *StOVP20* (Wu et al. 2018; doi.org/10.1038/s41467-018-07216-8). The most significant marker is solcap_snp_c2_25522, which can be passed to the `fitQTL` function to get the estimated haplotype effects, as both a table (`effects`) and barplot (`plots`). Use the parameter `dominance = 2` to include digenic dominance effects. To estimate a 90% Bayesian credible interval (CI) for the effects, the number of MCMC iterations is increased based on the output from `set_params`.
 ```{r}
 params <- set_params( data, trait = "tuber_shape", q=0.05, r=0.05)
 params
@@ -128,7 +128,7 @@ fit2$plots$add
 fit2$plots$dom
 ```
 
-The largest effect corresponds to haplotype W6511-1R.4. The function `haplo_get` can be used to extract the dosage of this haplotype across the population.
+The dominance plot shows the digenic effects above the diagonal, and below the diagonal is the sum of the additive and digenic effects. The largest additive effect (in magnitude) corresponds to haplotype W6511-1R.4. The function `haplo_get` can be used to extract the dosage of this haplotype across the population.
 ```{r}
 haplos <- haplo_get( data = data, 
                       marker = "solcap_snp_c2_25522")

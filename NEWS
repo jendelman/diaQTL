@@ -4,6 +4,7 @@ Changes in 0.80
 * fitQTL returns residuals 
 * fitQTL returns Bayesian CI
 * Changed color scheme for fitQTL plots
+* Dominance plot from fitQTL has dom above diagonal, add + dom below diagonal
 
 Changes in 0.79
 * Cosmetic change to scaling of GCA

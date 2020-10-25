@@ -24,8 +24,8 @@ Parameter \code{dominance} refers to 1 = additive, 2 = digenic, 3 = trigenic, 4 
 }
 \examples{
 \dontrun{
-  IBmat_example = IBD(data = diallel_example, dominance=1) #additive
-  IBD_example = IBD(data = diallel_example, dominance=2) #digenic dominance
+  IBD_example = IBDmat(data = diallel_example, dominance=1) #additive
+  IBD_example = IBDmat(data = diallel_example, dominance=2) #digenic dominance
 }
 
 
