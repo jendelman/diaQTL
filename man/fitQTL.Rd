@@ -4,27 +4,30 @@
 \alias{fitQTL}
 \title{Fit a single QTL model}
 \usage{
-fitQTL(data, params, dominance = 1, trait, marker, cofactor = NULL)
+fitQTL(data, trait, marker, params, dominance = 1, CI = 0.9, cofactor = NULL)
 }
 \arguments{
 \item{data}{Variable of class \code{\link{diallel_geno_pheno}}}
-
-\item{params}{List containing the number of burn-in (burnIn) and total iterations (nIter)}
-
-\item{dominance}{Dominance degree (1-4). See Details.}
 
 \item{trait}{Name of trait}
 
 \item{marker}{Name of marker to fit as QTL}
 
-\item{cofactor}{Name of marker to fit as cofactor}
+\item{params}{List containing the number of burn-in (burnIn) and total iterations (nIter)}
+
+\item{dominance}{Dominance degree}
+
+\item{CI}{Probability for Bayesian credible interval}
+
+\item{cofactor}{Name of marker to fit as cofactor (optional)}
 }
 \value{
 List containing
 \describe{
 \item{R2}{Coefficient of determination}
 \item{deltaDIC}{Deviance Information Criterion relative to null model}
-\item{var}{Matrix with proportion of variance for additive (= heritability) and higher order effects}
+\item{resid}{Residuals}
+\item{var}{Matrix with proportion of variance for additive and higher order effects}
 \item{effects}{List of matrices containing the additive and higher order effects}
 \item{plots}{List of ggplot objects for the effects}
 }
@@ -33,26 +36,28 @@ List containing
 Fit a single QTL model
 }
 \details{
-Standard errors of the posterior mean estimates are calculated by dividing the SD of the Markov Chain by the square root of the effective number of iterations, which is calculated by function \code{effectiveSize} in R package \code{coda}. The error bars on the plot of additive effects correspond to +/- 1.96*SE (95 percent confidence interval). For binary traits, R2 = the squared phi correlation. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance.
+For quantitative traits, R2 is the percent of variation explained by the regression (MSS/TSS). For binary traits, R2 is the squared phi correlation (as a percentage). LOD score is the difference between the log10-likelihood for the QTL model vs. no QTL model; higher values are better. deltaDIC is the difference between the Deviance Information Criterion for the QTL model vs. no QTL model; lower values are better. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. MCMC \code{params} can be estimated using \code{\link{set_params}}. Parameter \code{CI} sets the size of the Bayesian credible interval for the estimated effects at (0.5-CI/2,0.5+CI/2). The returned list \code{effects} contains the additive (and when included) digenic dominance effects. The proportion of variance for each effect is returned in \code{var}, labeled h2 (additive), d2 (digenic dominance), t2 (trigenic dominance), q2 (quadrigenic dominance).
 }
 \examples{
 \dontrun{
 ## additive effects
-params1 <- set_params( diallel_example, trait = "tuber_shape" )
+params1 <- set_params( diallel_example, trait = "tuber_shape" ,q=0.05,r=0.05)
 
 fit1 <- fitQTL( data = diallel_example, 
                  trait = "tuber_shape", 
                  params = params1, 
-                 marker = "solcap_snp_c2_25522")
+                 marker = "solcap_snp_c2_25522",
+                 CI = 0.9)
                  
 ## additive + dominance effects
-params2 <- set_params( diallel_example, trait = "tuber_shape", dominance = TRUE )
+params2 <- set_params( diallel_example, trait = "tuber_shape", dominance=2,q=0.05,r=0.05)
 
 fit2 <- fitQTL( data = diallel_example, 
                  trait = "tuber_shape", 
                  params = params2, 
                  marker = "solcap_snp_c2_25522",
-                 dominance = 2)
+                 dominance = 2,
+                 CI=0.9)
                  
 }
                  

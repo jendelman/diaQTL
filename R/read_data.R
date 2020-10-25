@@ -118,7 +118,6 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.ma
   }
   rownames(X.GCA) <- ped$id
   
-  
   cat("Preparing genotype data...\n")
   genoX <- make_X(ped,ploidy,dominance)
   n.state <- ifelse(ploidy==2,4,100)

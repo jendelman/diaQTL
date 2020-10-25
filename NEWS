@@ -1,3 +1,10 @@
+Changes in 0.80
+* modified interface for set_params 
+* merged Amat and Dmat into IBDmat
+* fitQTL returns residuals 
+* fitQTL returns Bayesian CI
+* Changed color scheme for fitQTL plots
+
 Changes in 0.79
 * Cosmetic change to scaling of GCA
 
