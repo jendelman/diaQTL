@@ -28,7 +28,7 @@ table(apply(ped[,2:3],1,paste,collapse=" x "))
 ```
 
 ### 2) Genotype file
-The first 3 or 4 columns of the genotype file contain the map, with columns for marker name, chromosome, and the position in cM and/or bp (plotting features in the pacakage can use either map position). Subsequent columns contain the genotype probabilities for each individual. 
+The first 3 columns of the genotype file must be labeled marker, chrom, and cM, and the position in a reference genome (labeled bp) is optional as the fourth column (plotting features can use either cM or bp). Subsequent columns contain the genotype probabilities for each individual. 
 ```{r}
 genocsv <- system.file( "vignette_data", "potato_geno.csv", package = "diaQTL" )
 geno <- read.csv( genocsv, as.is = T, check.names = F )
@@ -100,7 +100,12 @@ ans1$peaks
 ans1$plot
 ```
 
-The results show there is a QTL at 49 Mb on chromosome 10 that explains $R^{2} = 34\%$ of the variance. This matches the location of the classical round locus in potato, which was recently identified as the gene *StOVP20* (Wu et al. 2018; doi.org/10.1038/s41467-018-07216-8). The most significant marker is solcap_snp_c2_25522, which can be passed to the `fitQTL` function to get the estimated haplotype effects, as both a table (`effects`) and barplot (`plots`). Use the parameter `dominance = 2` to include digenic dominance effects. To estimate a 90% Bayesian credible interval (CI) for the effects, the number of MCMC iterations is increased based on the output from `set_params`.
+The results show there is a QTL on chromosome 10 that explains $R^{2} = 34\%$ of the variance, and the most significant marker is solcap_snp_c2_25522. The 90% Bayesian credible interval (CI) for the QTL can be obtained using `BayesCI`:
+```{r}
+BayesCI(scan1_example,data,chrom="10",CI.prob=0.9)
+```
+
+This region coincides with the location of the classical Ro (round) QTL in potato, which was recently identified as the gene *StOVP20* [(Wu et al. 2018)](https://doi.org/10.1038/s41467-018-07216-8). Function `fitQTL` is used to get the estimated haplotype effects at the most significant marker, as both a table (`effects`) and barplot (`plots`). Use the parameter `dominance = 2` to include digenic dominance effects. To estimate a 90% Bayesian CI for the effects, the number of MCMC iterations is increased based on the output from `set_params`.
 ```{r}
 params <- set_params( data, trait = "tuber_shape", q=0.05, r=0.05)
 params

@@ -4,7 +4,15 @@
 \alias{fitQTL}
 \title{Fit a single QTL model}
 \usage{
-fitQTL(data, trait, marker, params, dominance = 1, CI = 0.9, cofactor = NULL)
+fitQTL(
+  data,
+  trait,
+  marker,
+  params,
+  dominance = 1,
+  CI.prob = 0.9,
+  cofactor = NULL
+)
 }
 \arguments{
 \item{data}{Variable of class \code{\link{diallel_geno_pheno}}}
@@ -17,7 +25,7 @@ fitQTL(data, trait, marker, params, dominance = 1, CI = 0.9, cofactor = NULL)
 
 \item{dominance}{Dominance degree}
 
-\item{CI}{Probability for Bayesian credible interval}
+\item{CI.prob}{Probability for Bayesian credible interval}
 
 \item{cofactor}{Name of marker to fit as cofactor (optional)}
 }
@@ -36,7 +44,7 @@ List containing
 Fit a single QTL model
 }
 \details{
-For quantitative traits, R2 is the percent of variation explained by the regression (MSS/TSS). For binary traits, R2 is the squared phi correlation (as a percentage). LOD score is the difference between the log10-likelihood for the QTL model vs. no QTL model; higher values are better. deltaDIC is the difference between the Deviance Information Criterion for the QTL model vs. no QTL model; lower values are better. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. MCMC \code{params} can be estimated using \code{\link{set_params}}. Parameter \code{CI} sets the size of the Bayesian credible interval for the estimated effects at (0.5-CI/2,0.5+CI/2). The returned list \code{effects} contains the additive (and when included) digenic dominance effects. The proportion of variance for each effect is returned in \code{var}, labeled h2 (additive), d2 (digenic dominance), t2 (trigenic dominance), q2 (quadrigenic dominance). The returned object \code{plots$dom} shows the digenic dominance effects above the diagonal, and below the diagonal is the sum of the additive and digenic dominance effects.
+For quantitative traits, R2 is the percent of variation explained by the regression (MSS/TSS). For binary traits, R2 is the squared phi correlation (as a percentage). LOD score is the difference between the log10-likelihood for the QTL model vs. no QTL model; higher values are better. deltaDIC is the difference between the Deviance Information Criterion for the QTL model vs. no QTL model; lower values are better. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. MCMC \code{params} can be estimated using \code{\link{set_params}}. Parameter \code{CI.prob} sets the probability (e.g., 0.90, 0.95) for the Bayesian credible interval for the estimated effects. The returned list \code{effects} contains the additive (and when included) digenic dominance effects. The proportion of variance for each effect is returned in \code{var}, labeled h2 (additive), d2 (digenic dominance), t2 (trigenic dominance), q2 (quadrigenic dominance). The returned object \code{plots$dom} shows the digenic dominance effects above the diagonal, and below the diagonal is the sum of the additive and digenic dominance effects.
 }
 \examples{
 \dontrun{
@@ -47,7 +55,7 @@ fit1 <- fitQTL( data = diallel_example,
                  trait = "tuber_shape", 
                  params = params1, 
                  marker = "solcap_snp_c2_25522",
-                 CI = 0.9)
+                 CI.prob = 0.9)
                  
 ## additive + dominance effects
 params2 <- set_params( diallel_example, trait = "tuber_shape", dominance=2,q=0.05,r=0.05)
@@ -57,7 +65,7 @@ fit2 <- fitQTL( data = diallel_example,
                  params = params2, 
                  marker = "solcap_snp_c2_25522",
                  dominance = 2,
-                 CI=0.9)
+                 CI.prob=0.9)
                  
 }
                  

@@ -21,7 +21,7 @@
 #' 
 #' @export
 
-IBD <- function(data,dominance=1,chrom=NULL) {
+IBDmat <- function(data,dominance=1,chrom=NULL) {
   stopifnot(inherits(data,"diallel_geno"))
   stopifnot(dominance %in% 1:4)
   if (dominance > data@dominance) {
