@@ -2,7 +2,7 @@
 #' 
 #' Determine burn-in and total number of iterations
 #' 
-#' Determines the burn-in and total number of iterations using the Raftery and Lewis diagnostic from R package \code{coda}, based on a 95% probability that the estimate for quantile \code{q} of the additive effects is within the interval \code{(q-r,q+r)}. The 90th percentile for burn-in and total iterations across the additive effects is returned. Parameter \code{dominance} specifies which genetic model (1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance) to use when determining the number of iterations, but this must be parameter must still be specified when calling functions such as \code{\link{scan1}} or \code{\link{fitQTL}}. Suggested values for \code{\link{scan1}} are q=0.5 and r=0.1. For \code{\link{fitQTL}}, the values depend on the desired Bayesican credible interval. For a 90% CI, suggested values are q=0.05 and r=0.05. If \code{marker=NULL} (default), the first marker of every chromosome is analyzed to generate parameters suitable for \code{\link{scan1}}. Parameter \code{nIter} sets the number of iterations used to apply the Raftery and Lewis diagnostic; the default value is 2000, and if a larger number is needed, an error will be generated with this information.
+#' Determines the burn-in and total number of iterations using the Raftery and Lewis diagnostic from R package \code{coda}, based on a 95% probability that the estimate for quantile \code{q} of the additive effects is within the interval \code{(q-r,q+r)}. The 90th percentile for burn-in and total iterations across the additive effects is returned. Parameter \code{dominance} specifies which genetic model (1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance) to use when determining the number of iterations, but this must be parameter must still be specified when calling functions such as \code{\link{scan1}} or \code{\link{fitQTL}}. Suggested values for \code{\link{scan1}} are q=0.5 and r=0.1. For \code{\link{fitQTL}}, the values depend on the desired Bayesican credible interval. For a 90% CI, suggested values are q=0.05 and r=0.025. If \code{marker=NULL} (default), the first marker of every chromosome is analyzed to generate parameters suitable for \code{\link{scan1}}. Parameter \code{nIter} sets the number of iterations used to apply the Raftery and Lewis diagnostic; the default value is 2000, and if a larger number is needed, an error will be generated with this information.
 #' 
 #' @param data variable of class \code{\link{diallel_geno_pheno}}
 #' @param trait name of trait
@@ -54,7 +54,8 @@ set_params <- function(data,trait,dominance=1,marker=NULL,q=0.5,r=0.1,nIter=2000
   if (is.null(marker)) {
     chrom <- unique(data@map[,2])
     marker <- data@map$marker[match(chrom,data@map[,2])] #first marker of each chromosome
-  } 
+  }
+  stopifnot(all(marker %in% data@map$marker))
   marker <- get_bin(marker,data@map)
   n.mark <- length(marker)
   

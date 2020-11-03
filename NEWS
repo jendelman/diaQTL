@@ -1,3 +1,7 @@
+Changes in 0.82
+* Check whether marker is valid in set_params
+* Updated recommendation for set_params
+
 Changes in 0.81
 * Added function BayesCI
 * cM no longer optional 

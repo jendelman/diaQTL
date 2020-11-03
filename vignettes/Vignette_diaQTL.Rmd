@@ -107,7 +107,7 @@ BayesCI(scan1_example,data,chrom="10",CI.prob=0.9)
 
 This region coincides with the location of the classical Ro (round) QTL in potato, which was recently identified as the gene *StOVP20* [(Wu et al. 2018)](https://doi.org/10.1038/s41467-018-07216-8). Function `fitQTL` is used to get the estimated haplotype effects at the most significant marker, as both a table (`effects`) and barplot (`plots`). Use the parameter `dominance = 2` to include digenic dominance effects. To estimate a 90% Bayesian CI for the effects, the number of MCMC iterations is increased based on the output from `set_params`.
 ```{r}
-params <- set_params( data, trait = "tuber_shape", q=0.05, r=0.05)
+params <- set_params( data, trait = "tuber_shape", q=0.05, r=0.025)
 params
 
 fit1 <- fitQTL( data = data, 
