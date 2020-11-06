@@ -1,7 +1,7 @@
 #' @importFrom BGLR BGLR
 #' @importFrom stats cor
 #' 
-qtl1 <- function(y,X,Z,params,geno=NULL,Xcof=NULL,X.GCA=NULL) {
+qtl1 <- function(y,X,Z,params,geno=NULL,Xcof=NULL,G1=NULL,X.GCA=NULL) {
   model <- "BGLR(y=y,verbose=F,response_type=params$response,burnIn=params$burnIn,nIter=params$nIter,thin=1,ETA=list(x=list(X=X,model='FIXED')"
   
   if (!is.null(X.GCA)) {
@@ -16,7 +16,9 @@ qtl1 <- function(y,X,Z,params,geno=NULL,Xcof=NULL,X.GCA=NULL) {
       model <- paste(model,gsub("Q",i,"aQ=list(X=XQ,model='BayesC',saveEffects=TRUE)"),sep=",")
     }
   }
-
+  if (!is.null(G1)) {
+    model <- paste(model,"polyg=list(K=G1,model='RKHS')",sep=",")
+  }
   if (!is.null(Xcof)) {
     model <- paste(model,"cof=list(X=Xcof,model='BayesC')",sep=",")
   }

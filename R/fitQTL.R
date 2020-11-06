@@ -2,7 +2,7 @@
 #' 
 #' Fit a single QTL model
 #' 
-#' For quantitative traits, R2 is the percent of variation explained by the regression (MSS/TSS). For binary traits, R2 is the squared phi correlation (as a percentage). LOD score is the difference between the log10-likelihood for the QTL model vs. no QTL model; higher values are better. deltaDIC is the difference between the Deviance Information Criterion for the QTL model vs. no QTL model; lower values are better. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. MCMC \code{params} can be estimated using \code{\link{set_params}}. Parameter \code{CI.prob} sets the probability (e.g., 0.90, 0.95) for the Bayesian credible interval for the estimated effects. The returned list \code{effects} contains the additive (and when included) digenic dominance effects. The proportion of variance for each effect is returned in \code{var}, labeled h2 (additive), d2 (digenic dominance), t2 (trigenic dominance), q2 (quadrigenic dominance). The returned object \code{plots$dom} shows the digenic dominance effects above the diagonal, and below the diagonal is the sum of the additive and digenic dominance effects. 
+#' For quantitative traits, R2 is the percent of variation explained by the regression (MSS/TSS). For binary traits, R2 is the squared phi correlation (as a percentage). LOD score is the difference between the log10-likelihood for the QTL model vs. no QTL model; higher values are better. deltaDIC is the difference between the Deviance Information Criterion for the QTL model vs. no QTL model; lower values are better. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. MCMC \code{params} can be estimated using \code{\link{set_params}}. Parameter \code{CI.prob} sets the probability (e.g., 0.90, 0.95) for the Bayesian credible interval for the estimated effects. The returned list \code{effects} contains the additive (and when included) digenic dominance effects. The proportion of variance for each effect is returned in \code{var}. The returned object \code{plots$dom} shows the digenic dominance effects above the diagonal, and below the diagonal is the sum of the additive and digenic dominance effects. The polygenic background effect has covariance equal to the additive relationship computed by \code{\link{IBDmat}}, leaving out the chromosome with the QTL. For faster execution with the polygenic model, use \code{\link{Gprep}} first.
 #' 
 #' @param data Variable of class \code{\link{diallel_geno_pheno}}
 #' @param trait Name of trait
@@ -10,6 +10,7 @@
 #' @param params List containing the number of burn-in (burnIn) and total iterations (nIter)
 #' @param dominance Dominance degree 
 #' @param CI.prob Probability for Bayesian credible interval
+#' @param polygenic TRUE/FALSE whether to include polygenic background effect
 #' @param cofactor Name of marker to fit as cofactor (optional)
 #' 
 #' @return List containing
@@ -17,7 +18,7 @@
 #' \item{R2}{Coefficient of determination}
 #' \item{deltaDIC}{Deviance Information Criterion relative to null model}
 #' \item{resid}{Residuals}
-#' \item{var}{Matrix with proportion of variance for additive and higher order effects}
+#' \item{var}{Matrix with proportion of variance for the effects}
 #' \item{effects}{List of matrices containing the additive and higher order effects}
 #' \item{plots}{List of ggplot objects for the effects}
 #' }
@@ -50,13 +51,21 @@
 #' @import ggplot2
 #' @importFrom BGLR readBinMat
 
-fitQTL <- function(data,trait,marker,params,dominance=1,CI.prob=0.9,cofactor=NULL) {
+fitQTL <- function(data,trait,marker,params,dominance=1,CI.prob=0.9,polygenic=TRUE,cofactor=NULL) {
 
   stopifnot(inherits(data,"diallel_geno_pheno"))
   stopifnot(trait %in% colnames(data@pheno))
   stopifnot(marker %in% data@map$marker)
   if (dominance > data@dominance) {
     stop("Dominance degree cannot exceed value used with read_data.")
+  }
+  if (polygenic) {
+    if (!inherits(data,"diallel_geno_pheno_G")) {
+      data <- Gprep(data,marker)
+    }
+    G1 <- data@Z %*% tcrossprod(data@G1,data@Z)
+  } else {
+    G1 <- NULL
   }
   
   y <- data@pheno[,trait]
@@ -76,22 +85,26 @@ fitQTL <- function(data,trait,marker,params,dominance=1,CI.prob=0.9,cofactor=NUL
   
   #no marker model
   ans0 <- qtl1(y=y,X=data@X,Z=data@Z,params=params,Xcof=Xcof,X.GCA=data@X.GCA)
-
+  
   #with marker
   marker2 <- get_bin(marker,data@map)
-  ans1 <- qtl1(y=y,X=data@X,Z=data@Z,geno=data@geno[[marker2]][1:dominance],params=params,Xcof=Xcof)
+  ans1 <- qtl1(y=y,X=data@X,Z=data@Z,geno=data@geno[[marker2]][1:dominance],params=params,Xcof=Xcof,G1=G1)
   
   effect.lower <- effect.upper <- effect.mean <- vector("list",length=dominance)
-  variances <- matrix(0,nrow=params$nIter-params$burnIn,ncol=dominance)
-  colnames(variances) <- c("h2","d2","t2","q2")[1:dominance]
-
+  variances <- matrix(0,nrow=params$nIter-params$burnIn,ncol=dominance+as.integer(polygenic))
+  colnames(variances) <- c("polygenic","additive","digenic","trigenic","quadrigenic")[1:(dominance+as.integer(polygenic))]
+  
+  if (polygenic) {
+    variances[,1] <- scan("tmp/ETA_polyg_varU.dat",quiet = T)[params$burnIn+1:(params$nIter-params$burnIn)]*mean(diag(G1))
+  } 
+  
   for (j in 1:dominance) {
     ans <- readBinMat(sub(pattern="X",replacement=j,x="tmp/ETA_aX_b.bin"))
     effect.mean[[j]] <- apply(ans,2,mean)
     tmp <- apply(ans,2,quantile,p=c(0.5-CI.prob/2,0.5+CI.prob/2))
     effect.lower[[j]] <- tmp[1,]
     effect.upper[[j]] <- tmp[2,]
-    variances[,j] <- apply(tcrossprod(data@Z %*% data@geno[[marker2]][[j]],ans),2,var)
+    variances[,as.integer(polygenic)+j] <- apply(tcrossprod(data@Z %*% data@geno[[marker2]][[j]],ans),2,var)
   }
   varE <- scan("tmp/varE.dat",quiet = T)[params$burnIn+1:(params$nIter-params$burnIn)]
   h2 <- variances/(apply(variances,1,sum) + varE)  #proportion of variance for each term

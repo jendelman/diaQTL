@@ -11,6 +11,7 @@ fitQTL(
   params,
   dominance = 1,
   CI.prob = 0.9,
+  polygenic = TRUE,
   cofactor = NULL
 )
 }
@@ -27,6 +28,8 @@ fitQTL(
 
 \item{CI.prob}{Probability for Bayesian credible interval}
 
+\item{polygenic}{TRUE/FALSE whether to include polygenic background effect}
+
 \item{cofactor}{Name of marker to fit as cofactor (optional)}
 }
 \value{
@@ -35,7 +38,7 @@ List containing
 \item{R2}{Coefficient of determination}
 \item{deltaDIC}{Deviance Information Criterion relative to null model}
 \item{resid}{Residuals}
-\item{var}{Matrix with proportion of variance for additive and higher order effects}
+\item{var}{Matrix with proportion of variance for the effects}
 \item{effects}{List of matrices containing the additive and higher order effects}
 \item{plots}{List of ggplot objects for the effects}
 }
@@ -44,7 +47,7 @@ List containing
 Fit a single QTL model
 }
 \details{
-For quantitative traits, R2 is the percent of variation explained by the regression (MSS/TSS). For binary traits, R2 is the squared phi correlation (as a percentage). LOD score is the difference between the log10-likelihood for the QTL model vs. no QTL model; higher values are better. deltaDIC is the difference between the Deviance Information Criterion for the QTL model vs. no QTL model; lower values are better. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. MCMC \code{params} can be estimated using \code{\link{set_params}}. Parameter \code{CI.prob} sets the probability (e.g., 0.90, 0.95) for the Bayesian credible interval for the estimated effects. The returned list \code{effects} contains the additive (and when included) digenic dominance effects. The proportion of variance for each effect is returned in \code{var}, labeled h2 (additive), d2 (digenic dominance), t2 (trigenic dominance), q2 (quadrigenic dominance). The returned object \code{plots$dom} shows the digenic dominance effects above the diagonal, and below the diagonal is the sum of the additive and digenic dominance effects.
+For quantitative traits, R2 is the percent of variation explained by the regression (MSS/TSS). For binary traits, R2 is the squared phi correlation (as a percentage). LOD score is the difference between the log10-likelihood for the QTL model vs. no QTL model; higher values are better. deltaDIC is the difference between the Deviance Information Criterion for the QTL model vs. no QTL model; lower values are better. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. MCMC \code{params} can be estimated using \code{\link{set_params}}. Parameter \code{CI.prob} sets the probability (e.g., 0.90, 0.95) for the Bayesian credible interval for the estimated effects. The returned list \code{effects} contains the additive (and when included) digenic dominance effects. The proportion of variance for each effect is returned in \code{var}. The returned object \code{plots$dom} shows the digenic dominance effects above the diagonal, and below the diagonal is the sum of the additive and digenic dominance effects. The polygenic background effect has covariance equal to the additive relationship computed by \code{\link{IBDmat}}, leaving out the chromosome with the QTL. For faster execution with the polygenic model, use \code{\link{Gprep}} first.
 }
 \examples{
 \dontrun{

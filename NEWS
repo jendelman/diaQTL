@@ -1,3 +1,6 @@
+Changes in 0.83
+* Added polygenic effect to fitQTL
+
 Changes in 0.82
 * Check whether marker is valid in set_params
 * Updated recommendation for set_params
