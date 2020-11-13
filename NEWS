@@ -1,3 +1,6 @@
+Changes in 0.84
+* Added function valents_summary
+
 Changes in 0.83
 * Added polygenic effect to fitQTL
 
