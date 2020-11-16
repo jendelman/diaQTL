@@ -2,15 +2,12 @@
 #' 
 #' Performs a linear regression for each position in the map. 
 #' 
-#' For non-binary traits, R2 is the proportion of variance explained by the regression. For binary traits, R2 is the squared phi correlation.
-#' LOD score is the difference between the log-likelihood of the model with QTL and the null model
-#' (no QTL); higher values are better. deltaDIC is the difference between the DIC of the model with QTL minus
-#' the DIC of the null model; lower values are better. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. Parameter \code{params} can be estimated using \code{\link{set_params}}.
+#' For quantitative traits, R2 is the percent of variation explained by the regression (MSS/TSS). For binary traits, R2 is the squared phi correlation (as a percentage). LOD score is the difference between the log10-likelihood for the QTL model vs. no QTL model; higher values are better. deltaDIC is the difference between the Deviance Information Criterion for the QTL model vs. no QTL model; lower values are better. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. MCMC \code{params} can be estimated using \code{\link{set_params}}.  
 
 #' @param data Variable of class \code{\link{diallel_geno_pheno}}
 #' @param trait Name of trait
 #' @param params List containing burnIn and nIter
-#' @param dominance Dominance degree (1-4). See Details.
+#' @param dominance Dominance degree (1-4)
 #' @param chrom Names of chromosomes to scan (default is all)
 #' @param cofactor Optional name of marker to include as cofactor in the scan
 #' @param n.core Number of cores for parallel execution (only available from Linux or Mac command line)

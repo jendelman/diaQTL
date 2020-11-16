@@ -28,7 +28,7 @@ table(apply(ped[,2:3],1,paste,collapse=" x "))
 ```
 
 ### 2) Genotype file
-The first 3 or 4 columns of the genotype file contain the map, with columns for marker name, chromosome, and the position in cM and/or bp (plotting features in the pacakage can use either map position). Subsequent columns contain the genotype probabilities for each individual. 
+The first 3 columns of the genotype file must be labeled marker, chrom, and cM, and the position in a reference genome (labeled bp) is optional as the fourth column (plotting features can use either cM or bp). Subsequent columns contain the genotype probabilities for each individual. 
 ```{r}
 genocsv <- system.file( "vignette_data", "potato_geno.csv", package = "diaQTL" )
 geno <- read.csv( genocsv, as.is = T, check.names = F )
@@ -56,7 +56,7 @@ head( pheno )
 hist(pheno$tuber_shape,main="",xlab="Tuber shape")
 ```
 
-Tuber shape in this data set is defined as -log(L/W - 1), where L/W is the average length/width ratio of tubers weighing 6-10 ounces (170-285g). Higher values correspond to rounder tubers.
+To improve normality of the residuals, tuber shape in this data set is defined as log(L/W - 1), where L/W is the average length/width ratio of tubers weighing 6-10 ounces (170-285g). 
 
 ## Read the data
 After installing and attaching the package, use `read_data` to read in all three files. (If there are fixed effects in the phenotype input file, they need to be specified as well; consult the reference manual.) The parameter `dominance = 2` is used to indicate that only digenic dominance will be modeled. (Higher order dominance effects can be included if desired; consult the manual). By default, markers with the same map position in cM (using whatever numerical precision is present in the input map) are binned to reduce the computing time. The parameter `n.core = 2` is used to enable multicore processing via forking, but this only works from the command line on Linux or MacOS/UNIX systems.
@@ -70,9 +70,9 @@ data <- read_data(genofile = genocsv,
 ```
 
 ## Setting parameters
-diaQTL uses Bayesian regression methods from R package BGLR, which are based on Markov Chain Monte Carlo (MCMC). The function `set_params` is used to determine the total number of iterations (`nIter`) and the number that should be discarded as burn-in (`burnIn`). Consult the reference manual on how to change the tolerance parameters if needed. Because MCMC is a stochastic process, the results will not be the same each time.
+diaQTL uses Bayesian regression methods from R package BGLR, which are based on Markov Chain Monte Carlo (MCMC). The function `set_params` determines the burn-in and total number of iterations using the Raftery and Lewis diagnostic from R package `coda`, based on a 95% probability that the estimate for quantile `q` of the additive effects is within the interval `(q-r,q+r)`. For the genome scan, we have found the results based on `q=0.5,r=0.1` to be adequate. Because MCMC is a stochastic process, the results will not be the same each time.
 ```{r}
-params <- set_params( data, trait = "tuber_shape" )
+params <- set_params( data, trait = "tuber_shape", q=0.5, r=0.1)
 params
 ```
 
@@ -100,17 +100,26 @@ ans1$peaks
 ans1$plot
 ```
 
-The results show there is a QTL at 49 Mb on chromosome 10 that explains $R^{2} = 36\%$ of the variance. This matches the location of the classical round locus in potato, which was recently identified as the gene *StOVP20* (Wu et al. 2018; doi.org/10.1038/s41467-018-07216-8). The most significant marker is "solcap_snp_c2_255222", which can be passed to the `fitQTL` function to get the estimated haplotype effects, as both a table (`effects`) and barplot (`plots`). Use the parameter `dominance = 2` to include digenic dominance effects. To improve the precision of the results, the number of MCMC iterations is increased compared to that used for `scan1`.
+The results show there is a QTL on chromosome 10 that explains $R^{2} = 34\%$ of the variance, and the most significant marker is solcap_snp_c2_25522. The 90% Bayesian credible interval (CI) for the QTL can be obtained using `BayesCI`:
 ```{r}
+BayesCI(scan1_example,data,chrom="10",CI.prob=0.9)
+```
+
+This region coincides with the location of the classical Ro (round) QTL in potato, which was recently identified as the gene *StOVP20* [(Wu et al. 2018)](https://doi.org/10.1038/s41467-018-07216-8). Function `fitQTL` is used to get the estimated haplotype effects at the most significant marker, as both a table (`effects`) and barplot (`plots`). Use the parameter `dominance = 2` to include digenic dominance effects. To estimate a 90% Bayesian CI for the effects, the number of MCMC iterations is increased based on the output from `set_params`.
+```{r}
+params <- set_params( data, trait = "tuber_shape", 
+                      marker = "solcap_snp_c2_25522", q=0.05, r=0.025)
+params
+
 fit1 <- fitQTL( data = data, 
                 trait = "tuber_shape", 
-                params = list(burnIn=100,nIter=3000), 
+                params = params, 
                 marker = "solcap_snp_c2_25522")
 
 #With dominance
 fit2 <- fitQTL( data = data, 
                 trait = "tuber_shape", 
-                params = list(burnIn=100,nIter=3000), 
+                params = params, 
                 marker = "solcap_snp_c2_25522",
                 dominance = 2)
 
@@ -118,14 +127,14 @@ fit2 <- fitQTL( data = data,
 print(data.frame(Add=round(fit1$deltaDIC,0),Dom=round(fit2$deltaDIC,0)),row.names=F)
 ```
 
-Because the dominance model has more parameters, a penalized measure of goodness-of-fit is needed to determine whether it is superior to the additive model. `fitQTL` returns the Deviance Information Criterion (DIC) for the QTL model relative to the baseline model (no QTL) as deltaDIC. Lower DIC values are better, so the dominance model is selected in this case. The proportion of variance due to additive effects ($h^2$), as well as for higher order effects when included (e.g., $d^2$ for digenic dominance), is returned in `var`. 
+Because the dominance model has more parameters, a penalized measure of goodness-of-fit is needed to determine whether it is superior to the additive model. `fitQTL` returns the Deviance Information Criterion (DIC) for the QTL model relative to the baseline model (no QTL) as deltaDIC. Lower DIC values are better, so the dominance model is selected in this case. The proportion of variance for the polygenic and QTL effects (additive, digenic, etc.) is returned in `var`. 
 ```{r}
 fit2$var
 fit2$plots$add
 fit2$plots$dom
 ```
 
-The largest effect corresponds to haplotype W6511-1R.4. The function `haplo_get` can be used to extract the dosage of this haplotype across the population.
+The dominance plot shows the digenic effects above the diagonal, and below the diagonal is the sum of the additive and digenic effects. The largest additive effect (in magnitude) corresponds to haplotype W6511-1R.4. The function `haplo_get` can be used to extract the dosage of this haplotype across the population.
 ```{r}
 haplos <- haplo_get( data = data, 
                       marker = "solcap_snp_c2_25522")

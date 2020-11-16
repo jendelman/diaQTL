@@ -1,3 +1,33 @@
+Changes in 0.84
+* Added function valents_summary
+
+Changes in 0.83
+* Added polygenic effect to fitQTL
+
+Changes in 0.82
+* Check whether marker is valid in set_params
+* Updated recommendation for set_params
+
+Changes in 0.81
+* Added function BayesCI
+* cM no longer optional 
+
+Changes in 0.80
+* modified interface for set_params 
+* merged Amat and Dmat into IBDmat
+* fitQTL returns residuals 
+* fitQTL returns Bayesian CI
+* Changed color scheme for fitQTL plots
+* Dominance plot from fitQTL has dom above diagonal, add + dom below diagonal
+
+Changes in 0.79
+* Cosmetic change to scaling of GCA
+
+Changes in 0.78
+* Fixed bug in read_polyancestry
+* explicitly set stringsAsFactors = T when reading phenofile
+* Fixed tmp directory issue
+
 Changes in 0.77
 * Changed terminology from "haplotype.pairs" to "diplotypes"
 * Added functions to get and plot diplotype dosage
