@@ -92,7 +92,12 @@ fitQTL <- function(data,trait,marker,params,dominance=1,CI.prob=0.9,polygenic=TR
   
   effect.lower <- effect.upper <- effect.mean <- vector("list",length=dominance)
   variances <- matrix(0,nrow=params$nIter-params$burnIn,ncol=dominance+as.integer(polygenic))
-  colnames(variances) <- c("polygenic","additive","digenic","trigenic","quadrigenic")[1:(dominance+as.integer(polygenic))]
+  
+  if(polygenic){
+    colnames(variances) <- c("polygenic","additive","digenic","trigenic","quadrigenic")[1:(dominance+as.integer(polygenic))]
+  }else{
+    colnames(variances) <- c("additive","digenic","trigenic","quadrigenic")[1:(dominance+as.integer(polygenic))]
+  }
   
   if (polygenic) {
     variances[,1] <- scan("tmp/ETA_polyg_varU.dat",quiet = T)[params$burnIn+1:(params$nIter-params$burnIn)]*mean(diag(G1))
