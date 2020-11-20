@@ -4,7 +4,15 @@
 \alias{haplo_freq}
 \title{Haplotype frequencies}
 \usage{
-haplo_freq(data, haplotypes, dosage, position, chrom = NULL)
+haplo_freq(
+  data,
+  haplotypes,
+  dosage,
+  id = NULL,
+  position = "cM",
+  chrom = NULL,
+  markers = NULL
+)
 }
 \arguments{
 \item{data}{Variable inheriting from class \code{\link{diallel_geno}}}
@@ -13,9 +21,13 @@ haplo_freq(data, haplotypes, dosage, position, chrom = NULL)
 
 \item{dosage}{Dosage threshold}
 
-\item{position}{Either "cM" or "bp" for plotting}
+\item{id}{Vector of id names (default is entire population)}
+
+\item{position}{Either "cM" (default) or "bp" for plotting}
 
 \item{chrom}{Names of chromosomes (default is all)}
+
+\item{markers}{Optional, markers to indicate with dashed line. Only available when plotting a single chromosome.}
 }
 \value{
 List containing
@@ -25,8 +37,8 @@ List containing
 }
 }
 \description{
-Plot the frequency of individuals with haplotype dosage above a threshold
+Plots the frequency of individuals with haplotype dosage above a threshold
 }
 \details{
-Useful for visualizing selection in selfed populations.
+Useful for visualizing selection in selfed populations. For multiple chromosomes, each haplotype is shown in its own panel using facet_wrap. For one chromosome, the haplotypes are shown on the same set of axes.
 }

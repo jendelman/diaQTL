@@ -1,3 +1,8 @@
+Changes in 0.85
+* Modified haplo_freq plot, now returns frequency of individuals
+* Fixed read_polyancestry to handle degenerate case of 1 pop with 1 chrom
+* Added functions phased_parents and haplo_unique
+
 Changes in 0.84
 * Added function valents_summary
 

@@ -94,15 +94,12 @@ fitQTL <- function(data,trait,marker,params,dominance=1,CI.prob=0.9,polygenic=TR
   variances <- matrix(0,nrow=params$nIter-params$burnIn,ncol=dominance+as.integer(polygenic))
   
   if(polygenic){
-    colnames(variances) <- c("polygenic","additive","digenic","trigenic","quadrigenic")[1:(dominance+as.integer(polygenic))]
-  }else{
-    colnames(variances) <- c("additive","digenic","trigenic","quadrigenic")[1:(dominance+as.integer(polygenic))]
-  }
-  
-  if (polygenic) {
+    colnames(variances) <- c("polygenic","additive","digenic","trigenic","quadrigenic")[1:(dominance+1)]
     variances[,1] <- scan("tmp/ETA_polyg_varU.dat",quiet = T)[params$burnIn+1:(params$nIter-params$burnIn)]*mean(diag(G1))
-  } 
-  
+  }else{
+    colnames(variances) <- c("additive","digenic","trigenic","quadrigenic")[1:dominance]
+  }
+
   for (j in 1:dominance) {
     ans <- readBinMat(sub(pattern="X",replacement=j,x="tmp/ETA_aX_b.bin"))
     effect.mean[[j]] <- apply(ans,2,mean)
@@ -139,7 +136,7 @@ fitQTL <- function(data,trait,marker,params,dominance=1,CI.prob=0.9,polygenic=TR
          subtitle = paste("Marker:", marker)) + 
     theme_bw() + 
     scale_x_continuous(name="Haplotype",labels=1:data@ploidy,breaks=1:data@ploidy) +
-    geom_bar(stat="identity",position="dodge",colour="black") + 
+    geom_bar(stat="identity",position="dodge",colour="black",fill="grey50") + 
     ylab("Additive Effect") + 
     theme(text = element_text(size=13)) + 
     facet_grid(.~founders,scales = "free_x") +

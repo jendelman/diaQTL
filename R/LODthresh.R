@@ -14,10 +14,10 @@
 #' 
 LODthresh <- function(genome.size,num.parents,ploidy) {
   if (ploidy==2) {
-    ans <- predict(diaQTL:::LOD2x,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+    ans <- predict.scam(diaQTL:::LOD2x,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
   } 
   if (ploidy==4) {
-    ans <- predict(diaQTL:::LOD4x,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+    ans <- predict.scam(diaQTL:::LOD4x,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
   }
   return(round(ans,1))
 }
