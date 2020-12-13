@@ -1,6 +1,7 @@
 Changes in 0.86
 * Removed valents_summary
 * Added digenic model to LODthresh 
+* Updated potato dataset
 
 Changes in 0.85
 * Modified haplo_freq plot, now returns frequency of individuals

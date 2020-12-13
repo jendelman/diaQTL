@@ -28,5 +28,5 @@ LODthresh <- function(genome.size,num.parents,ploidy,dominance=1) {
       ans <- predict.scam(diaQTL:::LOD4x.digenic,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
     }
   }
-  return(round(ans,1))
+  return(round(ans,2))
 }
