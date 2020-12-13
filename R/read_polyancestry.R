@@ -44,7 +44,7 @@ read_polyancestry <- function(filename,mapfile=NULL,remove.outliers=TRUE) {
   write.csv(ped[,2:4],"diaQTL_pedfile.csv",row.names=F)
   
   k <- grep("parentgeno",temp[ix])
-  header <- strsplit(temp[ix[k]+1],split=",",fixed=T)[[1]]
+  header <- setdiff(strsplit(temp[ix[k]+1],split=",",fixed=T)[[1]],"")
   parents <- header[-(1:3)]
   header[1:3] <- c("marker","chrom","cM")
   x <- strsplit(temp[c((ix[k]+2):(ix[k+1]-1))],split=",")
@@ -60,7 +60,7 @@ read_polyancestry <- function(filename,mapfile=NULL,remove.outliers=TRUE) {
   }
   colnames(pp) <- header
   if (!is.null(mapfile)) {
-    pp2 <- merge(data.frame(pp),map)
+    pp2 <- merge(data.frame(pp,check.names = FALSE),map)
     pp <- pp2[match(pp[,"marker"],pp2$marker),]
     pp <- pp[,c(header[1:3],"bp",parents)]
     write.csv(pp,"diaQTL_parents.csv",row.names=F)
