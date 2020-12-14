@@ -18,7 +18,7 @@
 #' @importFrom utils read.csv write.csv
 
 phased_parents <- function(filename,interval,markers,parents) {
-  x <- read.csv(filename,as.is=T)
+  x <- read.csv(filename,as.is=T,check.names=F)
   interval <- match(interval,x$marker)
   if (any(is.na(interval))) {
     stop("Markers are not in the file.")
@@ -58,7 +58,7 @@ phased_parents <- function(filename,interval,markers,parents) {
     ans <- lapply(tmp,function(z){matrix(as.integer(unlist(z)),ncol=ploidy,nrow=nf,byrow=T)})
   }
   
-  p <- ggplot(data=map) + geom_segment(aes(x=x1,xend=x2,y=y1,yend=y2),colour="grey50") + geom_segment(data=data.frame(x=c(1,2),y=c(0,0),yend=c(1,1),xend=c(1,2)),aes(x=x,xend=xend,y=y,yend=yend)) + geom_segment(data=map2,aes(x=x2,xend=x3,y=y2,yend=y3),colour="blue") + theme_classic() + theme(axis.line=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank()) + xlab("") + ylab("") + xlim(0,10) + ylim(0,1.4)
+  p <- ggplot(data=map) + geom_segment(aes(x=x1,xend=x2,y=y1,yend=y2),colour="grey50") + geom_segment(data=data.frame(x=c(1,2),y=c(0,0),yend=c(1,1),xend=c(1,2)),aes(x=x,xend=xend,y=y,yend=yend)) + geom_segment(data=map2,aes(x=x2,xend=x3,y=y2,yend=y3),colour="blue") + theme_classic() + theme(axis.line=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank()) + xlab("") + ylab("")
   
   #Text labeling
   p <- p + geom_fit_text(data=map2,mapping=aes(xmin=x3,xmax=x4,y=y3,label=features),place="left") + geom_text(data=data.frame(x=rep(0.97,2),y=c(1,1.05)),aes(x=x,y=y,label=c(map$cM[1],"cM"),hjust=1,vjust=0)) + geom_text(data=data.frame(x=0.97,y=0),aes(x=x,y=y,label=map$cM[m],hjust=1,vjust=1)) + geom_text(data=data.frame(x=rep(2.03,2),y=c(1,1.05)),aes(x=x,y=y,label=c(map$bp[1],"bp"),hjust=0,vjust=0)) + geom_text(data=data.frame(x=2.03,y=0),aes(x=x,y=y,label=map$bp[m],hjust=0,vjust=1))
