@@ -26,7 +26,7 @@ qtl1 <- function(y,X,Z,params,geno=NULL,Xcof=NULL,G1=NULL,X.GCA=NULL) {
   
   ans <- try(setwd("tmp"),silent=T)
   if (inherits(ans,"try-error")) {
-    system(command="mkdir tmp")
+    dir.create("tmp")
     setwd("tmp")
   } 
   ans <- suppressWarnings(eval(parse(text=model)))
