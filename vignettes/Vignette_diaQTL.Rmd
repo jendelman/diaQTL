@@ -105,10 +105,12 @@ The results show there is a QTL on chromosome 10 that explains $R^{2} = 34\%$ of
 BayesCI(scan1_example,data,chrom="10",CI.prob=0.9)
 ```
 
-This region coincides with the location of the classical Ro (round) QTL in potato, which was recently identified as the gene *StOVP20* [(Wu et al. 2018)](https://doi.org/10.1038/s41467-018-07216-8). Function `fitQTL` is used to get the estimated haplotype effects at the most significant marker, as both a table (`effects`) and barplot (`plots`). Use the parameter `dominance = 2` to include digenic dominance effects. To estimate a 90% Bayesian CI for the effects, the number of MCMC iterations is increased based on the output from `set_params`.
+This region coincides with the location of the classical Ro (round) QTL in potato, which was recently identified as the gene *StOVP20* [(Wu et al. 2018)](https://doi.org/10.1038/s41467-018-07216-8). 
+
+Function `fitQTL` is used to get the estimated haplotype effects at the most significant marker, as both a table (`effects`) and barplot (`plots`). Use the option `dominance = 2` to include digenic dominance effects. To estimate a 90% Bayesian CI for the effects, the number of MCMC iterations is increased based on the output from `set_params`.
 ```{r}
 params <- set_params( data, trait = "tuber_shape", 
-                      marker = "solcap_snp_c2_25522", q=0.05, r=0.025)
+                      marker = "solcap_snp_c2_25522", q=0.05, r=0.025, dominance = 2)
 params
 
 fit1 <- fitQTL( data = data, 
@@ -134,15 +136,15 @@ fit2$plots$add
 fit2$plots$dom
 ```
 
-The dominance plot shows the digenic effects above the diagonal, and below the diagonal is the sum of the additive and digenic effects. The largest additive effect (in magnitude) corresponds to haplotype W6511-1R.4. The function `haplo_get` can be used to extract the dosage of this haplotype across the population.
+The dominance plot shows the digenic effects above the diagonal, and below the diagonal is the sum of the additive and digenic effects. The largest additive effect (in magnitude) corresponds to haplotype W6511-1R.2. The function `haplo_get` can be used to extract the dosage of this haplotype across the population.
 ```{r}
 haplos <- haplo_get( data = data, 
                       marker = "solcap_snp_c2_25522")
-hist(haplos[,"W6511-1R.4"],main="",xlab="Dosage")
-which(haplos[,"W6511-1R.4"] > 1.8)
+hist(haplos[,"W6511-1R.2"],main="",xlab="Dosage")
+which(haplos[,"W6511-1R.2"] > 1.8)
 ```
 
-The result shows there are three individuals with two copies of the W6511-1R.4 haplotype, which is possible due to "double reduction." This occurs when a quadrivalent forms in meiosis I and sister chromatid fragments migrate to the same pole in meiosis II. The function `haplo_plot` can be used to visualize the pattern of recombination between parental haplotypes.
+The result shows there are three individuals with two copies of the W6511-1R.2 haplotype, which is possible due to "double reduction." This occurs when a quadrivalent forms in meiosis I and sister chromatid fragments migrate to the same pole in meiosis II. The function `haplo_plot` can be used to visualize the pattern of recombination between parental haplotypes.
 ```{r}
 haplo_plot( data = data, 
             id = "W15268-53R", 
@@ -151,7 +153,7 @@ haplo_plot( data = data,
             marker = "solcap_snp_c2_25522" )
 ```
 
-The dark blue segment indicates two copies of the W6511-1R.4 haplotype, and the dashed vertical line shows the position of the QTL at 49 Mb.
+The dark blue segment indicates two copies of the W6511-1R.2 haplotype, and the dashed vertical line shows the position of the QTL at 49 Mb.
 
 ## Multiple QTL mapping
 In the absence of epistasis, multiple QTL on different chromosomes can be detected adequately with `scan1`. If there is epistasis, or if the QTL are on the same chromosome, other methods are needed. At present, the only option available in `diaQTL` is to conduct a second analysis with `scan1` using the most significant marker from the first scan as a cofactor. Consult the reference manual for more details.

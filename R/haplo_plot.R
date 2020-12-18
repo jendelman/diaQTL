@@ -7,7 +7,7 @@
 #' @param data Variable inheriting from class \code{\link{diallel_geno}}
 #' @param id Name of individual
 #' @param chrom Name of chromosome
-#' @param position Either "cM" or "bp"
+#' @param position Either "cM" (default) or "bp"
 #' @param markers Optional, markers to indicate with dashed line
 #' 
 #' @return ggplot object 
@@ -26,7 +26,7 @@
 #' @export
 #' @import ggplot2
 
-haplo_plot <- function(data,id,chrom,position,markers=NULL) {
+haplo_plot <- function(data,id,chrom,position="cM",markers=NULL) {
   stopifnot(inherits(data,"diallel_geno"))
   stopifnot(position %in% colnames(data@map))
   stopifnot(chrom %in% data@map$chrom)

@@ -4,7 +4,7 @@
 \alias{haplo_plot}
 \title{Plot parental haplotype dosage}
 \usage{
-haplo_plot(data, id, chrom, position, markers = NULL)
+haplo_plot(data, id, chrom, position = "cM", markers = NULL)
 }
 \arguments{
 \item{data}{Variable inheriting from class \code{\link{diallel_geno}}}
@@ -13,7 +13,7 @@ haplo_plot(data, id, chrom, position, markers = NULL)
 
 \item{chrom}{Name of chromosome}
 
-\item{position}{Either "cM" or "bp"}
+\item{position}{Either "cM" (default) or "bp"}
 
 \item{markers}{Optional, markers to indicate with dashed line}
 }

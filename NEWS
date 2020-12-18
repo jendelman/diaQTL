@@ -1,3 +1,16 @@
+Changes in 0.87
+* Modified haplo_unique to become haplo_cluster
+
+Changes in 0.86
+* Removed valents_summary
+* Added digenic model to LODthresh 
+* Updated potato dataset
+
+Changes in 0.85
+* Modified haplo_freq plot, now returns frequency of individuals
+* Fixed read_polyancestry to handle degenerate case of 1 pop with 1 chrom
+* Added functions phased_parents and haplo_unique
+
 Changes in 0.84
 * Added function valents_summary
 

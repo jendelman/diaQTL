@@ -4,7 +4,7 @@
 \alias{LODthresh}
 \title{LOD thresholds for scan1}
 \usage{
-LODthresh(genome.size, num.parents, ploidy)
+LODthresh(genome.size, num.parents, ploidy, dominance = 1)
 }
 \arguments{
 \item{genome.size}{Genome size in Morgans (not centiMorgans)}
@@ -12,6 +12,8 @@ LODthresh(genome.size, num.parents, ploidy)
 \item{num.parents}{Number of parents}
 
 \item{ploidy}{2 or 4}
+
+\item{dominance}{1 (additive) or 2 (digenic dominance)}
 }
 \value{
 LOD threshold
