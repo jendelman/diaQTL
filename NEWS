@@ -1,3 +1,7 @@
+Changes in 0.88
+* Modified haplo_switch to become fine_map
+* Added bioRxiv citation
+
 Changes in 0.87
 * Modified haplo_unique to become haplo_cluster
 
