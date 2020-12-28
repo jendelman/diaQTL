@@ -36,19 +36,18 @@ qtl1 <- function(y,X,Z,params,geno=NULL,Xcof=NULL,G1=NULL,X.GCA=NULL) {
   if (params$response=="ordinal") {
     y2 <- as.integer(y)-1
     resid <- y2 - ans$prob[,2]
-    
     yhat <- ifelse(ans$prob[ix,2] > 0.5,1,0)
-    if (sd(yhat)>0) {
-      R2 <- cor(yhat,y2[ix])^2*100
-    } else {
-      R2 <- 0
-    }
   } else {
-    meany <- mean(y[ix])
-    R2 <- sum((ans$yHat[ix]-meany)^2)/sum((y[ix]-meany)^2)*100
-    resid <- y-ans$yHat
+    y2 <- y
+    resid <- y2 - ans$yHat
+    yhat <- ans$yHat[ix]
+  }
+  if (sd(yhat)>0) {
+    r2 <- cor(yhat,y2[ix])^2
+  } else {
+    r2 <- 0
   }
   
-  result <- list(LL=ans$fit$logLikAtPostMean,DIC=ans$fit$DIC,R2=R2,resid=resid)
+  result <- list(LL=ans$fit$logLikAtPostMean,DIC=ans$fit$DIC,r2=r2,resid=resid)
   return(result)
 }

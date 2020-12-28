@@ -100,7 +100,7 @@ ans1$peaks
 ans1$plot
 ```
 
-The results show there is a QTL on chromosome 10 that explains $R^{2} = 34\%$ of the variance, and the most significant marker is solcap_snp_c2_25522. The 90% Bayesian credible interval (CI) for the QTL can be obtained using `BayesCI`:
+The results show there is a QTL on chromosome 10, and the most significant marker is solcap_snp_c2_25522. The 90% Bayesian credible interval (CI) for the QTL can be obtained using `BayesCI`:
 ```{r}
 BayesCI(scan1_example,data,chrom="10",CI.prob=0.9)
 ```
@@ -116,14 +116,16 @@ params
 fit1 <- fitQTL( data = data, 
                 trait = "tuber_shape", 
                 params = params, 
-                marker = "solcap_snp_c2_25522")
+                marker = "solcap_snp_c2_25522",
+                CI.prob = 0.9)
 
 #With dominance
 fit2 <- fitQTL( data = data, 
                 trait = "tuber_shape", 
                 params = params, 
                 marker = "solcap_snp_c2_25522",
-                dominance = 2)
+                dominance = 2,
+                CI.prob = 0.9)
 
 #Compare DIC for additive vs. dominance model
 print(data.frame(Add=round(fit1$deltaDIC,0),Dom=round(fit2$deltaDIC,0)),row.names=F)
@@ -133,10 +135,15 @@ Because the dominance model has more parameters, a penalized measure of goodness
 ```{r}
 fit2$var
 fit2$plots$add
+```
+
+The error bars on the additive effects correspond to the 90% CI in this example. Although they appear quite large, the relative order of the haplotype effects should be very reliable for a population of this size, based on simulation studies [(Amadeu et al. 2020)](https://doi.org/10.1101/2020.12.18.423479). The dominance plot shows the digenic effects above the diagonal, and below the diagonal is the sum of the additive and digenic effects:
+```{r}
 fit2$plots$dom
 ```
 
-The dominance plot shows the digenic effects above the diagonal, and below the diagonal is the sum of the additive and digenic effects. The largest additive effect (in magnitude) corresponds to haplotype W6511-1R.2. The function `haplo_get` can be used to extract the dosage of this haplotype across the population.
+
+The largest additive effect (in magnitude) corresponds to haplotype W6511-1R.2. The function `haplo_get` can be used to extract the dosage of this haplotype across the population.
 ```{r}
 haplos <- haplo_get( data = data, 
                       marker = "solcap_snp_c2_25522")

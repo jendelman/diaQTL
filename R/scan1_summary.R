@@ -82,7 +82,7 @@ scan1_summary <- function(scan1_data,
   }
 
   peaks <- scan1_data[k,]
-  peaks$R2 <- round(peaks$R2,1)
+  peaks$r2 <- round(peaks$r2,2)
   peaks$LOD <- round(peaks$LOD,1)
   peaks$deltaDIC <- round(peaks$deltaDIC,1)
   return(list(peaks=peaks,plot=p))
