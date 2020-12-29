@@ -1,3 +1,7 @@
+Changes in 0.90
+* Added constraint that sum of qtl effects (for each order) is zero
+* Inclusion of CI for fitQTL is now optional
+
 Changes in 0.89
 * Changed R2 to r2
 
