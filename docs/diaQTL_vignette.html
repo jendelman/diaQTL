@@ -498,9 +498,9 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>The function <code>LODthresh</code> can be used to estimate the LOD threshold corresponding to a genome-wide false positive rate of 0.05. This function uses a curve fit to simulated datasets with no QTL, which produces results similar to a permutation test (which is also available via the function <code>scan1_permute</code>). The genome size for the potato dataset can be estimated from the genetic map.</p>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">tapply</span>(data<span class="sc">@</span>map<span class="sc">$</span>cM,data<span class="sc">@</span>map<span class="sc">$</span>chrom,max))<span class="sc">/</span><span class="dv">100</span> <span class="co">#Morgans </span></span></code></pre></div>
 <pre><code>## [1] 12.0932</code></pre>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">LODthresh</span>(<span class="at">genome.size=</span><span class="fl">12.2</span>,<span class="at">num.parents=</span><span class="dv">3</span>,<span class="at">ploidy=</span><span class="dv">4</span>) <span class="co">#threshold</span></span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">LODthresh</span>(<span class="at">genome.size=</span><span class="fl">12.1</span>,<span class="at">num.parents=</span><span class="dv">3</span>,<span class="at">ploidy=</span><span class="dv">4</span>) <span class="co">#threshold</span></span></code></pre></div>
 <pre><code>##    1 
-## 6.82</code></pre>
+## 6.81</code></pre>
 </div>
 <div id="results" class="section level2">
 <h2>Results</h2>

@@ -89,7 +89,7 @@ scan1_example <- scan1( data = data,
 The function `LODthresh` can be used to estimate the LOD threshold corresponding to a genome-wide false positive rate of 0.05. This function uses a curve fit to simulated datasets with no QTL, which produces results similar to a permutation test (which is also available via the function `scan1_permute`). The genome size for the potato dataset can be estimated from the genetic map.
 ```{r }
 sum(tapply(data@map$cM,data@map$chrom,max))/100 #Morgans 
-LODthresh(genome.size=12.2,num.parents=3,ploidy=4) #threshold
+LODthresh(genome.size=12.1,num.parents=3,ploidy=4) #threshold
 ```
 
 ## Results
