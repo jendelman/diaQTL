@@ -10,7 +10,7 @@
 #' @param dominance Dominance degree (1-4)
 #' @param chrom Names of chromosomes to scan (default is all)
 #' @param cofactor Optional name of marker to include as cofactor in the scan
-#' @param n.core Number of cores for parallel execution (only available from Linux or Mac command line)
+#' @param n.core Number of cores for parallel execution
 #' 
 #' @return Data frame containing the map, LOD, r2 and deltaDIC results. 
 #' 
@@ -28,7 +28,7 @@
 #' @export
 #' @importFrom BGLR BGLR
 #' @importFrom stats model.matrix
-#' @importFrom parallel mclapply
+#' @importFrom parallel makeCluster stopCluster parLapply clusterExport
 
 scan1 <- function(data,trait,params,dominance=1,chrom=NULL,cofactor=NULL,n.core=1) {
   
@@ -65,13 +65,13 @@ scan1 <- function(data,trait,params,dominance=1,chrom=NULL,cofactor=NULL,n.core=
   bins <- get_bin(map$marker,map)
   #ans <- mclapply(X=unique(bins),FUN=function(k,y,data,Xcof,params,dominance){qtl1(y=y,X=data@X,Z=data@Z,Xcof=Xcof,params=params,geno=data@geno[[k]][1:dominance])},y=y,data=data,Xcof=Xcof,params=params,dominance=dominance,mc.cores = n.core)
   
-  cl <- parallel::makeCluster(n.core)
-  parallel::clusterExport(cl=cl,varlist=NULL)
-  parqtl1 = function(k,y,data,Xcof,params,dominance){
+  cl <- makeCluster(n.core)
+  clusterExport(cl=cl,varlist=NULL)
+  parqtl1 <- function(k,y,data,Xcof,params,dominance){
     return(qtl1(y=y,X=data@X,Z=data@Z,Xcof=Xcof,params=params,geno=data@geno[[k]][1:dominance]))
   }
-  ans <- parallel::parLapply(cl, unique(bins), parqtl1, y=y, data=data, Xcof=Xcof, params=params, dominance=dominance)
-  parallel::stopCluster(cl)
+  ans <- parLapply(cl, unique(bins), parqtl1, y=y, data=data, Xcof=Xcof, params=params, dominance=dominance)
+  stopCluster(cl)
   
   fit <- data.frame(LOD=as.numeric(sapply(ans,function(x){x$LL})-ans0$LL)/log(10),r2=as.numeric(sapply(ans,function(x){x$r2})),deltaDIC=as.numeric(sapply(ans,function(x){x$DIC})-ans0$DIC))
   return(data.frame(map[,1:(ncol(map)-1)],fit[match(bins,unique(bins)),],stringsAsFactors = F))

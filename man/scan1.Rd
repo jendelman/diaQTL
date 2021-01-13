@@ -27,7 +27,7 @@ scan1(
 
 \item{cofactor}{Optional name of marker to include as cofactor in the scan}
 
-\item{n.core}{Number of cores for parallel execution (only available from Linux or Mac command line)}
+\item{n.core}{Number of cores for parallel execution}
 }
 \value{
 Data frame containing the map, LOD, r2 and deltaDIC results.

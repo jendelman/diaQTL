@@ -9,7 +9,7 @@
 #' @param chrom Names of chromosomes to scan (default is all)
 #' @param dominance Dominance degree (1-4)
 #' @param cofactor Optional name of marker to include as cofactor in the scan
-#' @param n.core Number of cores for parallel execution (only available from Linux or Mac command line)
+#' @param n.core Number of cores for parallel execution
 #' 
 #' @return Data frame with maximum LOD and minimum deltaDIC for each iteration
 #' 

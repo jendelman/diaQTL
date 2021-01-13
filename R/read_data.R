@@ -11,7 +11,7 @@
 #' @param fixed If there are fixed effects, this is a character vector of "factor" or "numeric"
 #' @param bin.markers TRUE/FALSE whether to bin markers with the same cM position
 #' @param dominance Maximum value of dominance that will be used for analysis (1-4). See Details.
-#' @param n.core Number of cores for parallel execution (only available for UNIX/Linux/MacOS command line)
+#' @param n.core Number of cores for parallel execution
 #' 
 #' @return Variable of class \code{\link{diallel_geno}} if phenofile is NULL, otherwise \code{\link{diallel_geno_pheno}}
 #' 
@@ -38,7 +38,7 @@
 #' @import Matrix
 #' @importFrom utils read.csv
 #' @importFrom methods new
-#' @importFrom parallel mclapply
+#' @importFrom parallel makeCluster stopCluster parLapply clusterExport
 #' 
 read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.markers=TRUE,dominance=2,n.core=1) {
   stopifnot(ploidy %in% c(2,4))
@@ -140,10 +140,10 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.ma
   
   #geno <- mclapply(X=bin.ix,FUN=f1,data=data,genoX=genoX,id=id,ploidy=ploidy,dominance=dominance,mc.cores=n.core)
   
-  cl <- parallel::makeCluster(n.core)
-  parallel::clusterExport(cl=cl,varlist=NULL)
-  geno <- parallel::parLapply(cl, bin.ix, f1, data=data,genoX=genoX,id=id,ploidy=ploidy,dominance=dominance)
-  parallel::stopCluster(cl)
+  cl <- makeCluster(n.core)
+  clusterExport(cl=cl,varlist=NULL)
+  geno <- parLapply(cl, bin.ix, f1, data=data,genoX=genoX,id=id,ploidy=ploidy,dominance=dominance)
+  stopCluster(cl)
   
   names(geno) <- bin.names
   attr(geno,"id") <- id

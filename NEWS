@@ -1,5 +1,6 @@
 Changes in 0.91
 * Updates to fine_map
+* Switched from mclapply to parLapply for Windows compatibility
 
 Changes in 0.90
 * Added constraint that sum of qtl effects (for each order) is zero
