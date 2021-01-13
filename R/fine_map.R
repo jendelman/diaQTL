@@ -53,21 +53,17 @@ fine_map <- function(data,haplotype,interval,trait=NULL) {
   hapans <- hapans[1:n2,]
   
   if (n2 > 1) {
-    decreasing <- which(hapans[,1]>=1)
+    decreasing <- which(hapans[,1]>=0.5)
     if (length(decreasing) > 1) {
       tmp <- apply(hapans[decreasing,],1,function(z){min(which(z==0))})
-      ix.decreasing <- order(tmp,decreasing = F)
-    } else {
-      ix.decreasing <- 1
-    }
-    increasing <- which(hapans[,1]==0)
+      decreasing <- decreasing[order(tmp,decreasing = F)]
+    } 
+    increasing <- setdiff(1:n2,decreasing)
     if (length(increasing) > 1) {
       tmp <- apply(hapans[increasing,],1,function(z){max(which(z==0))})
-      ix.increasing <- order(tmp,decreasing = T)
-    } else {
-      ix.increasing <- 1
+      increasing <- increasing[order(tmp,decreasing = T)]
     }
-    ix <- c(decreasing[ix.decreasing],increasing[ix.increasing])
+    ix <- c(decreasing,increasing)
     hapans <- hapans[ix,]
     id.ans <- id.ans[ix]
   }
