@@ -63,7 +63,15 @@ scan1 <- function(data,trait,params,dominance=1,chrom=NULL,cofactor=NULL,n.core=
   #with marker
   map <- data@map[data@map$chrom %in% chrom,]
   bins <- get_bin(map$marker,map)
-  ans <- mclapply(X=unique(bins),FUN=function(k,y,data,Xcof,params,dominance){qtl1(y=y,X=data@X,Z=data@Z,Xcof=Xcof,params=params,geno=data@geno[[k]][1:dominance])},y=y,data=data,Xcof=Xcof,params=params,dominance=dominance,mc.cores = n.core)
+  #ans <- mclapply(X=unique(bins),FUN=function(k,y,data,Xcof,params,dominance){qtl1(y=y,X=data@X,Z=data@Z,Xcof=Xcof,params=params,geno=data@geno[[k]][1:dominance])},y=y,data=data,Xcof=Xcof,params=params,dominance=dominance,mc.cores = n.core)
+  
+  cl <- parallel::makeCluster(n.core)
+  parallel::clusterExport(cl=cl,varlist=NULL)
+  parqtl1 = function(k,y,data,Xcof,params,dominance){
+    return(qtl1(y=y,X=data@X,Z=data@Z,Xcof=Xcof,params=params,geno=data@geno[[k]][1:dominance]))
+  }
+  ans <- parallel::parLapply(cl, unique(bins), parqtl1, y=y, data=data, Xcof=Xcof, params=params, dominance=dominance)
+  parallel::stopCluster(cl)
   
   fit <- data.frame(LOD=as.numeric(sapply(ans,function(x){x$LL})-ans0$LL)/log(10),r2=as.numeric(sapply(ans,function(x){x$r2})),deltaDIC=as.numeric(sapply(ans,function(x){x$DIC})-ans0$DIC))
   return(data.frame(map[,1:(ncol(map)-1)],fit[match(bins,unique(bins)),],stringsAsFactors = F))
