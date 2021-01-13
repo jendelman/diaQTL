@@ -138,7 +138,12 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.ma
     return(geno)
   }
   
-  geno <- mclapply(X=bin.ix,FUN=f1,data=data,genoX=genoX,id=id,ploidy=ploidy,dominance=dominance,mc.cores=n.core)
+  #geno <- mclapply(X=bin.ix,FUN=f1,data=data,genoX=genoX,id=id,ploidy=ploidy,dominance=dominance,mc.cores=n.core)
+  
+  cl <- parallel::makeCluster(n.core)
+  parallel::clusterExport(cl=cl,varlist=NULL)
+  geno <- parallel::parLapply(cl, bin.ix, f1, data=data,genoX=genoX,id=id,ploidy=ploidy,dominance=dominance)
+  parallel::stopCluster(cl)
   
   names(geno) <- bin.names
   attr(geno,"id") <- id
