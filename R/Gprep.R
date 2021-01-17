@@ -2,10 +2,10 @@
 #' 
 #' Compute realized relationship matrix for fitQTL
 #' 
-#' Computes the additive realized relationship matrix with \code{\link{IBDmat}} so that \code{\link{fitQTL}} does not need to and can run more quickly. The chromosome containing \code{marker} is excluded from the relationship calculation.
+#' Computes the additive realized relationship matrix with \code{\link{IBDmat}} so that \code{\link{fitQTL}} does not need to and can run more quickly. The chromosome(s) containing \code{marker} is (are) excluded from the relationship calculation.
 #' 
 #' @param data variable inheriting from class \code{\link{diallel_geno_pheno}}
-#' @param marker marker that will be used for \code{\link{fitQTL}} 
+#' @param marker markers that will be used for \code{\link{fitQTL}} 
 #' 
 #' @return variable inheriting from class \code{\link{diallel_geno_pheno_G}}
 #' 

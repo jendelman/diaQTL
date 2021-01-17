@@ -30,9 +30,12 @@
 
 scan1_permute <- function(data,trait,params,n.permute=1000,chrom=NULL,dominance=1,cofactor=NULL,n.core=1) {
   LOD <- deltaDIC <- numeric(n.permute)
+  n <- nrow(data@pheno)
   for (i in 1:n.permute) {
-    if (i%%100==0) {print(paste("Permutation",i))}
-    data@pheno[,trait] <- sample(data@pheno[,trait])
+    print(paste("Permutation",i))
+    ix <- sample(1:n)
+    data@pheno <- data@pheno[ix,]
+    data@X <- Matrix(data@X[ix,])
     ans <- scan1(data=data,trait=trait,params=params,chrom=chrom,dominance=dominance,cofactor=cofactor,n.core=n.core)
     LOD[i] <- max(ans$LOD,na.rm=T)
     deltaDIC[i] <- min(ans$deltaDIC,na.rm=T)

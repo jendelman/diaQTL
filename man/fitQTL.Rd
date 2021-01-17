@@ -11,8 +11,7 @@ fitQTL(
   params,
   dominance = 1,
   CI.prob = 0.9,
-  polygenic = TRUE,
-  cofactor = NULL
+  polygenic = TRUE
 )
 }
 \arguments{
@@ -29,8 +28,6 @@ fitQTL(
 \item{CI.prob}{Probability for Bayesian credible interval}
 
 \item{polygenic}{TRUE/FALSE whether to include polygenic background effect}
-
-\item{cofactor}{Name of marker to fit as cofactor (optional)}
 }
 \value{
 List containing

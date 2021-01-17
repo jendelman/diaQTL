@@ -3,13 +3,14 @@
 #' Summary of scan1 result
 #' 
 #' @param scan1_data output from scan1
-#' @param thresh optional, LOD threshold for plotting
+#' @param thresh optional, threshold for plotting
 #' @param chrom optional, subset of chromosomes to plot 
-#' @param position Either "cM" or "bp"
+#' @param position Either "cM" (default) or "bp"
+#' @param statistic Either "LOD" (default) or "DIC"
 #' 
 #' @return List containing 
 #' \describe{
-#' \item{peaks}{Data frame of the markers with the highest LOD score per chromosome}
+#' \item{peaks}{Data frame of the markers with the highest LOD or lowest DIC per chromosome}
 #' \item{plot}{ggplot object}
 #' }
 #' @examples
@@ -24,8 +25,14 @@
 scan1_summary <- function(scan1_data,
                           thresh=NULL,
                           chrom = NULL,
-                          position = "cM") {
+                          position = "cM",
+                          statistic = "LOD") {
+  
   stopifnot(position %in% colnames(scan1_data))
+  stopifnot(statistic %in% c("LOD","DIC"))
+  if (statistic=="DIC") {
+    statistic <- "deltaDIC"
+  }
   
   if(!is.null(chrom)) {
     scan1_data <- scan1_data[scan1_data$chrom %in% chrom,]
@@ -43,29 +50,33 @@ scan1_summary <- function(scan1_data,
   
   k <- integer(nchr)
   for (i in 1:nchr) {
-    y <- scan1_data$LOD
+    y <- scan1_data[,statistic]
     y[scan1_data$chrom!=allchr[i]] <- NA
-    k[i] <- which.max(y)
+    if (statistic=="LOD") {
+      k[i] <- which.max(y)
+    } else {
+      k[i] <- which.min(y)
+    }
   }
   
   p <- NULL
   if (nchr==1) {
     plotme <- data.frame(x=x,
-                         y=scan1_data$LOD,
+                         y=scan1_data[,statistic],
                          chrom=scan1_data$chrom) 
     p <- ggplot(data=plotme,aes(x=x,y=y)) +
         geom_line(color="#440154") +
-        ylab("LOD") +
+        ylab(statistic) +
         theme_bw() +
         theme(text = element_text(size=13),panel.grid = element_blank()) +
         xlab(x.label)
   } else {
     col <- ifelse(as.integer(factor(scan1_data$chrom))%%2==1,"1","0")
     x <- get_x(map=data.frame(chrom=scan1_data$chrom,position=x,stringsAsFactors = F))
-    plotme <- data.frame(x=x,y=scan1_data$LOD,col=col)
+    plotme <- data.frame(x=x,y=scan1_data[,statistic],col=col)
     breaks <- (tapply(x,scan1_data$chrom,max) + tapply(x,scan1_data$chrom,min))/2
     p <- ggplot(data=plotme,aes(x=x,y=y,colour=col)) +
-        ylab("LOD") +
+        ylab(statistic) +
         theme_bw() +
         scale_x_continuous(name="Chromosome",breaks=breaks,labels=allchr) +
         scale_colour_manual(values=c("#21908c","#440154"))+

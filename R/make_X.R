@@ -3,9 +3,9 @@
 make_X <- function(ped,ploidy,dominance) {
   # ped is data frame with variables id,parent1,parent2
   # X1 is used to map genotype probabilities for each F1 population to additive founder effects
-  # X1 has dimensions nind x (ploidy*nf) x (# F1 genotype states), where nf = number of founders and nind is number of individuals in the population
+  # X1 is list of length nind, containing matrices of dimension (ploidy*nf) x (# F1 genotype states), where nf = number of founders and nind is number of individuals in the population
   # X2 is used to map genotype probabilities for each population to digenic dominance founder effects
-  # X2 has dimensions nind x (# possible digenic effects) x (# F1 genotype states)
+  # X2 is list of length nind, containing matrices of dimensions (# possible digenic effects) x (# F1 genotype states)
   # X3 and X4 are for trigenic and quadrigenic effects
   # haplotypes have .1, .2, etc. appended to founder name
   

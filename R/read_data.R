@@ -102,7 +102,7 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.ma
   } 
   
   ped <- ped[match(id,ped$id),]
-  data <- data[,c(1:max(cM,bp),match(id,colnames(data)))]
+  data <- as.matrix(data[,match(id,colnames(data))])
   
   #GCA
   parents <- sort(unique(c(ped$parent1,ped$parent2)))
@@ -120,8 +120,8 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.ma
   genoX <- make_X(ped,ploidy,dominance)
   n.state <- ifelse(ploidy==2,4,100)
   
-  f1 <- function(j,data,genoX,id,ploidy,dominance) {
-    tmp <- unlist(lapply(data[j,id],strsplit,split="=>",fixed=T),recursive = F)
+  f1 <- function(j,data,genoX,ploidy,dominance) {
+    tmp <- unlist(lapply(data[j,],strsplit,split="=>",fixed=T),recursive = F)
     tmp2 <- lapply(tmp,strsplit,split="|",fixed=T)
     states <- lapply(tmp2,function(x){as.integer(x[[1]])})
     genoprob <- lapply(tmp2,function(x){y<-as.numeric(x[[2]])
@@ -130,19 +130,17 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.ma
     geno <- vector("list",length=dominance)
     for (q in 1:dominance) {
       tmp3 <- mapply(FUN=function(u,v,w){tcrossprod(u[,v],t(w))},u=genoX[[q]],v=states,w=genoprob)
-      if(is.matrix(tmp3)){ # in case of all probs=1
-        tmp3 = split(tmp3, rep(1:ncol(tmp3), each = nrow(tmp3)))
-      }
-      geno[[q]] <- Matrix(t(sapply(tmp3,function(x){as.vector(x)})),sparse=TRUE)
+      if(is.list(tmp3)){ 
+        tmp3 <- sapply(tmp3,function(x){as.vector(x)})
+      } 
+      geno[[q]] <- Matrix(t(tmp3))
     }
     return(geno)
   }
   
-  #geno <- mclapply(X=bin.ix,FUN=f1,data=data,genoX=genoX,id=id,ploidy=ploidy,dominance=dominance,mc.cores=n.core)
-  
   cl <- makeCluster(n.core)
   clusterExport(cl=cl,varlist=NULL)
-  geno <- parLapply(cl, bin.ix, f1, data=data,genoX=genoX,id=id,ploidy=ploidy,dominance=dominance)
+  geno <- parLapply(cl, bin.ix, f1, data=data,genoX=genoX,ploidy=ploidy,dominance=dominance)
   stopCluster(cl)
   
   names(geno) <- bin.names
@@ -152,7 +150,8 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.ma
     attr(geno,"diplotypes") <- attr(genoX,"diplotypes")
   }
 
-  data <- new(Class="diallel_geno",ploidy=as.integer(ploidy),dominance=as.integer(dominance),X.GCA=X.GCA,map=map,geno=geno)
+  data <- new(Class="diallel_geno",ploidy=as.integer(ploidy),polyorigin=data[bin.ix,],Xa=genoX[[1]],dominance=as.integer(dominance),X.GCA=X.GCA,map=map,geno=geno)
+  rownames(data@polyorigin) <- bin.names
   
   if (is.null(phenofile)) {
     return(data)

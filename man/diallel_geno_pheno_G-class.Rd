@@ -13,7 +13,11 @@ S4 class with genotype and phenotype data and the additive relationship matrix
 \describe{
 \item{\code{ploidy}}{Either 2 or 4}
 
-\item{\code{dominance}}{Integer 1-4 indicating 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance.}
+\item{\code{polyorigin}}{matrix of character strings from the genotype input file}
+
+\item{\code{Xa}}{list of matrices with the expected haplotype dosage (rows) for each parental origin genotype (columns)}
+
+\item{\code{dominance}}{Maximum dosage stored in slot \code{geno}. Integer 1-4 indicating 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance.}
 
 \item{\code{X.GCA}}{Incidence matrix for GCA effects}
 

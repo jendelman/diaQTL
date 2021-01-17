@@ -11,7 +11,6 @@
 #' @param dominance Dominance degree 
 #' @param CI.prob Probability for Bayesian credible interval
 #' @param polygenic TRUE/FALSE whether to include polygenic background effect
-#' @param cofactor Name of marker to fit as cofactor (optional)
 #' 
 #' @return List containing
 #' \describe{
@@ -51,8 +50,8 @@
 #' @import ggplot2
 #' @importFrom BGLR readBinMat
 
-fitQTL <- function(data,trait,marker,params,dominance=1,CI.prob=0.9,polygenic=TRUE,cofactor=NULL) {
-
+fitQTL <- function(data,trait,marker,params,dominance=1,CI.prob=0.9,polygenic=TRUE) {
+  
   stopifnot(inherits(data,"diallel_geno_pheno"))
   stopifnot(trait %in% colnames(data@pheno))
   stopifnot(marker %in% data@map$marker)
@@ -76,19 +75,12 @@ fitQTL <- function(data,trait,marker,params,dominance=1,CI.prob=0.9,polygenic=TR
   }
   params <- list(response=response,nIter=params$nIter,burnIn=params$burnIn)
 
-  if (!is.null(cofactor)) {
-    stopifnot(cofactor %in% data@map$marker)
-    Xcof <- data@Z%*%data@geno[[get_bin(cofactor,data@map)]][[1]]
-  } else {
-    Xcof <- NULL
-  }
-  
   #no marker model
-  ans0 <- qtl1(y=y,X=data@X,Z=data@Z,params=params,Xcof=Xcof,X.GCA=data@X.GCA)
+  ans0 <- qtl1(y=y,X=data@X,Z=data@Z,params=params,X.GCA=data@X.GCA)
   
   #with marker
   marker2 <- get_bin(marker,data@map)
-  ans1 <- qtl1(y=y,X=data@X,Z=data@Z,geno=data@geno[[marker2]][1:dominance],params=params,Xcof=Xcof,G1=G1)
+  ans1 <- qtl1(y=y,X=data@X,Z=data@Z,geno=data@geno[[marker2]][1:dominance],params=params,G1=G1)
   
   effect.lower <- effect.upper <- effect.mean <- vector("list",length=dominance)
   variances <- matrix(0,nrow=params$nIter-params$burnIn,ncol=dominance+as.integer(polygenic))

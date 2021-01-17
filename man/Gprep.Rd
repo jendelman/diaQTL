@@ -9,7 +9,7 @@ Gprep(data, marker)
 \arguments{
 \item{data}{variable inheriting from class \code{\link{diallel_geno_pheno}}}
 
-\item{marker}{marker that will be used for \code{\link{fitQTL}}}
+\item{marker}{markers that will be used for \code{\link{fitQTL}}}
 }
 \value{
 variable inheriting from class \code{\link{diallel_geno_pheno_G}}
@@ -18,7 +18,7 @@ variable inheriting from class \code{\link{diallel_geno_pheno_G}}
 Compute realized relationship matrix for fitQTL
 }
 \details{
-Computes the additive realized relationship matrix with \code{\link{IBDmat}} so that \code{\link{fitQTL}} does not need to and can run more quickly. The chromosome containing \code{marker} is excluded from the relationship calculation.
+Computes the additive realized relationship matrix with \code{\link{IBDmat}} so that \code{\link{fitQTL}} does not need to and can run more quickly. The chromosome(s) containing \code{marker} is (are) excluded from the relationship calculation.
 }
 \examples{
 \dontrun{
