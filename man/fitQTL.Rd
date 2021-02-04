@@ -10,24 +10,27 @@ fitQTL(
   marker,
   params,
   dominance = 1,
+  cofactor = NULL,
   CI.prob = 0.9,
   polygenic = TRUE
 )
 }
 \arguments{
-\item{data}{Variable of class \code{\link{diallel_geno_pheno}}}
+\item{data}{variable of class \code{\link{diallel_geno_pheno}}}
 
-\item{trait}{Name of trait}
+\item{trait}{name of trait}
 
-\item{marker}{Name of marker to fit as QTL}
+\item{marker}{name of marker to fit as QTL}
 
-\item{params}{List containing the number of burn-in (burnIn) and total iterations (nIter)}
+\item{params}{list containing the number of burn-in (burnIn) and total iterations (nIter)}
 
-\item{dominance}{Dominance degree}
+\item{dominance}{dominance degree}
 
-\item{CI.prob}{Probability for Bayesian credible interval}
+\item{cofactor}{optional, see Details for format.}
 
-\item{polygenic}{TRUE/FALSE whether to include polygenic background effect}
+\item{CI.prob}{probability for Bayesian credible interval}
+
+\item{polygenic}{TRUE/FALSE whether to include a polygenic effect}
 }
 \value{
 List containing
@@ -44,7 +47,9 @@ List containing
 Fit a single QTL model
 }
 \details{
-LOD score is the difference between the log10-likelihood for the QTL model vs. no QTL model (higher is better). deltaDIC is the difference between the Deviance Information Criterion for the QTL model vs. no QTL model (lower values is better). r2 is the squared correlation between the fitted and observed values. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. MCMC \code{params} can be estimated using \code{\link{set_params}}. Parameter \code{CI.prob} sets the probability (e.g., 0.90, 0.95) for the Bayesian credible interval for the estimated effects (to disable plotting of the CI, use \code{CI.prob=NULL}). The returned list \code{effects} contains the additive (and when included) digenic dominance effects. The proportion of variance for each effect is returned in \code{var}. The returned object \code{plots$dom} shows the digenic dominance effects above the diagonal, and below the diagonal is the sum of the additive and digenic dominance effects. The polygenic background effect has covariance equal to the additive relationship computed by \code{\link{IBDmat}}, leaving out the chromosome with the QTL. For faster execution with the polygenic model, use \code{\link{Gprep}} first.
+The number of burn-in and total iterations in \code{params} can be estimated using \code{\link{set_params}}. Parameter \code{dominance} controls the genetic model for the QTL: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. The optional argument \code{cofactor} should be a list with three components: marker = name of the marker; dominance = 1, 2, 3, or 4; epistasis = TRUE/FALSE. When \code{polygenic = TRUE}, the model includes a random effect with covariance equal to the additive relationship computed by \code{\link{IBDmat}}, leaving out chromosome(s) with the QTL and cofactor (if present). Parameter \code{CI.prob} sets the probability (e.g., 0.90, 0.95) for the Bayesian credible interval for the estimated effects (to disable plotting of the CI, use \code{CI.prob=NULL}).
+
+The LOD and deltaDIC values returned by the function are relative to a model without \code{marker} but including the cofactor and polygenic effect when present. If \code{polygenic = FALSE}, the null model includes a GCA effect. r2 is the squared correlation between the fitted and observed values. The returned list \code{effects} contains the additive (and when included) digenic dominance effects. The proportion of variance for each effect is returned in \code{var}. The returned object \code{plots$dom} shows the digenic dominance effects above the diagonal, and below the diagonal is the sum of the additive and digenic dominance effects.
 }
 \examples{
 \dontrun{

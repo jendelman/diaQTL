@@ -2,15 +2,18 @@
 #' 
 #' Fit a single QTL model
 #' 
-#' LOD score is the difference between the log10-likelihood for the QTL model vs. no QTL model (higher is better). deltaDIC is the difference between the Deviance Information Criterion for the QTL model vs. no QTL model (lower values is better). r2 is the squared correlation between the fitted and observed values. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. MCMC \code{params} can be estimated using \code{\link{set_params}}. Parameter \code{CI.prob} sets the probability (e.g., 0.90, 0.95) for the Bayesian credible interval for the estimated effects (to disable plotting of the CI, use \code{CI.prob=NULL}). The returned list \code{effects} contains the additive (and when included) digenic dominance effects. The proportion of variance for each effect is returned in \code{var}. The returned object \code{plots$dom} shows the digenic dominance effects above the diagonal, and below the diagonal is the sum of the additive and digenic dominance effects. The polygenic background effect has covariance equal to the additive relationship computed by \code{\link{IBDmat}}, leaving out the chromosome with the QTL. For faster execution with the polygenic model, use \code{\link{Gprep}} first.
+#' The number of burn-in and total iterations in \code{params} can be estimated using \code{\link{set_params}}. Parameter \code{dominance} controls the genetic model for the QTL: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. The optional argument \code{cofactor} should be a list with three components: marker = name of the marker; dominance = 1, 2, 3, or 4; epistasis = TRUE/FALSE. When \code{polygenic = TRUE}, the model includes a random effect with covariance equal to the additive relationship computed by \code{\link{IBDmat}}, leaving out chromosome(s) with the QTL and cofactor (if present). Parameter \code{CI.prob} sets the probability (e.g., 0.90, 0.95) for the Bayesian credible interval for the estimated effects (to disable plotting of the CI, use \code{CI.prob=NULL}). 
 #' 
-#' @param data Variable of class \code{\link{diallel_geno_pheno}}
-#' @param trait Name of trait
-#' @param marker Name of marker to fit as QTL
-#' @param params List containing the number of burn-in (burnIn) and total iterations (nIter)
-#' @param dominance Dominance degree 
-#' @param CI.prob Probability for Bayesian credible interval
-#' @param polygenic TRUE/FALSE whether to include polygenic background effect
+#' The LOD and deltaDIC values returned by the function are relative to a model without \code{marker} but including the cofactor and polygenic effect when present. If \code{polygenic = FALSE}, the null model includes a GCA effect. r2 is the squared correlation between the fitted and observed values. The returned list \code{effects} contains the additive (and when included) digenic dominance effects. The proportion of variance for each effect is returned in \code{var}. The returned object \code{plots$dom} shows the digenic dominance effects above the diagonal, and below the diagonal is the sum of the additive and digenic dominance effects. 
+#' 
+#' @param data variable of class \code{\link{diallel_geno_pheno}}
+#' @param trait name of trait
+#' @param marker name of marker to fit as QTL
+#' @param params list containing the number of burn-in (burnIn) and total iterations (nIter)
+#' @param dominance dominance degree
+#' @param cofactor optional, see Details for format.
+#' @param polygenic TRUE/FALSE whether to include a polygenic effect
+#' @param CI.prob probability for Bayesian credible interval
 #' 
 #' @return List containing
 #' \describe{
@@ -50,7 +53,7 @@
 #' @import ggplot2
 #' @importFrom BGLR readBinMat
 
-fitQTL <- function(data,trait,marker,params,dominance=1,CI.prob=0.9,polygenic=TRUE) {
+fitQTL <- function(data,trait,marker,params,dominance=1,cofactor=NULL,CI.prob=0.9,polygenic=TRUE) {
   
   stopifnot(inherits(data,"diallel_geno_pheno"))
   stopifnot(trait %in% colnames(data@pheno))
@@ -58,11 +61,27 @@ fitQTL <- function(data,trait,marker,params,dominance=1,CI.prob=0.9,polygenic=TR
   if (dominance > data@dominance) {
     stop("Dominance degree cannot exceed value used with read_data.")
   }
-  if (polygenic) {
-    if (!inherits(data,"diallel_geno_pheno_G")) {
-      data <- Gprep(data,marker)
+  
+  marker2 <- get_bin(marker,data@map)
+  if (!is.null(cofactor)) {
+    stopifnot(is.list(cofactor))
+    stopifnot(cofactor$marker %in% data@map$marker)
+    cofactor$marker <- get_bin(cofactor$marker,data@map)
+    cofactor$X <- data@geno[[cofactor$marker]][1:cofactor$dominance]
+    if (cofactor$epistasis) {
+      cofactor$Xaa <- data@Z%*%faa(j=cofactor$marker,k=marker2,data=data)
+    } else {
+      cofactor$Xaa <- NULL
     }
-    G1 <- data@Z %*% tcrossprod(data@G1,data@Z)
+    poly.marker <- c(marker,cofactor$marker)
+  } else {
+    poly.marker <- marker
+  }
+  
+  if (polygenic) {
+    G1 <- IBDmat(data=data,dominance=1,
+                 chrom=setdiff(unique(data@map$chrom),data@map$chrom[match(poly.marker,data@map$marker)]))
+    G1 <- data@Z %*% tcrossprod(G1,data@Z)
   } else {
     G1 <- NULL
   }
@@ -76,21 +95,19 @@ fitQTL <- function(data,trait,marker,params,dominance=1,CI.prob=0.9,polygenic=TR
   params <- list(response=response,nIter=params$nIter,burnIn=params$burnIn)
 
   #no marker model
-  ans0 <- qtl1(y=y,X=data@X,Z=data@Z,params=params,X.GCA=data@X.GCA)
+  if (!polygenic) {
+    ans0 <- qtl1(y=y,X=data@X,Z=data@Z,params=params,X.GCA=data@X.GCA,cofactor=cofactor)
+  } else {
+    ans0 <- qtl1(y=y,X=data@X,Z=data@Z,params=params,G1=G1,cofactor=cofactor)
+  }
   
   #with marker
-  marker2 <- get_bin(marker,data@map)
-  ans1 <- qtl1(y=y,X=data@X,Z=data@Z,geno=data@geno[[marker2]][1:dominance],params=params,G1=G1)
+  ans1 <- qtl1(y=y,X=data@X,Z=data@Z,geno=data@geno[[marker2]][1:dominance],
+               params=params,G1=G1,cofactor=cofactor)
   
   effect.lower <- effect.upper <- effect.mean <- vector("list",length=dominance)
-  variances <- matrix(0,nrow=params$nIter-params$burnIn,ncol=dominance+as.integer(polygenic))
-  
-  if(polygenic){
-    colnames(variances) <- c("polygenic","additive","digenic","trigenic","quadrigenic")[1:(dominance+1)]
-    variances[,1] <- scan("tmp/ETA_polyg_varU.dat",quiet = T)[params$burnIn+1:(params$nIter-params$burnIn)]*mean(diag(G1))
-  }else{
-    colnames(variances) <- c("additive","digenic","trigenic","quadrigenic")[1:dominance]
-  }
+  variances <- matrix(0,nrow=params$nIter-params$burnIn,ncol=dominance)
+  colnames(variances) <- c("additive","digenic","trigenic","quadrigenic")[1:dominance]
 
   for (j in 1:dominance) {
     ans <- readBinMat(sub(pattern="X",replacement=j,x="tmp/ETA_aX_b.bin"))
@@ -101,8 +118,28 @@ fitQTL <- function(data,trait,marker,params,dominance=1,CI.prob=0.9,polygenic=TR
       effect.lower[[j]] <- tmp[1,]
       effect.upper[[j]] <- tmp[2,]
     }
-    variances[,as.integer(polygenic)+j] <- apply(tcrossprod(data@Z %*% data@geno[[marker2]][[j]],ans),2,var)
+    variances[,j] <- apply(tcrossprod(data@Z %*% data@geno[[marker2]][[j]],ans),2,var)
   }
+  
+  if (polygenic) {
+    var.poly <- scan("tmp/ETA_polyg_varU.dat",quiet = T)[params$burnIn+1:(params$nIter-params$burnIn)]*mean(diag(G1))
+    variances <- cbind(variances,polygenic=var.poly)
+  } 
+  
+  if (!is.null(cofactor)) {
+    var.cof <- matrix(0,nrow=params$nIter-params$burnIn,ncol=cofactor$dominance)
+    colnames(var.cof) <- paste("cofactor",c("additive","digenic","trigenic","quadrigenic")[1:cofactor$dominance],sep=".")
+    for (j in 1:cofactor$dominance) {
+      ans <- readBinMat(sub(pattern="X",replacement=j,x="tmp/ETA_cofX_b.bin"))
+      var.cof[,j] <- apply(tcrossprod(data@Z %*% cofactor$X[[j]],ans),2,var)
+    }
+    variances <- cbind(variances,var.cof)
+    if (cofactor$epistasis) {
+      ans <- readBinMat("tmp/ETA_cofAA_b.bin")
+      variances <- cbind(variances,cofactor.epistasis=apply(tcrossprod(cofactor$Xaa,ans),2,var))  
+    }
+  }
+  
   varE <- scan("tmp/varE.dat",quiet = T)[params$burnIn+1:(params$nIter-params$burnIn)]
   h2 <- variances/(apply(variances,1,sum) + varE)  #proportion of variance for each term
   if (!is.null(CI.prob)) {

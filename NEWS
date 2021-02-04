@@ -1,3 +1,9 @@
+Changes in 0.93
+* Added new cofactor functionality to fitQTL
+* Base model for fitQTL now includes polygenic term
+* Removed Gprep function
+* Added n.core option for IBDmat
+
 Changes in 0.92
 * Modified permutation test to preserve relationship between phenotypes and fixed effects
 * Modified cofactor functionality in scan1 to include additive x additive epistasis
