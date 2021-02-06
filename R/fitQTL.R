@@ -79,8 +79,11 @@ fitQTL <- function(data,trait,marker,params,dominance=1,cofactor=NULL,CI.prob=0.
   }
   
   if (polygenic) {
-    G1 <- IBDmat(data=data,dominance=1,
-                 chrom=setdiff(unique(data@map$chrom),data@map$chrom[match(poly.marker,data@map$marker)]))
+    chroms <- setdiff(unique(data@map$chrom),data@map$chrom[match(poly.marker,data@map$marker)])
+    if (length(chroms)==0) {
+      stop("There are no chromosomes remaining for the polygenic effect.")
+    }
+    G1 <- IBDmat(data=data,dominance=1,chrom=chroms)
     G1 <- data@Z %*% tcrossprod(G1,data@Z)
   } else {
     G1 <- NULL
@@ -95,12 +98,8 @@ fitQTL <- function(data,trait,marker,params,dominance=1,cofactor=NULL,CI.prob=0.
   params <- list(response=response,nIter=params$nIter,burnIn=params$burnIn)
 
   #no marker model
-  if (!polygenic) {
-    ans0 <- qtl1(y=y,X=data@X,Z=data@Z,params=params,X.GCA=data@X.GCA,cofactor=cofactor)
-  } else {
-    ans0 <- qtl1(y=y,X=data@X,Z=data@Z,params=params,G1=G1,cofactor=cofactor)
-  }
-  
+  ans0 <- qtl1(y=y,X=data@X,Z=data@Z,params=params,X.GCA=data@X.GCA,cofactor=cofactor)
+
   #with marker
   ans1 <- qtl1(y=y,X=data@X,Z=data@Z,geno=data@geno[[marker2]][1:dominance],
                params=params,G1=G1,cofactor=cofactor)

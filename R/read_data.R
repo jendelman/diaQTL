@@ -40,7 +40,7 @@
 #' @importFrom methods new
 #' @importFrom parallel makeCluster stopCluster parLapply clusterExport
 #' 
-read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.markers=TRUE,dominance=2,n.core=1) {
+read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.markers=TRUE,dominance=4,n.core=1) {
   stopifnot(ploidy %in% c(2,4))
   if ((dominance > 2) & (ploidy==2)) {
     stop("Only digenic dominance exists for diploids.")

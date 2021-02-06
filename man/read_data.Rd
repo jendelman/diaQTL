@@ -11,7 +11,7 @@ read_data(
   phenofile = NULL,
   fixed = NULL,
   bin.markers = TRUE,
-  dominance = 2,
+  dominance = 4,
   n.core = 1
 )
 }

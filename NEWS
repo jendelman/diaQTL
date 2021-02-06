@@ -1,6 +1,9 @@
+Changes in 0.94
+* Changed default value for dominance in read_data to 4
+* Updated vignette
+
 Changes in 0.93
 * Added new cofactor functionality to fitQTL
-* Base model for fitQTL now includes polygenic term
 * Removed Gprep function
 * Added n.core option for IBDmat
 
