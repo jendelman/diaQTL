@@ -23,7 +23,9 @@ S4 class with genotype and phenotype data
 
 \item{\code{map}}{data frame with marker,chrom, position (cM and/or bp) and bin}
 
-\item{\code{geno}}{list of length equal to the number of marker bins. Each element is a list of length ploidy corresponding to additive, digenic, trigenic, and quadrigenic effects. The elements in the nested list are sparse matrices with dimensions (id x effects).}
+\item{\code{geno}}{list of length equal to the number of marker bins. Each element is a list of length \code{dominance}. The elements in the nested list are sparse matrices with dimensions (id x effects), containing the dosage for each effect.}
+
+\item{\code{prob}}{list of length equal to the number of marker bins. Each element is a sparse matrix (dimensions id x haplotypes) containing the probability that the haplotype is present in the individual.}
 
 \item{\code{pheno}}{data frame of phenotypes}
 

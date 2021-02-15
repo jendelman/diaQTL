@@ -1,3 +1,7 @@
+Changes in 0.95
+* Added @prob to diallel_geno class
+* Modified haplo_plot to accept multiple individuals
+
 Changes in 0.94
 * Changed default value for dominance in read_data to 4
 * Updated vignette

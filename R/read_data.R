@@ -137,20 +137,35 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.ma
     }
     return(geno)
   }
+  f0 <- function(j,data,genoX,ploidy) {
+    tmp <- unlist(lapply(data[j,],strsplit,split="=>",fixed=T),recursive = F)
+    tmp2 <- lapply(tmp,strsplit,split="|",fixed=T)
+    states <- lapply(tmp2,function(x){as.integer(x[[1]])})
+    genoprob <- lapply(tmp2,function(x){y<-as.numeric(x[[2]])
+                                        y/sum(y)})
+    tmp3 <- mapply(FUN=function(u,v,w){
+      u[u>1] <- 1
+      tcrossprod(u[,v],t(w))},u=genoX,v=states,w=genoprob)
+    if(is.list(tmp3)){ 
+      tmp3 <- sapply(tmp3,function(x){as.vector(x)})
+    } 
+    return(Matrix(t(tmp3)))
+  }
   
   cl <- makeCluster(n.core)
   clusterExport(cl=cl,varlist=NULL)
   geno <- parLapply(cl, bin.ix, f1, data=data,genoX=genoX,ploidy=ploidy,dominance=dominance)
+  prob <- parLapply(cl, bin.ix, f0, data=data,genoX=genoX[[1]],ploidy=ploidy)
   stopCluster(cl)
   
-  names(geno) <- bin.names
-  attr(geno,"id") <- id
-  attr(geno,"haplotypes") <- attr(genoX,"haplotypes")
+  names(geno) <- names(prob) <- bin.names
+  attr(prob,"id") <- attr(geno,"id") <- id
+  attr(prob,"haplotypes") <- attr(geno,"haplotypes") <- attr(genoX,"haplotypes")
   if (dominance > 1) {
     attr(geno,"diplotypes") <- attr(genoX,"diplotypes")
   }
 
-  data <- new(Class="diallel_geno",ploidy=as.integer(ploidy),polyorigin=data[bin.ix,],Xa=genoX[[1]],dominance=as.integer(dominance),X.GCA=X.GCA,map=map,geno=geno)
+  data <- new(Class="diallel_geno",ploidy=as.integer(ploidy),polyorigin=data[bin.ix,],Xa=genoX[[1]],dominance=as.integer(dominance),X.GCA=X.GCA,map=map,geno=geno,prob=prob)
   rownames(data@polyorigin) <- bin.names
   
   if (is.null(phenofile)) {
