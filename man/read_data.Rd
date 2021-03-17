@@ -11,7 +11,7 @@ read_data(
   phenofile = NULL,
   fixed = NULL,
   bin.markers = TRUE,
-  dominance = 2,
+  dominance = 4,
   n.core = 1
 )
 }
@@ -30,7 +30,7 @@ read_data(
 
 \item{dominance}{Maximum value of dominance that will be used for analysis (1-4). See Details.}
 
-\item{n.core}{Number of cores for parallel execution (only available for UNIX/Linux/MacOS command line)}
+\item{n.core}{Number of cores for parallel execution}
 }
 \value{
 Variable of class \code{\link{diallel_geno}} if phenofile is NULL, otherwise \code{\link{diallel_geno_pheno}}

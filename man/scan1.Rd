@@ -15,28 +15,28 @@ scan1(
 )
 }
 \arguments{
-\item{data}{Variable of class \code{\link{diallel_geno_pheno}}}
+\item{data}{variable of class \code{\link{diallel_geno_pheno}}}
 
-\item{trait}{Name of trait}
+\item{trait}{name of trait}
 
-\item{params}{List containing burnIn and nIter}
+\item{params}{list containing burnIn and nIter}
 
-\item{dominance}{Dominance degree (1-4)}
+\item{dominance}{dominance degree (1-4)}
 
-\item{chrom}{Names of chromosomes to scan (default is all)}
+\item{chrom}{names of chromosomes to scan (default is all)}
 
-\item{cofactor}{Optional name of marker to include as cofactor in the scan}
+\item{cofactor}{optional, see Details for format.}
 
-\item{n.core}{Number of cores for parallel execution (only available from Linux or Mac command line)}
+\item{n.core}{number of cores for parallel execution}
 }
 \value{
-Data frame containing the map, LOD, R2 and deltaDIC results.
+Data frame containing the map, LOD, r2 and deltaDIC results.
 }
 \description{
 Performs a linear regression for each position in the map.
 }
 \details{
-For quantitative traits, R2 is the percent of variation explained by the regression (MSS/TSS). For binary traits, R2 is the squared phi correlation (as a percentage). LOD score is the difference between the log10-likelihood for the QTL model vs. no QTL model; higher values are better. deltaDIC is the difference between the Deviance Information Criterion for the QTL model vs. no QTL model; lower values are better. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. MCMC \code{params} can be estimated using \code{\link{set_params}}.
+LOD score is the difference between the log10-likelihood for the QTL model vs. no QTL model (higher is better). deltaDIC is the difference between the Deviance Information Criterion for the QTL model vs. no QTL model (lower values is better). r2 is the squared correlation between the fitted and observed values. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. MCMC \code{params} can be estimated using \code{\link{set_params}}. The argument \code{cofactor} should be a list with three components: marker = name of the marker; dominance = 1, 2, 3, or 4; epistasis = TRUE/FALSE. When a cofactor is included, the LOD and deltaDIC values are relative to a model with the cofactor.
 }
 \examples{
 \dontrun{

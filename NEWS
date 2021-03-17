@@ -1,3 +1,32 @@
+Changes in 0.94
+* Changed default value for dominance in read_data to 4
+* Updated vignette
+
+Changes in 0.93
+* Added new cofactor functionality to fitQTL
+* Removed Gprep function
+* Added n.core option for IBDmat
+
+Changes in 0.92
+* Modified permutation test to preserve relationship between phenotypes and fixed effects
+* Modified cofactor functionality in scan1 to include additive x additive epistasis
+* Modified scan1_summary so that either DIC or LOD can be used
+
+Changes in 0.91
+* Updates to fine_map
+* Switched from mclapply to parLapply for Windows compatibility
+
+Changes in 0.90
+* Added constraint that sum of qtl effects (for each order) is zero
+* Inclusion of CI for fitQTL is now optional
+
+Changes in 0.89
+* Changed R2 to r2
+
+Changes in 0.88
+* Modified haplo_switch to become fine_map
+* Added bioRxiv citation
+
 Changes in 0.87
 * Modified haplo_unique to become haplo_cluster
 

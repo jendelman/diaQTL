@@ -37,8 +37,8 @@ BayesCI <- function(scan1_data,data,chrom,CI.prob=0.9) {
   upper <- min(upper+1,n)
   limits <- scan1a$cM[ix[c(lower,upper)]]
   out <- scan1_data[scan1_data$chrom == chrom & scan1_data$cM >= limits[1] & scan1_data$cM <= limits[2],]
-  out$R2 <- round(out$R2,2)
-  out$LOD <- round(out$LOD,2)
-  out$deltaDIC <- round(out$deltaDIC,2)
+  out$r2 <- round(out$r2,2)
+  out$LOD <- round(out$LOD,1)
+  out$deltaDIC <- round(out$deltaDIC,1)
   return(out)
 }

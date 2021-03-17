@@ -4,21 +4,29 @@
 \alias{scan1_summary}
 \title{Summary of scan1 result}
 \usage{
-scan1_summary(scan1_data, thresh = NULL, chrom = NULL, position = "cM")
+scan1_summary(
+  scan1_data,
+  thresh = NULL,
+  chrom = NULL,
+  position = "cM",
+  statistic = "LOD"
+)
 }
 \arguments{
 \item{scan1_data}{output from scan1}
 
-\item{thresh}{optional, LOD threshold for plotting}
+\item{thresh}{optional, threshold for plotting}
 
 \item{chrom}{optional, subset of chromosomes to plot}
 
-\item{position}{Either "cM" or "bp"}
+\item{position}{Either "cM" (default) or "bp"}
+
+\item{statistic}{Either "LOD" (default) or "DIC"}
 }
 \value{
 List containing
 \describe{
-\item{peaks}{Data frame of the markers with the highest LOD score per chromosome}
+\item{peaks}{Data frame of the markers with the highest LOD or lowest DIC per chromosome}
 \item{plot}{ggplot object}
 }
 }

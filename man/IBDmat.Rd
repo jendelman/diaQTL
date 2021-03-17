@@ -4,7 +4,7 @@
 \alias{IBDmat}
 \title{Realized IBD relationship}
 \usage{
-IBDmat(data, dominance = 1, chrom = NULL)
+IBDmat(data, dominance = 1, chrom = NULL, n.core = 1)
 }
 \arguments{
 \item{data}{Variable inheriting from class \code{\link{diallel_geno}}}
@@ -12,6 +12,8 @@ IBDmat(data, dominance = 1, chrom = NULL)
 \item{dominance}{One of 1,2,3,4}
 
 \item{chrom}{Optional, vector of chromosome names to include}
+
+\item{n.core}{number of cores for parallel execution}
 }
 \value{
 Relationship matrix
