@@ -13,7 +13,7 @@
 #'
 #' @examples
 #' \dontrun{
-#'   BayesCI(scan1_example,data,chrom="10",CI.prob=0.9)
+#'   BayesCI(scan1_example,diallel_example,chrom="10",CI.prob=0.9)
 #'   }
 #' @export
 
@@ -23,7 +23,7 @@ BayesCI <- function(scan1_data,data,chrom,CI.prob=0.9) {
   scan1a <- scan1_data[match(names(data@geno),scan1_data$marker),]
   ix <- which(scan1a$chrom == chrom)
   x <- scan1a$cM[ix]
-  
+
   tmp <- data.frame(pos=ix,left=c(0,diff(x)/2),right=c(diff(x)/2,0),prob=10^scan1a$LOD[ix])
   tmp$y <- tmp$prob*(tmp$right+tmp$left)
   tmp$area <- tmp$y/sum(tmp$y)

@@ -7,26 +7,112 @@
 #' @param genome.size Genome size in Morgans (not centiMorgans)
 #' @param num.parents Number of parents
 #' @param ploidy 2 or 4
+#' @param alpha false positive rate: 0.01, 0.05, 0.10, or 0.20
 #' @param dominance 1 (additive) or 2 (digenic dominance)
 #' 
 #' @return LOD threshold
+#' 
+#' @examples
+#' \dontrun{
+#'   LODthresh(genome.size=10, 
+#'             num.parents=4,
+#'             ploidy=4,
+#'             dominance=1,
+#'             alpha=0.05)
+#'   } 
+#'   
 #' @export
 #' @importFrom scam predict.scam
 #' 
-LODthresh <- function(genome.size,num.parents,ploidy,dominance=1) {
-  if (ploidy==2) {
-    if (dominance==1) {
-      ans <- predict.scam(diaQTL:::LOD2x.add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
-    } else {
-      ans <- predict.scam(diaQTL:::LOD2x.digenic,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
-    }
-  } 
-  if (ploidy==4) {
-    if (dominance==1) {
-      ans <- predict.scam(diaQTL:::LOD4x.add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
-    } else {
-      ans <- predict.scam(diaQTL:::LOD4x.digenic,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+LODthresh <- function(genome.size,num.parents,ploidy,alpha=0.05,dominance=1) {
+
+  ## Checking for input errors
+  if(!is.numeric(genome.size) | genome.size>12.5)
+    stop(deparse("genome size should be numeric (in Morgans) and lower than 12"))
+  
+  if(!is.numeric(num.parents) | (round(num.parents)!=num.parents))
+    stop(deparse("number of parents should be integer and numeric"))
+  
+  if(!c(ploidy %in% c(2,4)))
+    stop(deparse("ploidy should be 2 or 4"))
+  
+  if(!c(alpha %in% c(0.01,0.05,0.10,0.20)))
+    stop(deparse("alpha should be 0.01, 0.05, 0.10, or 0.20"))
+  
+  if(!c(dominance %in% c(1,2)))
+    stop(deparse("dominance should be 1 (additive) or 2 (additive+digenic dominance)"))
+  
+  if(alpha==0.01){
+    if (ploidy==2) {
+      if (dominance==1) {
+        ans <- predict.scam(diaQTL:::LOD2x01add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+      } else {
+        ans <- predict.scam(diaQTL:::LOD2x01dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+      }
+    } 
+  
+    if (ploidy==4) {
+      if (dominance==1) {
+        ans <- predict.scam(diaQTL:::LOD4x01add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+      } else {
+        ans <- predict.scam(diaQTL:::LOD4x01dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+      }
     }
   }
+  
+  if(alpha==0.05){
+    if (ploidy==2) {
+      if (dominance==1) {
+        ans <- predict.scam(diaQTL:::LOD2x05add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+      } else {
+        ans <- predict.scam(diaQTL:::LOD2x05dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+      }
+    } 
+    
+    if (ploidy==4) {
+      if (dominance==1) {
+        ans <- predict.scam(diaQTL:::LOD4x05add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+      } else {
+        ans <- predict.scam(diaQTL:::LOD4x05dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+      }
+    }
+  }
+  
+  if(alpha==0.10){
+    if (ploidy==2) {
+      if (dominance==1) {
+        ans <- predict.scam(diaQTL:::LOD2x10add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+      } else {
+        ans <- predict.scam(diaQTL:::LOD2x10dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+      }
+    } 
+    
+    if (ploidy==4) {
+      if (dominance==1) {
+        ans <- predict.scam(diaQTL:::LOD4x10add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+      } else {
+        ans <- predict.scam(diaQTL:::LOD4x10dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+      }
+    }
+  }
+  
+  if(alpha==0.20){
+    if (ploidy==2) {
+      if (dominance==1) {
+        ans <- predict.scam(diaQTL:::LOD2x20add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+      } else {
+        ans <- predict.scam(diaQTL:::LOD2x20dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+      }
+    } 
+    
+    if (ploidy==4) {
+      if (dominance==1) {
+        ans <- predict.scam(diaQTL:::LOD4x20add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+      } else {
+        ans <- predict.scam(diaQTL:::LOD4x20dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+      }
+    }
+  }
+  
   return(round(ans,2))
 }

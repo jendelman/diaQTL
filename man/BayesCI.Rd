@@ -26,6 +26,6 @@ Parameter \code{CI.prob} sets the probability for the Bayesian credible interval
 }
 \examples{
 \dontrun{
-  BayesCI(scan1_example,data,chrom="10",CI.prob=0.9)
+  BayesCI(scan1_example,diallel_example,chrom="10",CI.prob=0.9)
   }
 }
