@@ -33,17 +33,8 @@ Video resources:
 
 1) Tutorial about `diaQTL` presented as part of the "Tools for Polyploids Workshop 2021":
 
-
-<figure class="video_container">
-  <iframe src="https://www.youtube.com/embed/UF8UJkGl16Y/iOxckvAWCnU" frameborder="0" allowfullscreen="true"> </iframe>
-</figure>
-
-
+[![Watch the video](https://img.youtube.com/vi/iOxckvAWCnU/maxresdefault.jpg)](https://youtu.be/iOxckvAWCnU)
 
 2) Seminar on "QTL Mapping in Tetraploid Diallel Populations" presented as part of the Computational Genetics Discussion Group (The Roslin Institute) Seminar Series of 2021:
 
-
-<figure class="video_container">
-  <iframe src="https://www.youtube.com/embed/UF8UJkGl16Y)" frameborder="0" allowfullscreen="true"> </iframe>
-</figure>
-
+[![Watch the video](https://img.youtube.com/vi/UF8UJkGl16Y/maxresdefault.jpg)](https://youtu.be/UF8UJkGl16Y)
