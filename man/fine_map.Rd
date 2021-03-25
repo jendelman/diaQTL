@@ -14,6 +14,8 @@ fine_map(data, haplotype, interval, trait = NULL, marker = NULL)
 \item{interval}{2-vector with marker names}
 
 \item{trait}{Name of trait to plot (optional)}
+
+\item{marker}{Optional, marker to indicate with dashed line}
 }
 \value{
 ggplot2 variable

@@ -18,6 +18,8 @@
 #' @importFrom utils read.csv write.csv
 
 phased_parents <- function(filename,interval,markers,parents) {
+  x1=x2=y1=y2=xend=y=yend=x3=y3=x4=value=ymin=ymax=NULL #to avoid NOTE while doing R check
+  
   x <- read.csv(filename,as.is=T,check.names=F)
   interval <- match(interval,x$marker)
   if (any(is.na(interval))) {

@@ -8,6 +8,7 @@
 #' @param haplotype Name of parental haplotype
 #' @param interval 2-vector with marker names
 #' @param trait Name of trait to plot (optional)
+#' @param marker Optional, marker to indicate with dashed line
 #' 
 #' @return ggplot2 variable
 #' 
@@ -27,6 +28,7 @@
 #' @export
 
 fine_map <- function(data,haplotype,interval,trait=NULL,marker=NULL) {
+  z=x=NULL #to avoid NOTE while doing R check
   
   stopifnot(haplotype %in% attr(data@geno,"haplotypes"))
   stopifnot(all(interval %in% data@map$marker))

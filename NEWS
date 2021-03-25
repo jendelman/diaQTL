@@ -1,8 +1,11 @@
 Changes in 0.95
 * Updated scan1_summary for default statistic as deltaDIC
-* Add marker position in fina_map
-* Added new function diaQTLthresh
-* Added alpha parameter for LODthresh and diaQTLthresh
+* Added marker position in fine_map
+* Added new function DIC_thresh
+* Added alpha parameter for LOD_thresh and DIC_thresh
+* Added deltaDIC option for BayesCI
+* Fixed all the notes for R checking
+* Updated vignette in terms of deltaDIC
 
 Changes in 0.94
 * Changed default value for dominance in read_data to 4

@@ -14,7 +14,7 @@
 #' 
 #' @examples
 #' \dontrun{
-#'   LODthresh(genome.size=10, 
+#'   LOD_thresh(genome.size=10, 
 #'             num.parents=4,
 #'             ploidy=4,
 #'             dominance=1,
@@ -24,7 +24,7 @@
 #' @export
 #' @importFrom scam predict.scam
 #' 
-LODthresh <- function(genome.size,num.parents,ploidy,alpha=0.05,dominance=1) {
+LOD_thresh <- function(genome.size,num.parents,ploidy,alpha=0.05,dominance=1) {
 
   ## Checking for input errors
   if(!is.numeric(genome.size) | genome.size>12.5)
@@ -45,17 +45,17 @@ LODthresh <- function(genome.size,num.parents,ploidy,alpha=0.05,dominance=1) {
   if(alpha==0.01){
     if (ploidy==2) {
       if (dominance==1) {
-        ans <- predict.scam(diaQTL:::LOD2x01add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+        ans <- predict.scam(LOD2x01add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
       } else {
-        ans <- predict.scam(diaQTL:::LOD2x01dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+        ans <- predict.scam(LOD2x01dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
       }
     } 
   
     if (ploidy==4) {
       if (dominance==1) {
-        ans <- predict.scam(diaQTL:::LOD4x01add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+        ans <- predict.scam(LOD4x01add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
       } else {
-        ans <- predict.scam(diaQTL:::LOD4x01dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+        ans <- predict.scam(LOD4x01dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
       }
     }
   }
@@ -63,17 +63,17 @@ LODthresh <- function(genome.size,num.parents,ploidy,alpha=0.05,dominance=1) {
   if(alpha==0.05){
     if (ploidy==2) {
       if (dominance==1) {
-        ans <- predict.scam(diaQTL:::LOD2x05add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+        ans <- predict.scam(LOD2x05add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
       } else {
-        ans <- predict.scam(diaQTL:::LOD2x05dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+        ans <- predict.scam(LOD2x05dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
       }
     } 
     
     if (ploidy==4) {
       if (dominance==1) {
-        ans <- predict.scam(diaQTL:::LOD4x05add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+        ans <- predict.scam(LOD4x05add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
       } else {
-        ans <- predict.scam(diaQTL:::LOD4x05dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+        ans <- predict.scam(LOD4x05dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
       }
     }
   }
@@ -81,17 +81,17 @@ LODthresh <- function(genome.size,num.parents,ploidy,alpha=0.05,dominance=1) {
   if(alpha==0.10){
     if (ploidy==2) {
       if (dominance==1) {
-        ans <- predict.scam(diaQTL:::LOD2x10add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+        ans <- predict.scam(LOD2x10add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
       } else {
-        ans <- predict.scam(diaQTL:::LOD2x10dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+        ans <- predict.scam(LOD2x10dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
       }
     } 
     
     if (ploidy==4) {
       if (dominance==1) {
-        ans <- predict.scam(diaQTL:::LOD4x10add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+        ans <- predict.scam(LOD4x10add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
       } else {
-        ans <- predict.scam(diaQTL:::LOD4x10dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+        ans <- predict.scam(LOD4x10dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
       }
     }
   }
@@ -99,17 +99,17 @@ LODthresh <- function(genome.size,num.parents,ploidy,alpha=0.05,dominance=1) {
   if(alpha==0.20){
     if (ploidy==2) {
       if (dominance==1) {
-        ans <- predict.scam(diaQTL:::LOD2x20add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+        ans <- predict.scam(LOD2x20add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
       } else {
-        ans <- predict.scam(diaQTL:::LOD2x20dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+        ans <- predict.scam(LOD2x20dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
       }
     } 
     
     if (ploidy==4) {
       if (dominance==1) {
-        ans <- predict.scam(diaQTL:::LOD4x20add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+        ans <- predict.scam(LOD4x20add,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
       } else {
-        ans <- predict.scam(diaQTL:::LOD4x20dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
+        ans <- predict.scam(LOD4x20dig,newdata=data.frame(Genome.Size=genome.size,Num.Parents=num.parents))
       }
     }
   }

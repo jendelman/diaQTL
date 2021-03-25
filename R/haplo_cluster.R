@@ -22,6 +22,8 @@
 #' @import ggdendro
 
 haplo_cluster <- function(filename,marker,haplotypes=NULL) {
+  y=yend=xend=NULL #to avoid NOTE while doing R check
+  
   map <- read.csv(filename,as.is=T,check.names=F)
   stopifnot(marker %in% map$marker)
   stopifnot(length(marker) %in% 1:2)

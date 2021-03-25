@@ -9,7 +9,8 @@ scan1_summary(
   thresh = NULL,
   chrom = NULL,
   position = "cM",
-  statistic = "deltaDIC"
+  statistic = "deltaDIC",
+  flip = FALSE
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ scan1_summary(
 \item{position}{Either "cM" (default) or "bp"}
 
 \item{statistic}{Either "deltaDIC" (default) or "LOD"}
+
+\item{flip}{flip the vertical axis (default=FALSE)}
 }
 \value{
 List containing

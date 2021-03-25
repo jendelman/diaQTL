@@ -7,6 +7,7 @@
 #' @param scan1_data data frame output from scan1
 #' @param data variable of class \code{\link{diallel_geno_pheno}}
 #' @param chrom chromosome
+#' @param statistic Either "deltaDIC" (default) or "LOD"
 #' @param CI.prob probability for the credible interval
 #' 
 #' @return subset of scan1_data with markers in the CI
@@ -17,17 +18,23 @@
 #'   }
 #' @export
 
-BayesCI <- function(scan1_data,data,chrom,CI.prob=0.9) {
+BayesCI <- function(scan1_data,data,chrom,statistic="deltaDIC",CI.prob=0.9) {
   stopifnot(chrom %in% scan1_data$chrom)
   
   scan1a <- scan1_data[match(names(data@geno),scan1_data$marker),]
   ix <- which(scan1a$chrom == chrom)
   x <- scan1a$cM[ix]
 
-  tmp <- data.frame(pos=ix,left=c(0,diff(x)/2),right=c(diff(x)/2,0),prob=10^scan1a$LOD[ix])
+  if(statistic=="deltaDIC"){
+#    tmp <- data.frame(pos=ix,left=c(0,diff(x)/2),right=c(diff(x)/2,0),prob=exp((scan1a$deltaDIC[ix]+4*scan1a$LOD[ix]*log(10))/2))
+    tmp <- data.frame(pos=ix,left=c(0,diff(x)/2),right=c(diff(x)/2,0),prob=exp(-(scan1a$deltaDIC[ix])/2))
+    
+  }else{
+    tmp <- data.frame(pos=ix,left=c(0,diff(x)/2),right=c(diff(x)/2,0),prob=10^scan1a$LOD[ix])
+  }
+  
   tmp$y <- tmp$prob*(tmp$right+tmp$left)
   tmp$area <- tmp$y/sum(tmp$y)
-  
   n <- length(x)
   tmp$cdf <- apply(array(1:n),1,function(k){sum(tmp$area[1:k])})
   

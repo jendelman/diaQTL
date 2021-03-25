@@ -7,6 +7,7 @@
 #' @param chrom optional, subset of chromosomes to plot 
 #' @param position Either "cM" (default) or "bp"
 #' @param statistic Either "deltaDIC" (default) or "LOD"
+#' @param flip flip the vertical axis (default=FALSE)
 #' 
 #' @return List containing 
 #' \describe{
@@ -26,7 +27,8 @@ scan1_summary <- function(scan1_data,
                           thresh=NULL,
                           chrom = NULL,
                           position = "cM",
-                          statistic = "deltaDIC") {
+                          statistic = "deltaDIC",
+                          flip = FALSE) {
   
   stopifnot(position %in% colnames(scan1_data))
   stopifnot(statistic %in% c("LOD","deltaDIC"))
@@ -45,20 +47,26 @@ scan1_summary <- function(scan1_data,
   allchr <- unique(scan1_data$chrom)
   nchr <- length(allchr)
   
-  if(statistic=="deltaDIC"){
-    statisticName = "- \U0394 DIC"
-    scan1_data[,statistic] = -scan1_data[,statistic]
-  }else{
-    statisticName = "LOD"
-  }
-  
   k <- integer(nchr)
   for (i in 1:nchr) {
     y <- scan1_data[,statistic]
     y[scan1_data$chrom!=allchr[i]] <- NA
+    if(statistic == "deltaDIC"){
+      k[i] <- which.min(y)
+    }else{
       k[i] <- which.max(y)
+    }
   }
   
+  if(flip){
+    scan1_data[,"deltaDIC"] = -scan1_data[,"deltaDIC"]
+    scan1_data[,"LOD"] = -scan1_data[,"LOD"]
+  }
+  if(statistic=="deltaDIC"){
+    statisticName = ifelse(flip, "-\U0394 DIC","\U0394 DIC")
+  }else{
+    statisticName = ifelse(flip, "-\U0394 LOD","LOD")
+  }
   
   p <- NULL
   if (nchr==1) {
@@ -90,7 +98,7 @@ scan1_summary <- function(scan1_data,
   }
     
   if (!is.null(thresh)) {
-    if(statistic=="deltaDIC")
+    if(flip)
       thresh=-thresh
     p <- p + geom_hline(yintercept = thresh,linetype="dashed",colour="#B89600")
   }
@@ -98,6 +106,10 @@ scan1_summary <- function(scan1_data,
   peaks <- scan1_data[k,]
   peaks$r2 <- round(peaks$r2,2)
   peaks$LOD <- round(peaks$LOD,1)
-  peaks$deltaDIC <- -round(peaks$deltaDIC,1)
+  peaks$deltaDIC <- round(peaks$deltaDIC,1)
+  if(flip){
+    peaks$LOD=-peaks$LOD
+    peaks$deltaDIC=-peaks$deltaDIC
+  }
   return(list(peaks=peaks,plot=p))
 }
