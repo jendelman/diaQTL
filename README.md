@@ -31,7 +31,7 @@ library(diaQTL)
 
 Video resources:
 
-1) Tutorial about `diaQTL` presented as part of the "Tools for Polyploids Workshop 2021":
+1) Tutorial about `diaQTL` presented as part of the [Tools for Polyploids Workshop 2021](https://www.polyploids.org):
 
 [![Watch the video](https://raw.githubusercontent.com/rramadeu/Tutorials_File/master/EndelmanTutorial.png)](https://youtu.be/iOxckvAWCnU)
 
