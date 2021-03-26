@@ -31,19 +31,10 @@ library(diaQTL)
 
 Video resources:
 
-1) Tutorial about `diaQTL` presented as part of the "Tools for Polyploids Workshop 2021":
+1) Tutorial about `diaQTL` presented as part of the [Tools for Polyploids Workshop 2021](https://www.polyploids.org):
 
-
-<figure class="video_container">
-  <iframe src="https://www.youtube.com/embed/UF8UJkGl16Y/iOxckvAWCnU" frameborder="0" allowfullscreen="true"> </iframe>
-</figure>
-
-
+[![Watch the video](https://raw.githubusercontent.com/rramadeu/Tutorials_File/master/EndelmanTutorial.png)](https://youtu.be/iOxckvAWCnU)
 
 2) Seminar on "QTL Mapping in Tetraploid Diallel Populations" presented as part of the Computational Genetics Discussion Group (The Roslin Institute) Seminar Series of 2021:
 
-
-<figure class="video_container">
-  <iframe src="https://www.youtube.com/embed/UF8UJkGl16Y)" frameborder="0" allowfullscreen="true"> </iframe>
-</figure>
-
+[![Watch the video](https://raw.githubusercontent.com/rramadeu/Tutorials_File/master/RodrigoSeminar.png)](https://youtu.be/UF8UJkGl16Y)
