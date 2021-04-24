@@ -4,7 +4,7 @@
 \alias{fine_map}
 \title{Visualize haplotype switches for fine mapping}
 \usage{
-fine_map(data, haplotype, interval, trait = NULL)
+fine_map(data, haplotype, interval, trait = NULL, marker = NULL)
 }
 \arguments{
 \item{data}{Variable inheriting from class \code{\link{diallel_geno}}}
@@ -14,6 +14,8 @@ fine_map(data, haplotype, interval, trait = NULL)
 \item{interval}{2-vector with marker names}
 
 \item{trait}{Name of trait to plot (optional)}
+
+\item{marker}{Optional, marker to indicate with dashed line}
 }
 \value{
 ggplot2 variable
@@ -23,4 +25,17 @@ Visualize haplotype switches for fine mapping
 }
 \details{
 Function returns graphic for all individuals with a haplotype switch (defined as change in dosage from 0 to \eqn{\geq} 1 or vice versa) for \code{haplotype} within \code{interval}. If \code{trait} is included, the trait values for each individual are displayed on the right side. The function requires map positions in bp to be included in \code{data}.
+}
+\examples{
+\dontrun{
+  fine_map(data = diallel_example, 
+           haplotype = "W6511-1R.2", 
+           interval = c("solcap_snp_c2_40766","solcap_snp_c1_15225"))
+  
+  fine_map(data = diallel_example, 
+           haplotype = "W6511-1R.2", 
+           interval = c("solcap_snp_c2_40766","solcap_snp_c1_15225"),
+           marker = "solcap_snp_c2_25522")
+  }
+
 }

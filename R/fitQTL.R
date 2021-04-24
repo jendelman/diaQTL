@@ -54,6 +54,7 @@
 #' @importFrom BGLR readBinMat
 
 fitQTL <- function(data,trait,marker,params,dominance=1,cofactor=NULL,CI.prob=0.9,polygenic=TRUE) {
+  Haplotype=Mean=CI.upper=CI.lower=x=z=NULL #to avoid NOTE while doing R check
   
   stopifnot(inherits(data,"diallel_geno_pheno"))
   stopifnot(trait %in% colnames(data@pheno))

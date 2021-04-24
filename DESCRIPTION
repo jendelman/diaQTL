@@ -1,11 +1,11 @@
 Package: diaQTL
 Title: QTL Analysis in Diallel Populations
-Version: 0.94
+Version: 0.95
 Author: Jeffrey B. Endelman and Rodrigo R. Amadeu
 Maintainer: Jeffrey Endelman <endelman@wisc.edu>
 Description: QTL analysis of diploid and autotetraploid diallel populations. Phenotypes are regressed on genotype probabilities, and the regression coefficients are random effects.
 Depends: R (>= 3.5.0)
-License: GPL-3
+License: GPL-3 + file LICENSE
 LazyData: true
 RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE)

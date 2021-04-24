@@ -9,7 +9,8 @@ scan1_summary(
   thresh = NULL,
   chrom = NULL,
   position = "cM",
-  statistic = "LOD"
+  statistic = "deltaDIC",
+  flip = FALSE
 )
 }
 \arguments{
@@ -21,12 +22,14 @@ scan1_summary(
 
 \item{position}{Either "cM" (default) or "bp"}
 
-\item{statistic}{Either "LOD" (default) or "DIC"}
+\item{statistic}{Either "deltaDIC" (default) or "LOD"}
+
+\item{flip}{flip the vertical axis (default=FALSE)}
 }
 \value{
 List containing
 \describe{
-\item{peaks}{Data frame of the markers with the highest LOD or lowest DIC per chromosome}
+\item{peaks}{Data frame of the markers with the highest LOD or lowest delta DIC per chromosome}
 \item{plot}{ggplot object}
 }
 }
