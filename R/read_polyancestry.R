@@ -7,13 +7,14 @@
 #' @param filename Name of polyancestry file 
 #' @param mapfile Optional name of CSV file containing the physical map (marker, chrom, bp)
 #' @param remove.outliers Should offspring flagged as outliers be removed (default is TRUE)
+#' @param outstem prefix for output filenames
 #' 
 #' @return NULL
 #'  
 #' @export
 #' @importFrom utils read.csv write.csv
 
-read_polyancestry <- function(filename,mapfile=NULL,remove.outliers=TRUE) {
+read_polyancestry <- function(filename,mapfile=NULL,remove.outliers=TRUE,outstem="") {
   
   if (!is.null(mapfile)) {
     map <- read.csv(mapfile,as.is=T)[,1:3]
@@ -41,7 +42,7 @@ read_polyancestry <- function(filename,mapfile=NULL,remove.outliers=TRUE) {
   y <- strsplit(parents,split="|",fixed=T)
   parents <- data.frame(pop=sapply(y,function(y){y[1]}),parent1=sapply(y,function(y){y[2]}),parent2=sapply(y,function(y){y[length(y)]}),stringsAsFactors = F)
   ped <- merge(ped,parents)
-  write.csv(ped[,2:4],"diaQTL_pedfile.csv",row.names=F)
+  write.csv(ped[,2:4],file=paste(outstem,"diaQTL_pedfile.csv",sep=""),row.names=F)
   
   k <- grep("parentgeno",temp[ix])
   header <- setdiff(strsplit(temp[ix[k]+1],split=",",fixed=T)[[1]],"")
@@ -63,7 +64,7 @@ read_polyancestry <- function(filename,mapfile=NULL,remove.outliers=TRUE) {
     pp2 <- merge(data.frame(pp,check.names = FALSE),map)
     pp <- pp2[match(pp[,"marker"],pp2$marker),]
     pp <- pp[,c(header[1:3],"bp",parents)]
-    write.csv(pp,"diaQTL_parents.csv",row.names=F)
+    write.csv(pp,paste(outstem,"diaQTL_parents.csv",sep=""),row.names=F)
   }
   
   k <- grep("genoprob",temp[ix])
@@ -82,9 +83,9 @@ read_polyancestry <- function(filename,mapfile=NULL,remove.outliers=TRUE) {
     genoprob[j,] <- x[c(1,keep+3)]
   }
   if (!is.null(mapfile)) {
-    write.csv(cbind(pp[,1:4],genoprob[match(pp[,1],genoprob[,1]),-1]),"diaQTL_genofile.csv",row.names=F)
+    write.csv(cbind(pp[,1:4],genoprob[match(pp[,1],genoprob[,1]),-1]),paste(outstem,"diaQTL_genofile.csv",sep=""),row.names=F)
   } else {
-    write.csv(cbind(pp[,1:3],genoprob[match(pp[,1],genoprob[,1]),-1]),"diaQTL_genofile.csv",row.names=F)
+    write.csv(cbind(pp[,1:3],genoprob[match(pp[,1],genoprob[,1]),-1]),paste(outstem,"diaQTL_genofile.csv",sep=""),row.names=F)
   }
   close(con)
   return(NULL)

@@ -24,6 +24,7 @@ diplo_get <- function(data,marker=NULL,id=NULL) {
   stopifnot(inherits(data,"diallel_geno"))
   stopifnot(is.null(marker)|is.null(id))
   stopifnot(!is.null(marker)|!is.null(id))
+  stopifnot(data@dominance > 1)
   if (!is.null(marker)) {
     k <- get_bin(marker,data@map)
     if (is.na(k)) {stop("Marker not present")}

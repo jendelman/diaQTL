@@ -4,7 +4,12 @@
 \alias{read_polyancestry}
 \title{Create diaQTL input files from polyancestry file}
 \usage{
-read_polyancestry(filename, mapfile = NULL, remove.outliers = TRUE)
+read_polyancestry(
+  filename,
+  mapfile = NULL,
+  remove.outliers = TRUE,
+  outstem = ""
+)
 }
 \arguments{
 \item{filename}{Name of polyancestry file}
@@ -12,6 +17,8 @@ read_polyancestry(filename, mapfile = NULL, remove.outliers = TRUE)
 \item{mapfile}{Optional name of CSV file containing the physical map (marker, chrom, bp)}
 
 \item{remove.outliers}{Should offspring flagged as outliers be removed (default is TRUE)}
+
+\item{outstem}{prefix for output filenames}
 }
 \description{
 Create diaQTL input files from polyancestry file

@@ -76,7 +76,8 @@ fine_map <- function(data,haplotype,interval,trait=NULL) {
   p <- ggplot(data=plotme) + geom_rect(aes(fill=z,xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax)) + theme_bw() + scale_fill_distiller(name="Dosage",palette="Blues",direction=1) + scale_x_continuous(name="",breaks=1:m,labels=map$marker,sec.axis=dup_axis(labels=map$bp)) + theme(axis.text.x.top = element_text(angle=90,hjust=1,vjust=0.5)) + theme(axis.text.x = element_text(angle=90,hjust=1,vjust=0.5)) + scale_y_continuous(name="",breaks=ymax-0.5,labels=id[id.ans]) + geom_vline(xintercept=1:m,colour="gray50",size=0.3)
   
   if (!is.null(trait)) {
-    trait.y <- data@pheno[match(id[id.ans],data@pheno$id),trait]
+    mean.y <- tapply(data@pheno[,trait],data@pheno$id,mean)
+    trait.y <- mean.y[match(id[id.ans],names(mean.y))]
     p <- p + geom_label(data=data.frame(x=rep(m+3,n2),y=ymax-0.5,label=format(trait.y,digits=2)),mapping=aes(x=x,y=y,label=label)) 
   }
   return(p)
