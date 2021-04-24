@@ -21,6 +21,7 @@
 #' @importFrom tidyr pivot_wider
 
 diplo_freq <- function(data,diplotypes,dosage,position,chrom=NULL) {
+  y <- NULL
   stopifnot(inherits(data,"diallel_geno"))
   stopifnot(position %in% colnames(data@map))
   stopifnot(diplotypes %in% attr(data@geno,"diplotypes"))

@@ -23,6 +23,7 @@
 #' @importFrom tidyr pivot_wider
 
 haplo_freq <- function(data,haplotypes,dosage,id=NULL,position="cM",chrom=NULL,markers=NULL) {
+  y=haplo=z=ymin=ymax=NULL #to avoid NOTE while doing R check
   stopifnot(inherits(data,"diallel_geno"))
   stopifnot(position %in% colnames(data@map))
   stopifnot(haplotypes %in% attr(data@geno,"haplotypes"))

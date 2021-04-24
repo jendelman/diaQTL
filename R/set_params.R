@@ -34,7 +34,7 @@
 #' @importFrom BGLR readBinMat
 #' @importFrom stats quantile
 
-set_params <- function(data,trait,dominance=1,marker=NULL,q=0.5,r=0.1,nIter=2000) {
+set_params <- function(data,trait,dominance=1,marker=NULL,q=0.5,r=0.1,nIter=2000){
   
   stopifnot(inherits(data,"diallel_geno_pheno"))
   stopifnot(trait %in% colnames(data@pheno))
@@ -70,5 +70,6 @@ set_params <- function(data,trait,dominance=1,marker=NULL,q=0.5,r=0.1,nIter=2000
     raftans <- rbind(raftans,tmp2[,1:2])
   }
   
-  return(list(burnIn=round(as.numeric(quantile(raftans[,1],probs=0.9)),0),nIter=round(as.numeric(quantile(raftans[,2],probs=0.9)),0)))
+  return(list(burnIn=round(as.numeric(quantile(raftans[,1],probs=0.9)),0),
+              nIter=round(as.numeric(quantile(raftans[,2],probs=0.9)),0)))
 }

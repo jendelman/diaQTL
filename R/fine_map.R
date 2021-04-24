@@ -8,13 +8,27 @@
 #' @param haplotype Name of parental haplotype
 #' @param interval 2-vector with marker names
 #' @param trait Name of trait to plot (optional)
+#' @param marker Optional, marker to indicate with dashed line
 #' 
 #' @return ggplot2 variable
+#' 
+#' @examples
+#' \dontrun{
+#'   fine_map(data = diallel_example, 
+#'            haplotype = "W6511-1R.2", 
+#'            interval = c("solcap_snp_c2_40766","solcap_snp_c1_15225"))
+#'   
+#'   fine_map(data = diallel_example, 
+#'            haplotype = "W6511-1R.2", 
+#'            interval = c("solcap_snp_c2_40766","solcap_snp_c1_15225"),
+#'            marker = "solcap_snp_c2_25522")
+#'   }
 #' 
 #' @import ggplot2
 #' @export
 
-fine_map <- function(data,haplotype,interval,trait=NULL) {
+fine_map <- function(data,haplotype,interval,trait=NULL,marker=NULL) {
+  z=x=NULL #to avoid NOTE while doing R check
   
   stopifnot(haplotype %in% attr(data@geno,"haplotypes"))
   stopifnot(all(interval %in% data@map$marker))
@@ -31,6 +45,13 @@ fine_map <- function(data,haplotype,interval,trait=NULL) {
   map <- data@map[data@map$chrom==chrom,]
   bins <- map$bin[match(markers,map$marker)]
   map <- map[map$bin %in% bins[1]:bins[2],]
+  
+  if(!is.null(marker)){
+    marker.pos=match(marker,map$marker)
+    if(is.na(marker.pos))
+      stop(deparse("marker not within interval"))
+  }
+  
   m <- nrow(map)
   
   hapans <- matrix(0,nrow=n,ncol=m)
@@ -79,6 +100,9 @@ fine_map <- function(data,haplotype,interval,trait=NULL) {
     mean.y <- tapply(data@pheno[,trait],data@pheno$id,mean)
     trait.y <- mean.y[match(id[id.ans],names(mean.y))]
     p <- p + geom_label(data=data.frame(x=rep(m+3,n2),y=ymax-0.5,label=format(trait.y,digits=2)),mapping=aes(x=x,y=y,label=label)) 
+  }
+  if(!is.null(marker)){
+    p <- p + geom_vline(xintercept = marker.pos, linetype="dashed", colour="#B89600",size=1.1)
   }
   return(p)
 }

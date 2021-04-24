@@ -1,0 +1,1 @@
+utils::globalVariables(c("S1codes","F1codes"))

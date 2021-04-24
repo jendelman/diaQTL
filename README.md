@@ -28,3 +28,13 @@ library(devtools)
 install_github("jendelman/diaQTL", build_vignettes=FALSE)
 library(diaQTL)
 ```
+
+Video resources:
+
+1) Tutorial about `diaQTL` presented as part of the [Tools for Polyploids Workshop 2021](https://www.polyploids.org):
+
+[![Watch the video](https://raw.githubusercontent.com/rramadeu/Tutorials_File/master/EndelmanTutorial.png)](https://youtu.be/iOxckvAWCnU)
+
+2) Seminar on "QTL Mapping in Tetraploid Diallel Populations" presented as part of the Computational Genetics Discussion Group (The Roslin Institute) Seminar Series of 2021:
+
+[![Watch the video](https://raw.githubusercontent.com/rramadeu/Tutorials_File/master/RodrigoSeminar.png)](https://youtu.be/UF8UJkGl16Y)

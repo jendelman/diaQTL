@@ -6,11 +6,12 @@
 #' @param thresh optional, threshold for plotting
 #' @param chrom optional, subset of chromosomes to plot 
 #' @param position Either "cM" (default) or "bp"
-#' @param statistic Either "LOD" (default) or "DIC"
+#' @param statistic Either "deltaDIC" (default) or "LOD"
+#' @param flip flip the vertical axis (default=FALSE)
 #' 
 #' @return List containing 
 #' \describe{
-#' \item{peaks}{Data frame of the markers with the highest LOD or lowest DIC per chromosome}
+#' \item{peaks}{Data frame of the markers with the highest LOD or lowest delta DIC per chromosome}
 #' \item{plot}{ggplot object}
 #' }
 #' @examples
@@ -26,13 +27,11 @@ scan1_summary <- function(scan1_data,
                           thresh=NULL,
                           chrom = NULL,
                           position = "cM",
-                          statistic = "LOD") {
+                          statistic = "deltaDIC",
+                          flip = FALSE) {
   
   stopifnot(position %in% colnames(scan1_data))
-  stopifnot(statistic %in% c("LOD","DIC"))
-  if (statistic=="DIC") {
-    statistic <- "deltaDIC"
-  }
+  stopifnot(statistic %in% c("LOD","deltaDIC"))
   
   if(!is.null(chrom)) {
     scan1_data <- scan1_data[scan1_data$chrom %in% chrom,]
@@ -52,11 +51,21 @@ scan1_summary <- function(scan1_data,
   for (i in 1:nchr) {
     y <- scan1_data[,statistic]
     y[scan1_data$chrom!=allchr[i]] <- NA
-    if (statistic=="LOD") {
-      k[i] <- which.max(y)
-    } else {
+    if(statistic == "deltaDIC"){
       k[i] <- which.min(y)
+    }else{
+      k[i] <- which.max(y)
     }
+  }
+  
+  if(flip){
+    scan1_data[,"deltaDIC"] = -scan1_data[,"deltaDIC"]
+    scan1_data[,"LOD"] = -scan1_data[,"LOD"]
+  }
+  if(statistic=="deltaDIC"){
+    statisticName = ifelse(flip, "-\U0394 DIC","\U0394 DIC")
+  }else{
+    statisticName = ifelse(flip, "-\U0394 LOD","LOD")
   }
   
   p <- NULL
@@ -66,7 +75,7 @@ scan1_summary <- function(scan1_data,
                          chrom=scan1_data$chrom) 
     p <- ggplot(data=plotme,aes(x=x,y=y)) +
         geom_line(color="#440154") +
-        ylab(statistic) +
+        ylab(statisticName) +
         theme_bw() +
         theme(text = element_text(size=13),panel.grid = element_blank()) +
         xlab(x.label)
@@ -76,7 +85,7 @@ scan1_summary <- function(scan1_data,
     plotme <- data.frame(x=x,y=scan1_data[,statistic],col=col)
     breaks <- (tapply(x,scan1_data$chrom,max) + tapply(x,scan1_data$chrom,min))/2
     p <- ggplot(data=plotme,aes(x=x,y=y,colour=col)) +
-        ylab(statistic) +
+        ylab(statisticName) +
         theme_bw() +
         scale_x_continuous(name="Chromosome",breaks=breaks,labels=allchr) +
         scale_colour_manual(values=c("#21908c","#440154"))+
@@ -89,6 +98,8 @@ scan1_summary <- function(scan1_data,
   }
     
   if (!is.null(thresh)) {
+    if(flip)
+      thresh=-thresh
     p <- p + geom_hline(yintercept = thresh,linetype="dashed",colour="#B89600")
   }
 
@@ -96,5 +107,9 @@ scan1_summary <- function(scan1_data,
   peaks$r2 <- round(peaks$r2,2)
   peaks$LOD <- round(peaks$LOD,1)
   peaks$deltaDIC <- round(peaks$deltaDIC,1)
+  if(flip){
+    peaks$LOD=-peaks$LOD
+    peaks$deltaDIC=-peaks$deltaDIC
+  }
   return(list(peaks=peaks,plot=p))
 }

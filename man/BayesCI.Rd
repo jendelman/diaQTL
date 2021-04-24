@@ -4,7 +4,7 @@
 \alias{BayesCI}
 \title{Bayesian Credible Interval for QTL position}
 \usage{
-BayesCI(scan1_data, data, chrom, CI.prob = 0.9)
+BayesCI(scan1_data, data, chrom, statistic = "deltaDIC", CI.prob = 0.9)
 }
 \arguments{
 \item{scan1_data}{data frame output from scan1}
@@ -12,6 +12,8 @@ BayesCI(scan1_data, data, chrom, CI.prob = 0.9)
 \item{data}{variable of class \code{\link{diallel_geno_pheno}}}
 
 \item{chrom}{chromosome}
+
+\item{statistic}{Either "deltaDIC" (default) or "LOD"}
 
 \item{CI.prob}{probability for the credible interval}
 }
@@ -26,6 +28,6 @@ Parameter \code{CI.prob} sets the probability for the Bayesian credible interval
 }
 \examples{
 \dontrun{
-  BayesCI(scan1_example,data,chrom="10",CI.prob=0.9)
+  BayesCI(scan1_example,diallel_example,chrom="10",CI.prob=0.9)
   }
 }

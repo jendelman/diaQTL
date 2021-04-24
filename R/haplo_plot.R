@@ -27,6 +27,7 @@
 #' @import ggplot2
 
 haplo_plot <- function(data,id,chrom,position="cM",markers=NULL) {
+  y=haplo=z=ymin=ymax=NULL #to avoid NOTE while doing R check
   stopifnot(inherits(data,"diallel_geno"))
   stopifnot(position %in% colnames(data@map))
   stopifnot(chrom %in% data@map$chrom)

@@ -2,8 +2,13 @@ Changes in 0.96
 * Added outstem option to read_polyancestry
 
 Changes in 0.95
-* Added @prob to diallel_geno class
-* Modified haplo_plot to accept multiple individuals
+* Updated scan1_summary for default statistic as deltaDIC
+* Added marker position in fine_map
+* Added new function DIC_thresh
+* Added alpha parameter for LOD_thresh and DIC_thresh
+* Added deltaDIC option for BayesCI
+* Fixed all the notes for R checking
+* Updated vignette in terms of deltaDIC
 
 Changes in 0.94
 * Changed default value for dominance in read_data to 4
