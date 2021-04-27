@@ -9,8 +9,8 @@ scan1(
   trait,
   params,
   dominance = 1,
-  chrom = NULL,
   cofactor = NULL,
+  chrom = NULL,
   n.core = 1
 )
 }
@@ -21,22 +21,22 @@ scan1(
 
 \item{params}{list containing burnIn and nIter}
 
-\item{dominance}{dominance degree (1-4)}
+\item{dominance}{maximum dominance for the scan, see Details}
+
+\item{cofactor}{optional data frame, see Details}
 
 \item{chrom}{names of chromosomes to scan (default is all)}
-
-\item{cofactor}{optional, see Details for format.}
 
 \item{n.core}{number of cores for parallel execution}
 }
 \value{
-Data frame containing the map, LOD, r2 and deltaDIC results.
+Data frame containing the map, LL, and deltaDIC.
 }
 \description{
 Performs a linear regression for each position in the map.
 }
 \details{
-LOD score is the difference between the log10-likelihood for the QTL model vs. no QTL model (higher is better). deltaDIC is the difference between the Deviance Information Criterion for the QTL model vs. no QTL model (lower values is better). r2 is the squared correlation between the fitted and observed values. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. MCMC \code{params} can be estimated using \code{\link{set_params}}. The argument \code{cofactor} should be a list with three components: marker = name of the marker; dominance = 1, 2, 3, or 4; epistasis = TRUE/FALSE. When a cofactor is included, the LOD and deltaDIC values are relative to a model with the cofactor.
+Parameter \code{dominance} has possible values of 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. MCMC \code{params} can be estimated using \code{\link{set_params}}. Optional argument \code{cofactor} is used to include other markers in the model during the scan, which can improve statistical power with multiple QTL. It is a data frame with three columns: marker = name of the marker, dominance = 1 to 4, and epistasis = TRUE/FALSE. Function returns deltaDIC = DIC for the QTL model relative to null model with only GCA effects for the parents, as well as LL = posterior mean of the log-likelihood, which is used by \code{\link{BayesCI}}.
 }
 \examples{
 \dontrun{

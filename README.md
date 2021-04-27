@@ -24,8 +24,7 @@ To install and load the package:
 
 ``` r
 install.packages("devtools")
-library(devtools)
-install_github("jendelman/diaQTL", build_vignettes=FALSE)
+devtools::install_github("jendelman/diaQTL", build_vignettes=FALSE)
 library(diaQTL)
 ```
 

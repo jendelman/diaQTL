@@ -2,7 +2,7 @@
 #' 
 #' Calculates realized relationship matrices (additive and dominance) from founder genotype probabilities
 #' 
-#' Parameter \code{dominance} refers to 1 = additive, 2 = digenic, 3 = trigenic, 4 = quadrigenic (Gallais 2003).  Can specify to use only a subset of the chromosomes (by default, all chromosomes are used). Calculated based on the marker bins.
+#' Parameter \code{dominance} refers to 1 = additive, 2 = digenic, 3 = trigenic, 4 = quadrigenic (Gallais 2003).  Can specify to use only a subset of the chromosomes (by default, all chromosomes are used). Calculated for each chromosome based on the marker bins and then averaged across chromosomes.
 #' 
 #' @param data Variable inheriting from class \code{\link{diallel_geno}}
 #' @param dominance One of 1,2,3,4 
@@ -38,27 +38,33 @@ IBDmat <- function(data,dominance=1,chrom=NULL,n.core=1) {
   markers <- split(map$marker,f=map$chrom)
   m <- nrow(map)
   
-  fK <- function(ix,data,dominance,n) {
+  f1 <- function(ix,data,dominance) {
+    id <- attr(data@geno,"id")
+    n <- length(id)
     K <- matrix(0,nrow=n,ncol=n)
+    dimnames(K) <- list(id,id)
     for (i in ix) {
       K <- K + as.matrix(tcrossprod(data@geno[[i]][[dominance]]))
     }
-    return(K)
+    m <- length(ix)
+    return(K/m/choose(n=data@ploidy,k=dominance))
   }
-  
-  id <- attr(data@geno,"id")
-  n <- length(id)
-  K <- matrix(0,n,n)
-  rownames(K) <- colnames(K) <- id
-  
-  cl <- makeCluster(n.core)
-  clusterExport(cl=cl,varlist=NULL)
-  ans <- parLapply(cl,markers,fK,data=data,dominance=dominance,n=n)
-  stopCluster(cl)
-  
-  for (i in 1:length(ans)) {
-    K <- K + ans[[i]]
+
+  if (dominance > 1) {  
+    cl <- makeCluster(n.core)
+    clusterExport(cl=cl,varlist=NULL)
+    ans <- parLapply(cl,markers,f1,data=data,dominance=dominance)
+    stopCluster(cl)
+  } else {
+    ans <- data@A[chrom]
   }
-  
-  return(K/m/choose(n=data@ploidy,k=dominance))
+
+  n.chrom <- length(chrom)
+  ans2 <- ans[[1]]
+  if (n.chrom > 1) {
+    for (i in 2:n.chrom) {
+      ans2 <- ans2 + ans[[i]]
+    }
+  }
+  return(ans2/n.chrom)
 }

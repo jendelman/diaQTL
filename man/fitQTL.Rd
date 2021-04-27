@@ -2,17 +2,16 @@
 % Please edit documentation in R/fitQTL.R
 \name{fitQTL}
 \alias{fitQTL}
-\title{Fit a single QTL model}
+\title{Fit multiple QTL model}
 \usage{
 fitQTL(
   data,
   trait,
-  marker,
+  qtl,
+  epistasis = NULL,
+  polygenic = FALSE,
   params,
-  dominance = 1,
-  cofactor = NULL,
-  CI.prob = 0.9,
-  polygenic = TRUE
+  CI.prob = 0.9
 )
 }
 \arguments{
@@ -20,36 +19,31 @@ fitQTL(
 
 \item{trait}{name of trait}
 
-\item{marker}{name of marker to fit as QTL}
+\item{qtl}{data frame, see Details}
+
+\item{epistasis}{optional data frame, see Details}
+
+\item{polygenic}{TRUE/FALSE whether to include additive polygenic effect}
 
 \item{params}{list containing the number of burn-in (burnIn) and total iterations (nIter)}
 
-\item{dominance}{dominance degree}
-
-\item{cofactor}{optional, see Details for format.}
-
 \item{CI.prob}{probability for Bayesian credible interval}
-
-\item{polygenic}{TRUE/FALSE whether to include a polygenic effect}
 }
 \value{
 List containing
 \describe{
-\item{r2}{sauared correlation betwen fitted and observed values}
-\item{deltaDIC}{Deviance Information Criterion relative to null model}
-\item{resid}{Residuals}
-\item{var}{Matrix with proportion of variance for the effects}
-\item{effects}{List of matrices containing the additive and higher order effects}
-\item{plots}{List of ggplot objects for the effects}
+\item{deltaDIC}{DIC relative to model with GCA but no QTL effects}
+\item{resid}{residuals}
+\item{var}{matrix with proportion of variance for the effects}
+\item{effects}{list with two matrices, \code{additive} and \code{digenic}, with markers on the rows and effects on the columns}
+\item{plots}{list of ggplot objects, one for each marker, containing elements \code{additive} and \code{digenic}. The digenic plot has digenic effects above the diagonal and the sum of additive and digenic effects below the diagonal.}
 }
 }
 \description{
-Fit a single QTL model
+Fit multiple QTL model
 }
 \details{
-The number of burn-in and total iterations in \code{params} can be estimated using \code{\link{set_params}}. Parameter \code{dominance} controls the genetic model for the QTL: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. The optional argument \code{cofactor} should be a list with three components: marker = name of the marker; dominance = 1, 2, 3, or 4; epistasis = TRUE/FALSE. When \code{polygenic = TRUE}, the model includes a random effect with covariance equal to the additive relationship computed by \code{\link{IBDmat}}, leaving out chromosome(s) with the QTL and cofactor (if present). Parameter \code{CI.prob} sets the probability (e.g., 0.90, 0.95) for the Bayesian credible interval for the estimated effects (to disable plotting of the CI, use \code{CI.prob=NULL}).
-
-The LOD and deltaDIC values returned by the function are relative to a model without \code{marker} but including the cofactor and polygenic effect when present. If \code{polygenic = FALSE}, the null model includes a GCA effect. r2 is the squared correlation between the fitted and observed values. The returned list \code{effects} contains the additive (and when included) digenic dominance effects. The proportion of variance for each effect is returned in \code{var}. The returned object \code{plots$dom} shows the digenic dominance effects above the diagonal, and below the diagonal is the sum of the additive and digenic dominance effects.
+Argument \code{qtl} is a data frame with columns \code{marker} and \code{dominance} to specify the marker name and highest order effect (1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance). All effects up to the value in \code{dominance} are included.  Optional argument \code{epistasis} is a data frame with columns \code{marker1} and \code{marker2}, where each row specifies an additive x additive epistatic interaction. The number of burn-in and total iterations in \code{params} can be estimated using \code{\link{set_params}}. Parameter \code{CI.prob} sets the probability (e.g., 0.90, 0.95) for the Bayesian credible interval for the estimated effects (to disable plotting of the CI, use \code{CI.prob=NULL}).
 }
 \examples{
 \dontrun{

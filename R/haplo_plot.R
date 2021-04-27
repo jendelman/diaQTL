@@ -25,9 +25,10 @@
 #' }
 #' @export
 #' @import ggplot2
+#' @importFrom rlang .data
 
 haplo_plot <- function(data,id,chrom,position="cM",markers=NULL) {
-  y=haplo=z=ymin=ymax=NULL #to avoid NOTE while doing R check
+  #y=haplo=z=ymin=ymax=NULL #to avoid NOTE while doing R check
   stopifnot(inherits(data,"diallel_geno"))
   stopifnot(position %in% colnames(data@map))
   stopifnot(chrom %in% data@map$chrom)
@@ -75,7 +76,7 @@ haplo_plot <- function(data,id,chrom,position="cM",markers=NULL) {
     plotme <- rbind(plotme,data.frame(z=as.vector(geno[,iq]),xmin=xmin,xmax=xmax,ymin=rep(y2,each=m),ymax=rep(y2+1,each=m)))
   }
   
-  p <- ggplot(data=plotme) + geom_rect(aes(fill=z,xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax)) + theme_bw() + scale_fill_distiller(name="Dosage",palette="Blues",direction=1) + scale_y_continuous(name="",labels=haplotypes[which(founders %in% parents)],breaks=(1:(data@ploidy*n.par))-0.5) + xlab(x.label) + geom_hline(yintercept=0:(data@ploidy*n.par),color="gray30")
+  p <- ggplot(data=plotme) + geom_rect(aes(fill=.data$z,xmin=.data$xmin,xmax=.data$xmax,ymin=.data$ymin,ymax=.data$ymax)) + theme_bw() + scale_fill_distiller(name="Dosage",palette="Blues",direction=1) + scale_y_continuous(name="",labels=haplotypes[which(founders %in% parents)],breaks=(1:(data@ploidy*n.par))-0.5) + xlab(x.label) + geom_hline(yintercept=0:(data@ploidy*n.par),color="gray30")
   id <- paste(id,collapse=" ")
   if (!is.null(features)) {
     p <- p + labs(title = id,subtitle = paste(c("Markers:",features),collapse=" "))

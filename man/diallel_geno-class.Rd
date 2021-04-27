@@ -25,6 +25,6 @@ S4 class with genotype data
 
 \item{\code{geno}}{list of length equal to the number of marker bins. Each element is a list of length \code{dominance}. The elements in the nested list are sparse matrices with dimensions (id x effects), containing the dosage for each effect.}
 
-\item{\code{prob}}{list of length equal to the number of marker bins. Each element is a sparse matrix (dimensions id x haplotypes) containing the probability that the haplotype is present in the individual.}
+\item{\code{A}}{list with the additive relationship matrix for each chromosome}
 }}
 
