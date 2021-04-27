@@ -177,7 +177,7 @@ Plots of the additive and digenic effects for each marker are contained as elmen
 fit3$plots[["solcap_snp_c2_25522"]]
 ```
 
-# Haplotype-based Selection
+## Haplotype-based Selection
 
 From the additive effects, we can select which haplotypes are desirable. In this example, since large negative values are desirable to maintain round tuber shape, the most desirable haplotype is W6511-1R.2. The function `haplo_get` can be used to extract the dosage of this haplotype across the population.
 ```{r}
