@@ -1,3 +1,6 @@
+Changes in 0.97
+* Added read_rabbit function for diploids
+
 Changes in 0.96
 * Added outstem option to read_polyancestry
 * New arguments for fitQTL to allow multiple QTL and epistasis

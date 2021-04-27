@@ -66,8 +66,9 @@ set_params <- function(data,trait,qtl=NULL,epistasis=NULL,polygenic=FALSE,q=0.5,
     if (inherits(tmp2,"character")) {
       stop(paste("Try increasing the number of iterations to",as.integer(tmp2[2])+100))
     }
-    tmp2 <- tmp2[,1:2]
+    tmp2 <- matrix(tmp2[,1:2],ncol=2)
     colnames(tmp2) <- c("burnIn","nIter")
+    rownames(tmp2) <- colnames(ans)
     if (is.null(raftans) || max(raftans[,2]) < max(tmp2[,2])) {
       raftans <- tmp2
     }

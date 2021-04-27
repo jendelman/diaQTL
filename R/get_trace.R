@@ -25,6 +25,10 @@ get_trace <- function(qtl,epistasis,polygenic,params) {
   } else {
     poly.trace <- NULL
   }
-  resid.trace <- scan("tmp/varE.dat",quiet = T)[params$burnIn+1:(params$nIter-params$burnIn)]
-  return(list(qtl=qtl.trace,epi=epi.trace,poly=poly.trace,resid=resid.trace))
+  if (params$response=="gaussian") {
+    resid.trace <- scan("tmp/varE.dat",quiet = T)[params$burnIn+1:(params$nIter-params$burnIn)]
+    return(list(qtl=qtl.trace,epi=epi.trace,poly=poly.trace,resid=resid.trace))
+  } else {
+    return(list(qtl=qtl.trace,epi=epi.trace,poly=poly.trace))
+  }
 }

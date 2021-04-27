@@ -188,7 +188,9 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params,CI.prob=
   if (polygenic) {
     variances <- cbind(variances,polygenic=ans$poly*mean(diag(polyG)))
   }  
-  variances <- cbind(variances,residual=ans$resid)
+  if (params$response=="gaussian") {
+    variances <- cbind(variances,residual=ans$resid)
+  }
   
   if (set.params) {
     return(variances)
