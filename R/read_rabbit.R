@@ -45,7 +45,7 @@ read_rabbit <- function(rabbit.outfile,ped.file,outstem) {
   tmp2 <- temp[5:(ix[2]-1)]
   tmp2 <- strsplit(tmp2,split=",",fixed=T)
   haplotypes <- sapply(tmp2,"[",1)
-  parents <- unique(gsub("_Paternal","",gsub("_Maternal","",parents)))
+  parents <- unique(gsub("_Paternal","",gsub("_Maternal","",haplotypes)))
   ped$parent1 <- parents[ped$parent1]
   ped$parent2 <- parents[ped$parent2]
   write.csv(ped,file=paste0(outstem,"diaQTL_ped.csv"),row.names=F)
