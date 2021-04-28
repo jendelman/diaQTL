@@ -73,5 +73,8 @@ set_params <- function(data,trait,qtl=NULL,epistasis=NULL,polygenic=FALSE,q=0.5,
       raftans <- tmp2
     }
   }
+  if (n.fit > 1) {
+    rownames(raftans) <- character(nrow(raftans))
+  }
   return(raftans)
 }
