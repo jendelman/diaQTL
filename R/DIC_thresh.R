@@ -1,3 +1,29 @@
+#' delta DIC thresholds for scan1
+#' 
+#' delta DIC thresholds for scan1
+#' 
+#' delta DIC thresholds to control the genome-wide false positive rate at level `alpha` were determined via simulation for up to 20 parents. A monotone decreasing convex curve was fit to these results using R package \code{scam} and is used for prediction. 
+#' 
+#' @param genome.size Genome size in Morgans (not centiMorgans)
+#' @param num.parents Number of parents
+#' @param ploidy 2 or 4
+#' @param alpha false positive rate: 0.01, 0.05, 0.10, or 0.20
+#' @param dominance 1 (additive) or 2 (digenic dominance)
+#' 
+#' @return deltaDIC threshold
+#' @examples
+#' \dontrun{
+#'   DIC_thresh(genome.size=10, 
+#'              num.parents=4,
+#'              ploidy=4,
+#'              dominance=1,
+#'              alpha=0.05)
+#'   } 
+#'   
+#' @export
+#' @importFrom scam predict.scam
+#' 
+
 DIC_thresh <- function(genome.size,num.parents,ploidy,alpha=0.05,dominance=1){
 
   ## Checking for input errors  
