@@ -9,7 +9,7 @@ haplo_plot(data, id, chrom, position = "cM", markers = NULL)
 \arguments{
 \item{data}{Variable inheriting from class \code{\link{diallel_geno}}}
 
-\item{id}{Name of individual}
+\item{id}{Name of individual(s)}
 
 \item{chrom}{Name of chromosome}
 
@@ -24,7 +24,7 @@ ggplot object
 Plot parental haplotype dosages across the chromosome for one individual
 }
 \details{
-For "cM" plotting, only one marker per bin is displayed. For "bp" plotting, all markers are included.
+For "cM" plotting, only one marker per bin is displayed. For "bp" plotting, all markers are included. If multiple individuals are included in \code{id}, then the plot shows the probability that a haplotype is present in all individuals.
 }
 \examples{
 \dontrun{

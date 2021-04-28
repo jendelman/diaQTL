@@ -9,8 +9,7 @@ scan1_summary(
   thresh = NULL,
   chrom = NULL,
   position = "cM",
-  statistic = "deltaDIC",
-  flip = FALSE
+  flip = TRUE
 )
 }
 \arguments{
@@ -22,14 +21,12 @@ scan1_summary(
 
 \item{position}{Either "cM" (default) or "bp"}
 
-\item{statistic}{Either "deltaDIC" (default) or "LOD"}
-
-\item{flip}{flip the vertical axis (default=FALSE)}
+\item{flip}{should QTL be plotted as peaks (TRUE) or valleys (FALSE)}
 }
 \value{
 List containing
 \describe{
-\item{peaks}{Data frame of the markers with the highest LOD or lowest delta DIC per chromosome}
+\item{peaks}{data frame of markers with the lowest DIC on each chromosome}
 \item{plot}{ggplot object}
 }
 }

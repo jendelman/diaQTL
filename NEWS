@@ -1,9 +1,19 @@
+Changes in 0.97
+* Added read_rabbit function for diploids
+
+Changes in 0.96
+* Added outstem option to read_polyancestry
+* New arguments for fitQTL to allow multiple QTL and epistasis
+* Added kinship matrices to diallel_geno class, computed in read_data, for faster fiTQTL
+* Renamed qtl1 as runBGLR
+* Changed set_params to return results for each genetic variance component
+* Changed scan1 and set_params to call fitQTL for better code stewardship
+
 Changes in 0.95
 * Updated scan1_summary for default statistic as deltaDIC
 * Added marker position in fine_map
-* Added new function DIC_thresh
-* Added alpha parameter for LOD_thresh and DIC_thresh
-* Added deltaDIC option for BayesCI
+* Replaced LODthresh with DIC_thresh
+* Added alpha parameter for DIC_thresh
 * Fixed all the notes for R checking
 * Updated vignette in terms of deltaDIC
 

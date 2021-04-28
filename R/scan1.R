@@ -2,17 +2,17 @@
 #' 
 #' Performs a linear regression for each position in the map. 
 #' 
-#' LOD score is the difference between the log10-likelihood for the QTL model vs. no QTL model (higher is better). deltaDIC is the difference between the Deviance Information Criterion for the QTL model vs. no QTL model (lower values is better). r2 is the squared correlation between the fitted and observed values. Parameter \code{dominance} controls the genetic model: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. MCMC \code{params} can be estimated using \code{\link{set_params}}. The argument \code{cofactor} should be a list with three components: marker = name of the marker; dominance = 1, 2, 3, or 4; epistasis = TRUE/FALSE. When a cofactor is included, the LOD and deltaDIC values are relative to a model with the cofactor. 
+#' Parameter \code{dominance} has possible values of 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. MCMC \code{params} can be estimated using \code{\link{set_params}}. Optional argument \code{cofactor} is used to include other markers in the model during the scan, which can improve statistical power with multiple QTL. It is a data frame with three columns: marker = name of the marker, dominance = 1 to 4, and epistasis = TRUE/FALSE. Function returns deltaDIC = DIC for the QTL model relative to null model with only GCA effects for the parents, as well as LL = posterior mean of the log-likelihood, which is used by \code{\link{BayesCI}}. 
 
 #' @param data variable of class \code{\link{diallel_geno_pheno}}
 #' @param trait name of trait
 #' @param params list containing burnIn and nIter
-#' @param dominance dominance degree (1-4)
+#' @param dominance maximum dominance for the scan, see Details
+#' @param cofactor optional data frame, see Details
 #' @param chrom names of chromosomes to scan (default is all)
-#' @param cofactor optional, see Details for format.
 #' @param n.core number of cores for parallel execution
 #' 
-#' @return Data frame containing the map, LOD, r2 and deltaDIC results. 
+#' @return Data frame containing the map, LL, and deltaDIC. 
 #' 
 #' @examples
 #' \dontrun{
@@ -26,11 +26,9 @@
 #' }
 #' 
 #' @export
-#' @importFrom BGLR BGLR
-#' @importFrom stats model.matrix
 #' @importFrom parallel makeCluster stopCluster parLapply clusterExport
 
-scan1 <- function(data,trait,params,dominance=1,chrom=NULL,cofactor=NULL,n.core=1) {
+scan1 <- function(data,trait,params,dominance=1,cofactor=NULL,chrom=NULL,n.core=1) {
   
   stopifnot(inherits(data,"diallel_geno_pheno"))
   stopifnot(trait %in% colnames(data@pheno))
@@ -50,34 +48,37 @@ scan1 <- function(data,trait,params,dominance=1,chrom=NULL,cofactor=NULL,n.core=
   }
   params <- list(response=response,nIter=params$nIter,burnIn=params$burnIn)
   
-  if (!is.null(cofactor)) {
-    stopifnot(is.list(cofactor))
-    stopifnot(cofactor$marker %in% data@map$marker)
-    cofactor$marker <- get_bin(cofactor$marker,data@map)
-    cofactor$X <- data@geno[[cofactor$marker]][1:cofactor$dominance]
-    cofactor$Xaa <- NULL
-  } 
-
-  #no marker model (but with cofactor)
-  ans0 <- qtl1(y=y,X=data@X,Z=data@Z,params=params,cofactor=cofactor,X.GCA=data@X.GCA)
+  #no marker model
+  ans0 <- runBGLR(y=y,Xfix=data@X,params=params,Xgca=data@Z %*% data@X.GCA,saveEffects=FALSE)
   
   #with marker
   map <- data@map[data@map$chrom %in% chrom,]
   bins <- get_bin(map$marker,map)
 
-  cl <- makeCluster(n.core)
-  clusterExport(cl=cl,varlist=NULL)
-  parqtl1 <- function(k,y,data,params,dominance,cofactor){
-    if (!is.null(cofactor) && cofactor$epistasis) {
-      cofactor$Xaa <- data@Z%*%faa(j=cofactor$marker,k=k,data=data)
+  f1 <- function(marker,data,dominance,cofactor,trait,params){
+    if (!is.null(cofactor)) {
+      qtl <- data.frame(marker=c(marker,cofactor$marker),dominance=c(dominance,cofactor$dominance))
+      ix <- which(cofactor$epistasis)
+      n.epi <- length(ix)
+      if (n.epi > 0) {
+        epistasis <- data.frame(marker1=rep(marker,n.epi),marker2=cofactor$marker[ix])
+      } else {
+        epistasis <- NULL
+      }
+    } else {
+      qtl <- data.frame(marker=marker,dominance=dominance)
+      epistasis <- NULL
     }
-    ans <- qtl1(y=y,X=data@X,Z=data@Z,params=params,geno=data@geno[[k]][1:dominance],cofactor)
+    ans <- fitQTL(data=data,trait=trait,qtl=qtl,epistasis=epistasis,
+                  polygenic=FALSE,params=params,CI.prob=-1)
     return(ans)
   }
-  ans <- parLapply(cl, unique(bins), parqtl1, y=y, data=data, params=params, dominance=dominance, cofactor=cofactor)
-  #ans <- lapply(unique(bins), parqtl1, y=y, data=data, cofactor=cofactor, params=params, dominance=dominance)
+  
+  cl <- makeCluster(n.core)
+  clusterExport(cl=cl,varlist=NULL)
+  ans1 <- parLapply(cl, unique(bins),f1,data=data,dominance=dominance,cofactor=cofactor,trait=trait,params=params)
   stopCluster(cl)
   
-  fit <- data.frame(LOD=as.numeric(sapply(ans,function(x){x$LL})-ans0$LL)/log(10),r2=as.numeric(sapply(ans,function(x){x$r2})),deltaDIC=as.numeric(sapply(ans,function(x){x$DIC})-ans0$DIC))
+  fit <- data.frame(LL=as.numeric(sapply(ans1,function(x){x$LL})),deltaDIC=as.numeric(sapply(ans1,function(x){x$DIC})-ans0$DIC))
   return(data.frame(map[,1:(ncol(map)-1)],fit[match(bins,unique(bins)),],stringsAsFactors = F))
 }

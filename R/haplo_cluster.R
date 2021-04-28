@@ -22,7 +22,7 @@
 #' @import ggdendro
 
 haplo_cluster <- function(filename,marker,haplotypes=NULL) {
-  y=yend=xend=NULL #to avoid NOTE while doing R check
+  #y=yend=xend=NULL #to avoid NOTE while doing R check
   
   map <- read.csv(filename,as.is=T,check.names=F)
   stopifnot(marker %in% map$marker)
@@ -95,7 +95,7 @@ haplo_cluster <- function(filename,marker,haplotypes=NULL) {
   ddat <- dendro_data(dhc,type="rectangle")
   xmax <- max(ddat$segments$yend)
   breaks <- extended(0,xmax,5)
-  p <- ggplot(segment(ddat)) + geom_segment(aes(x=y,y=x,xend=yend,yend=xend)) + scale_y_continuous(name="",breaks=NULL,labels=NULL) + geom_fit_text(data=ddat$labels,mapping=aes(xmax=y,xmin=-10,y=x,label=label),place="right") + scale_x_continuous("Distance",limits=c(-10,xmax),breaks=breaks,labels=breaks) + theme_classic() +  theme(axis.line.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
+  p <- ggplot(segment(ddat)) + geom_segment(aes(x=.data$y,y=.data$x,xend=.data$yend,yend=.data$xend)) + scale_y_continuous(name="",breaks=NULL,labels=NULL) + geom_fit_text(data=ddat$labels,mapping=aes(xmax=.data$y,xmin=-10,y=.data$x,label=.data$label),place="right") + scale_x_continuous("Distance",limits=c(-10,xmax),breaks=breaks,labels=breaks) + theme_classic() +  theme(axis.line.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 
   if (!finished) {
     print("Reached end of the chromosome and failed to find unique haplotypes")

@@ -2,7 +2,7 @@
 #' 
 #' Reads genotype, pedigree, and phenotype data files 
 #' 
-#' Genotype and pedigree input files can be created from PolyOrigin output using \code{\link{read_polyancestry}}. The first 3 columns of the genotype file should be the genetic map (labeled marker, chrom, cM), and a fourth column for a reference genome position (labeled bp) can also be included. The map is followed by the members of the population. The genotype data for each marker x individual combination is a string with the format "state|state|state...=>prob|prob|prob...", where "state" refers to the genotype state and "prob" is the genotype probability in decimal format. Only states with nonzero probabilities need to be listed. The encoding for the states in tetraploids is described in the documentation for the F1codes and S1codes datasets that come with the package. For diploids, there are 4 F1 genotype codes, 1,2,3,4, which correspond to haplotype combinations 1-3,1-4,2-3,2-4, respectively; the S1 genotype codes 1,2,3 correspond to 1-1,1-2,2-2, respectively. For the phenotype file, first column is id, followed by traits, and then any fixed effects. Pass a character vector for the function argument "fixed" to specify whether each effect is a factor or numeric covariate. The number of traits is deduced based on the number of columns. Binary traits must be coded N/Y and are converted to 0/1 internally for analysis by probit regression. Missing data in the phenotype file should be coded as NA. The parameter \code{dominance} specifies the maximum value of dominance that can be used in subsequent analysis: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. For maximum flexibility, use dominance = 4, but more memory is required. This will allow you to use any value of dominance (from 1 to 4) in functions such as \code{\link{scan1}} and \code{\link{fitQTL}}. Output files from the BGLR package are stored in a folder named 'tmp' in the current directory.
+#' Genotype and pedigree input files can be created from PolyOrigin output using \code{\link{read_polyancestry}}. The first 3 columns of the genotype file should be the genetic map (labeled marker, chrom, cM), and a fourth column for a reference genome position (labeled bp) can also be included. The map is followed by the members of the population. The genotype data for each marker x individual combination is a string with the format "state|state|state...=>prob|prob|prob...", where "state" refers to the genotype state and "prob" is the genotype probability in decimal format. Only states with nonzero probabilities need to be listed. The encoding for the states in tetraploids is described in the documentation for the F1codes and S1codes datasets that come with the package. For diploids, there are 4 F1 genotype codes, 1,2,3,4, which correspond to haplotype combinations 1-3,1-4,2-3,2-4, respectively; the S1 genotype codes 1,2,3 correspond to 1-1,1-2,2-2, respectively. For the phenotype file, first column is id, followed by traits, and then any fixed effects. Pass a character vector for the function argument "fixed" to specify whether each effect is a factor or numeric covariate. The number of traits is deduced based on the number of columns. Binary traits must be coded N/Y and are converted to 0/1 internally for analysis by probit regression. Missing data in the phenotype file should be coded as NA. The parameter \code{dominance} specifies the maximum value of dominance that can be used in subsequent analysis: 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. The default is dominance = ploidy, which allows the full range of dominance models in functions such as \code{\link{scan1}} and \code{\link{fitQTL}}, but this requires the most RAM. Output files from the BGLR package are stored in a folder named 'tmp' in the current directory.
 #'
 #' @param genofile File with map and genotype probabilities 
 #' @param ploidy Either 2 or 4
@@ -10,7 +10,7 @@
 #' @param phenofile File with phenotype data (optional)
 #' @param fixed If there are fixed effects, this is a character vector of "factor" or "numeric"
 #' @param bin.markers TRUE/FALSE whether to bin markers with the same cM position
-#' @param dominance Maximum value of dominance that will be used for analysis (1-4). See Details.
+#' @param dominance Maximum value of dominance that will be used for analysis. Default = ploidy.
 #' @param n.core Number of cores for parallel execution
 #' 
 #' @return Variable of class \code{\link{diallel_geno}} if phenofile is NULL, otherwise \code{\link{diallel_geno_pheno}}
@@ -40,8 +40,12 @@
 #' @importFrom methods new
 #' @importFrom parallel makeCluster stopCluster parLapply clusterExport
 #' 
-read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.markers=TRUE,dominance=4,n.core=1) {
+read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,
+                      fixed=NULL,bin.markers=TRUE,dominance=NULL,n.core=1) {
   stopifnot(ploidy %in% c(2,4))
+  if (is.null(dominance)) {
+    dominance <- ploidy
+  }
   if ((dominance > 2) & (ploidy==2)) {
     stop("Only digenic dominance exists for diploids.")
   }
@@ -137,20 +141,40 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,fixed=NULL,bin.ma
     }
     return(geno)
   }
+  f2 <- function(ix,geno,ploidy) {
+    id <- attr(geno,"id")
+    n <- length(id)
+    K <- matrix(0,nrow=n,ncol=n)
+    dimnames(K) <- list(id,id)
+    m <- length(ix)
+    for (i in ix) {
+      K <- K + as.matrix(tcrossprod(geno[[i]][[1]]))
+    }
+    return(K/m/ploidy)
+  }
   
   cl <- makeCluster(n.core)
   clusterExport(cl=cl,varlist=NULL)
-  geno <- parLapply(cl, bin.ix, f1, data=data,genoX=genoX,ploidy=ploidy,dominance=dominance)
-  stopCluster(cl)
   
+  geno <- parLapply(cl, bin.ix, f1, data=data,genoX=genoX,ploidy=ploidy,dominance=dominance)
+  #geno <- lapply(bin.ix,f1, data=data,genoX=genoX,ploidy=ploidy,dominance=dominance)
   names(geno) <- bin.names
   attr(geno,"id") <- id
   attr(geno,"haplotypes") <- attr(genoX,"haplotypes")
   if (dominance > 1) {
     attr(geno,"diplotypes") <- attr(genoX,"diplotypes")
   }
+  
+  ### additive relationship matrix for polygenic effects
+  map2 <- map[map$marker %in% bin.names,]
+  markers <- split(map2$marker,f=map2$chrom)
+  A <- parLapply(cl,markers,f2,geno=geno,ploidy=ploidy)
+  names(A) <- chroms
+  
+  stopCluster(cl)
 
-  data <- new(Class="diallel_geno",ploidy=as.integer(ploidy),polyorigin=data[bin.ix,],Xa=genoX[[1]],dominance=as.integer(dominance),X.GCA=X.GCA,map=map,geno=geno)
+  data <- new(Class="diallel_geno",ploidy=as.integer(ploidy),polyorigin=data[bin.ix,],Xa=genoX[[1]],
+              dominance=as.integer(dominance),X.GCA=X.GCA,map=map,geno=geno,A=A)
   rownames(data@polyorigin) <- bin.names
   
   if (is.null(phenofile)) {

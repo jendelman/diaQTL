@@ -1,0 +1,200 @@
+---
+title: "diaQTL Vignette"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{diaQTL Vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,collapse=FALSE,message = FALSE,comment="##",fig.width=5,fig.height=5)
+knitr::opts_knit$set(root.dir="~/")  
+```
+
+diaQTL uses Markov Chain Monte Carlo (MCMC) methods from R package BGLR to regress phenotypes on the expected dosage of parental origin genotypes. The example data set is a potato half-diallel population with three founders. 
+
+## Structure of the input files
+Three input files are needed for QTL analysis: (1) pedigree file, (2) genotype file, (3) phenotype file. In most situations, the PolyOrigin software will be used prior to running diaQTL. The diaQTL function `read_polyancestry` can be used to generate the pedigree and genotype input files from the PolyOrigin output file. 
+
+### 1) Pedigree file
+The pedigree file has three columns: id, parent1, and parent2 (maternal effects are not modeled). 
+```{r}
+pedcsv <- system.file("vignette_data", "potato_ped.csv", package = "diaQTL")
+ped <- read.csv(pedcsv, as.is = T)
+head(ped)
+table(apply(ped[,2:3],1,paste,collapse=" x "))
+```
+
+### 2) Genotype file
+The first 3 columns of the genotype file must be labeled marker, chrom, and cM, and the position in a reference genome (labeled bp) is optional as the fourth column (plotting features can use either cM or bp). Subsequent columns contain the genotype probabilities for each individual. 
+```{r}
+genocsv <- system.file( "vignette_data", "potato_geno.csv", package = "diaQTL" )
+geno <- read.csv( genocsv, as.is = T, check.names = F )
+geno[1:5,1:4]
+```
+Genotype probabilities are encoded as strings, following the format exported by the PolyOrigin software:
+```{r}
+geno[1,10]
+```
+The integers separated by | on the left side of the equal sign refer to genotype states, and the decimal numbers on the right side of the equal sign are probabilities. Only nonzero probabilities need to be included. There are 100 possible states for F1 populations, and 35 possible states for S1 populations:
+```{r}
+library( diaQTL )
+head( F1codes )
+head( S1codes )
+```
+Each state has four integers, separated by dashes, to indicate which parental chromosomes were inherited. For F1 populations, the maternal chromosomes are labeled 1-4 and the paternal chromosomes 5-8. 
+
+### 3) Phenotype file
+In the phenotype input file, the first column should be the individual identifier, followed by columns for different traits, and then optionally any columns with fixed effects to include in the linear model (e.g., block, environment). Only one trait, tuber shape, is provided in the example potato data set.
+
+```{r}
+phenocsv <- system.file( "vignette_data", "potato_pheno.csv", package = "diaQTL" )
+pheno <- read.csv( phenocsv, as.is = T )
+head( pheno )
+hist(pheno$tuber_shape,main="",xlab="Tuber shape")
+```
+
+To improve normality of the residuals, tuber shape in this data set is defined as log(L/W - 1), where L/W is the average length/width ratio of tubers weighing 6-10 ounces (170-285g). 
+
+## Read the data
+
+After installing and attaching the package, use `read_data` to read in all three files. (If there are fixed effects in the phenotype input file, they need to be specified as well; consult the reference manual.) By default, markers with the same map position in cM (using whatever numerical precision is present in the input map) are binned to reduce the computing time. The argument `n.core = 2` is used for parallel execution on multiple cores.
+```{r eval=FALSE}
+data <- read_data(genofile = genocsv,
+                  ploidy = 4,
+                  pedfile = pedcsv,
+                  phenofile = phenocsv, 
+                  n.core = 2)
+```
+```{r include=FALSE}
+load("~/Box Sync/Endelman/Software/diaQTL/data_04-25-21.rda")
+```
+
+## Setting parameters
+
+The function `set_params` determines the burn-in and total number of iterations using the Raftery and Lewis diagnostic from R package `coda`, based on a 95% probability that the estimate for quantile `q` of the additive effects is within the interval `(q-r,q+r)`. For the genome scan, we have found the results based on `q=0.5,r=0.1` to be adequate. Because MCMC is a stochastic process, the results will not be the same each time. Results are shown for each variance component, and the user should choose values based on the slowest to converge (i.e., the largest number of iterations).
+```{r}
+set_params( data, trait = "tuber_shape", q=0.5, r=0.1)
+```
+
+## QTL Discovery
+
+The `scan1` function performs a hypothesis test for each marker bin. By default an additive model is used, which means the predictor variables are founder haplotype dosages. The test statistic is $\Delta$DIC, which is the DIC (Deviance Information Criterion) for the QTL model relative to a null model with parental GCA effects but no QTL. Lower values of DIC indicate a better tradeoff between model complexity and goodness-of-fit.
+```{r}
+scan1a <- scan1( data = data, 
+                 trait = "tuber_shape",
+                 params = list(burnIn=50,nIter=500), 
+                 n.core = 2)
+head(scan1a)
+scan1_summary( scan1a, position="bp")
+```
+
+The `scan1_summary` function returns the marker with the lowest $\Delta$DIC score on each chromosome and a plot of the $\Delta$DIC profile. The main feature in this example is a QTL on chr10. For a single hypothesis test, $\Delta$DIC = = -10 is a [common recommendation](https://www.mrc-bsu.cam.ac.uk/software/bugs/the-bugs-project-dic/#q9) for model selection, but through simulation we have shown that lower values are needed to achieve a genome-wide significance level of $\alpha=0.05$. The function `DIC_thresh` returns the threshold for a half-diallel based on the number of parents, genome size, ploidy and $\alpha$. The genome size for the dataset can be obtained using `get_map`.
+
+```{r }
+get_map(data)
+DIC_thresh(genome.size=12.1,num.parents=3,ploidy=4,alpha=0.05) 
+DIC_thresh(genome.size=12.1,num.parents=3,ploidy=4,alpha=0.1) 
+```
+
+The peak on chr01 is right at the detection threshold for $\alpha = 0.05$ but clearly significant at $\alpha = 0.01$. For the purpose of illustrating multiple QTL functionality, we will consider it below. The most significant marker is solcap_snp_c2_25522 on chr10, and the 90% Bayesian credible interval (CI) can be obtained using `BayesCI` based on the profile log-likelihood (`LL`).
+```{r}
+BayesCI(scan1a,data,chrom="10",CI.prob=0.9)
+```
+
+This region coincides with the location of the classical Ro (round) QTL in potato, which has been identified as the gene *StOFP20* [(Wu et al. 2018)](https://doi.org/10.1038/s41467-018-07216-8). 
+
+## Dominance
+
+For a single tetraploid locus, there are four types of genetics effects. As mentioned already, additive effects are the regression coefficients for parental haplotype dosage. Digenic dominance effects are the regression coefficients for parental diplotypes, i.e., a combination of two parental haplotypes. Trigenic and quadrigenic dominance effects are also possible (and  do not exist in diploid species). Throughout the diaQTL package, the argument `dominance` is used to specify the highest order of the effect to include in the model. Thus, dominance = 1 indicates only additive effects, dominance = 2 indicates additive and digenic effects, etc.
+
+Having discovered a QTL, you may wish to rescan the chromosome with a digenic model to refine its position. In this case, the location of the QTL peak is unchanged, but we can see from the deltaDIC output that including digenic dominance lowered the DIC by 14 points. 
+```{r}
+scan1d <- scan1( data = data,
+                 trait = "tuber_shape",
+                 params = list(burnIn=50,nIter=500),
+                 dominance = 2,
+                 chrom = "10",
+                 n.core = 2)
+scan1_summary( scan1d, position="bp")$peaks
+```
+
+
+## QTL Modeling
+
+After discovery, the next step is to fit a multiple QTL model with function `fitQTL`. The argument `qtl` is a data frame with the marker names and dominance values for each QTL. An additive polygenic effect based on all chromosomes without QTL can also be included. We have already selected the digenic dominance model for the chr10 QTL over the purely additive model. Now let us see whether including trigenic dominance at the QTL or additive polygenic effects is justified. To improve the accuracy of the 90% Bayesian CI, we will run `set_params` again, but this time using `q=0.05,r=0.025` and only for our selected marker on chr10; digenic and polygenic effects can also be included.
+
+```{r}
+set_params( data, trait = "tuber_shape", q=0.05, r=0.025,
+            qtl = data.frame(marker="solcap_snp_c2_25522",dominance=2),
+            polygenic=TRUE)
+
+#trigenic QTL model
+fit1 <- fitQTL( data = data, trait = "tuber_shape", 
+                params = list(burnIn=100,nIter=5000),
+                qtl = data.frame(marker="solcap_snp_c2_25522",dominance=3),
+                polygenic = FALSE, CI.prob = 0.9)
+fit1$deltaDIC
+
+fit2 <- fitQTL( data = data, trait = "tuber_shape", 
+                params = list(burnIn=100,nIter=5000),
+                qtl = data.frame(marker="solcap_snp_c2_25522",dominance=2),
+                polygenic = TRUE, CI.prob = 0.9)
+fit2$deltaDIC
+```
+
+Based on the DIC results, we reject the inclusion of trigenic dominance effects but accept the (additive) polygenic effects. 
+
+Now add an additive effect for the minor QTL on chr01 and additive x additive epistasis with the chr10 QTL.
+
+```{r}
+qtl <- data.frame(marker=c("solcap_snp_c2_14750","solcap_snp_c2_25522"),
+                  dominance=c(1,2))
+fit3 <- fitQTL( data = data, trait = "tuber_shape", 
+                params = list(burnIn=100,nIter=5000),
+                qtl = qtl, 
+                polygenic = TRUE, CI.prob = 0.9)
+fit3$deltaDIC
+
+epistasis <- data.frame(marker1="solcap_snp_c2_25522",marker2="solcap_snp_c2_14750")
+fit4 <- fitQTL( data = data, trait = "tuber_shape", 
+                params = list(burnIn=100,nIter=5000),
+                qtl = qtl, epistasis = epistasis,
+                polygenic = TRUE, CI.prob = 0.9)
+fit4$deltaDIC
+```
+
+Including the additive effect for the chr01 QTL lowered the DIC by 15 points, which is enough by conventional guidelines to retain this effect in the model. There was no change in DIC with the epistatic effect, so it is omitted. 
+
+The proportion of variance for each of the effects is returned in `var`. The most important genetic effects were the additive effect on chr10 ($R^2 = 26\%$) and the additive polygenic effect ($R^2 = 30\%$). (Note: Additive effects only have the usual interpretation in terms of breeding value for a full diallel with selfed populations.) The total broad-sense heritability is estimated to be 0.67. 
+```{r}
+fit3$var
+```
+
+Plots of the additive and digenic effects for each marker are contained as elments of the list `plots`. For the dominance plot, digenic effects are above the diagonal, and below the diagonal is the sum of the additive and digenic effects. 
+```{r}
+fit3$plots[["solcap_snp_c2_25522"]]
+```
+
+## Haplotype-based Selection
+
+From the additive effects, we can select which haplotypes are desirable. In this example, since large negative values are desirable to maintain round tuber shape, the most desirable haplotype is W6511-1R.2. The function `haplo_get` can be used to extract the dosage of this haplotype across the population.
+```{r}
+haplos <- haplo_get( data = data, 
+                      marker = "solcap_snp_c2_25522")
+hist(haplos[,"W6511-1R.2"],main="",xlab="Dosage")
+which(haplos[,"W6511-1R.2"] > 1.8)
+```
+
+The result shows there are three individuals with two copies of the W6511-1R.2 haplotype, which is possible due to "double reduction." This occurs when a quadrivalent forms in meiosis I and sister chromatid fragments migrate to the same pole in meiosis II. The function `haplo_plot` can be used to visualize the pattern of recombination between parental haplotypes.
+```{r}
+haplo_plot( data = data, 
+            id = "W15268-53R", 
+            chrom = 10,
+            position = "bp",
+            marker = "solcap_snp_c2_25522" )
+```
+
+The dark blue segment indicates two copies of the W6511-1R.2 haplotype, and the dashed vertical line shows the position of the QTL.
+

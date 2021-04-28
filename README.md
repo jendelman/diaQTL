@@ -10,7 +10,7 @@ software](https://github.com/chaozhi/PolyOrigin.jl) is recommended to
 calculate the genotype probabilities for tetraploids.
 
 A [vignette is
-available](https://jendelman.github.io/diaQTL/diaQTL_vignette.html) to
+available](https://jendelman.github.io/diaQTL/diaQTL_Vignette.html) to
 illustrate the workflow using a sample potato dataset, and more detailed
 information is available in the [reference
 manual](https://jendelman.github.io/diaQTL/diaQTL_manual.pdf).
@@ -24,8 +24,7 @@ To install and load the package:
 
 ``` r
 install.packages("devtools")
-library(devtools)
-install_github("jendelman/diaQTL", build_vignettes=FALSE)
+devtools::install_github("jendelman/diaQTL", build_vignettes=FALSE)
 library(diaQTL)
 ```
 

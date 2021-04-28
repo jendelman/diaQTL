@@ -23,6 +23,8 @@ S4 class with genotype data
 
 \item{\code{map}}{data frame with marker,chrom, position (cM and/or bp) and bin}
 
-\item{\code{geno}}{list of length equal to the number of marker bins. Each element is a list of length \code{dominance}. The elements in the nested list are sparse matrices with dimensions (id x effects).}
+\item{\code{geno}}{list of length equal to the number of marker bins. Each element is a list of length \code{dominance}. The elements in the nested list are sparse matrices with dimensions (id x effects), containing the dosage for each effect.}
+
+\item{\code{A}}{list with the additive relationship matrix for each chromosome}
 }}
 

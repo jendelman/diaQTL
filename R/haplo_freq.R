@@ -21,9 +21,10 @@
 #' @export
 #' @import ggplot2
 #' @importFrom tidyr pivot_wider
+#' @importFrom rlang .data
 
 haplo_freq <- function(data,haplotypes,dosage,id=NULL,position="cM",chrom=NULL,markers=NULL) {
-  y=haplo=z=ymin=ymax=NULL #to avoid NOTE while doing R check
+  #y=haplo=z=ymin=ymax=NULL #to avoid NOTE while doing R check
   stopifnot(inherits(data,"diallel_geno"))
   stopifnot(position %in% colnames(data@map))
   stopifnot(haplotypes %in% attr(data@geno,"haplotypes"))
@@ -60,7 +61,7 @@ haplo_freq <- function(data,haplotypes,dosage,id=NULL,position="cM",chrom=NULL,m
     plotme <- data.frame(x=rep(x,n.haplo),
                          y=out$freq,
                          haplo=out$haplo)
-    p <- ggplot(data=plotme,aes(x=x,y=y,colour=haplo)) + geom_line() + scale_colour_brewer(name="Haplotype",palette="Set1") + ylab("Frequency") + theme_bw() + theme(text = element_text(size=13)) + xlab(x.label) + ylim(0,1) + geom_hline(yintercept=0,linetype=2,col="gray30") + geom_hline(yintercept=1,linetype=2,col="gray30")
+    p <- ggplot(data=plotme,aes(x=.data$x,y=.data$y,colour=.data$haplo)) + geom_line() + scale_colour_brewer(name="Haplotype",palette="Set1") + ylab("Frequency") + theme_bw() + theme(text = element_text(size=13)) + xlab(x.label) + ylim(0,1) + geom_hline(yintercept=0,linetype=2,col="gray30") + geom_hline(yintercept=1,linetype=2,col="gray30")
     if (!is.null(features)) {
       p <- p + labs(subtitle = paste(c("Markers:",features),collapse=" "))
       for (q in 1:length(features)) {
@@ -78,7 +79,7 @@ haplo_freq <- function(data,haplotypes,dosage,id=NULL,position="cM",chrom=NULL,m
     x <- get_x(map=data.frame(chrom=map$chrom,position=x,stringsAsFactors = F))
     plotme <- data.frame(x=rep(x,n.haplo),y=out$freq,col=rep(col,n.haplo),haplo=out$haplo)
     breaks <- (tapply(x,map$chrom,max) + tapply(x,map$chrom,min))/2
-    p <- ggplot(data=plotme,aes(x=x,y=y,colour=col)) + facet_wrap(~haplo,ncol=1) +
+    p <- ggplot(data=plotme,aes(x=.data$x,y=.data$y,colour=.data$col)) + facet_wrap(~.data$haplo,ncol=1) +
       ylab("Frequency") +
       theme_bw() +
       scale_x_continuous(name="Chromosome",breaks=breaks,labels=chrom) +

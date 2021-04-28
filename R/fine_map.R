@@ -25,10 +25,11 @@
 #'   }
 #' 
 #' @import ggplot2
+#' @importFrom rlang .data
 #' @export
 
 fine_map <- function(data,haplotype,interval,trait=NULL,marker=NULL) {
-  z=x=NULL #to avoid NOTE while doing R check
+  #z=x=NULL #to avoid NOTE while doing R check
   
   stopifnot(haplotype %in% attr(data@geno,"haplotypes"))
   stopifnot(all(interval %in% data@map$marker))
@@ -94,11 +95,12 @@ fine_map <- function(data,haplotype,interval,trait=NULL,marker=NULL) {
   ymin <- seq(n2-1,0,by=-1)
   ymax <- seq(n2,1,by=-1)
   plotme <- data.frame(xmin=rep(xmin,n2),xmax=rep(xmax,n2),ymin=rep(ymin,each=m),ymax=rep(ymax,each=m),z=as.numeric(t(hapans)))
-  p <- ggplot(data=plotme) + geom_rect(aes(fill=z,xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax)) + theme_bw() + scale_fill_distiller(name="Dosage",palette="Blues",direction=1) + scale_x_continuous(name="",breaks=1:m,labels=map$marker,sec.axis=dup_axis(labels=map$bp)) + theme(axis.text.x.top = element_text(angle=90,hjust=1,vjust=0.5)) + theme(axis.text.x = element_text(angle=90,hjust=1,vjust=0.5)) + scale_y_continuous(name="",breaks=ymax-0.5,labels=id[id.ans]) + geom_vline(xintercept=1:m,colour="gray50",size=0.3)
+  p <- ggplot(data=plotme) + geom_rect(aes(fill=.data$z,xmin=.data$xmin,xmax=.data$xmax,ymin=.data$ymin,ymax=.data$ymax)) + theme_bw() + scale_fill_distiller(name="Dosage",palette="Blues",direction=1) + scale_x_continuous(name="",breaks=1:m,labels=map$marker,sec.axis=dup_axis(labels=map$bp)) + theme(axis.text.x.top = element_text(angle=90,hjust=1,vjust=0.5)) + theme(axis.text.x = element_text(angle=90,hjust=1,vjust=0.5)) + scale_y_continuous(name="",breaks=ymax-0.5,labels=id[id.ans]) + geom_vline(xintercept=1:m,colour="gray50",size=0.3)
   
   if (!is.null(trait)) {
-    trait.y <- data@pheno[match(id[id.ans],data@pheno$id),trait]
-    p <- p + geom_label(data=data.frame(x=rep(m+3,n2),y=ymax-0.5,label=format(trait.y,digits=2)),mapping=aes(x=x,y=y,label=label)) 
+    mean.y <- tapply(data@pheno[,trait],data@pheno$id,mean)
+    trait.y <- mean.y[match(id[id.ans],names(mean.y))]
+    p <- p + geom_label(data=data.frame(x=rep(m+3,n2),y=ymax-0.5,label=format(trait.y,digits=2)),mapping=aes(x=.data$x,y=.data$y,label=.data$label)) 
   }
   if(!is.null(marker)){
     p <- p + geom_vline(xintercept = marker.pos, linetype="dashed", colour="#B89600",size=1.1)

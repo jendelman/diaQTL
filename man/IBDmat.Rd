@@ -22,7 +22,7 @@ Relationship matrix
 Calculates realized relationship matrices (additive and dominance) from founder genotype probabilities
 }
 \details{
-Parameter \code{dominance} refers to 1 = additive, 2 = digenic, 3 = trigenic, 4 = quadrigenic (Gallais 2003).  Can specify to use only a subset of the chromosomes (by default, all chromosomes are used). Calculated based on the marker bins.
+Parameter \code{dominance} refers to 1 = additive, 2 = digenic, 3 = trigenic, 4 = quadrigenic (Gallais 2003).  Can specify to use only a subset of the chromosomes (by default, all chromosomes are used). Calculated for each chromosome based on the marker bins and then averaged across chromosomes.
 }
 \examples{
 \dontrun{
