@@ -20,9 +20,9 @@ set_params(
 
 \item{trait}{name of trait}
 
-\item{qtl}{optional data frame, see Details}
+\item{qtl}{optional data frame, see Examples}
 
-\item{epistasis}{optional data frame, see Details}
+\item{epistasis}{optional data frame, see Example}
 
 \item{polygenic}{TRUE/FALSE whether to include additive polygenic effect}
 
@@ -39,17 +39,56 @@ matrix showing the number of burn-in and total iterations for the genetic varian
 Determine number of iterations for MCMC
 }
 \details{
-Determines the burn-in and total number of iterations using the Raftery and Lewis diagnostic from R package \code{coda}, based on a 95\% probability that the estimate for quantile \code{q} of the additive genetic variance is within the interval \code{(q-r,q+r)}. If \code{marker=NULL} (default), the first marker of each chromosome is analyzed, and the largest value across this set is returned. Parameter \code{dominance} specifies which genetic model (1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance) to use when determining the number of iterations, but this parameter must still be specified when calling functions such as \code{\link{scan1}} or \code{\link{fitQTL}}. The default values of q=0.5 and r=0.1 are recommended for \code{\link{scan1}} based on the idea of estimating the posterior mean. For estimating the 90\% Bayesian CI with \code{\link{fitQTL}}, suggested values are q=0.05, r=0.025. Parameter \code{nIter} sets the number of iterations used to apply the Raftery and Lewis diagnostic; the default value is 2000, and if a larger number is needed, an error will be generated with this information.
+Determines the burn-in and total number of iterations using the Raftery and Lewis diagnostic from
+R package \code{coda}, based on a 95\% probability that the estimate for quantile \code{q} of the
+additive genetic variance is within the interval \code{(q-r,q+r)}. If \code{marker=NULL} (default),
+the first marker of each chromosome is analyzed, and the largest value across this set is returned.
+Parameter \code{dominance} specifies which genetic model (1 = additive, 2 = digenic dominance,
+3 = trigenic dominance, 4 = quadrigenic dominance) to use when determining the number of iterations,
+but this parameter must still be specified when calling functions such as \code{\link{scan1}} or
+\code{\link{fitQTL}}. The default values of q=0.5 and r=0.1 are recommended for \code{\link{scan1}}
+based on the idea of estimating the posterior mean. For estimating the 90\% Bayesian CI with
+\code{\link{fitQTL}}, suggested values are q=0.05, r=0.025. Parameter \code{nIter} sets the
+number of iterations used to apply the Raftery and Lewis diagnostic; the default value is 2000,
+and if a larger number is needed, an error will be generated with this information.
 }
 \examples{
 \dontrun{
   # Parameters for scan1
   par1 <- set_params(data = diallel_example,
-                     trait = "tuber_shape",q=0.5,r=0.1)
+                     trait = "tuber_shape",
+                     q=0.5,
+                     r=0.1)
                      
-  # Parameters for fitQTL
-  par2 <- set_params(data = diallel_example,
-                     trait = "tuber_shape",q=0.05,r=0.025,marker="solcap_c2_25522")
+  # Parameters for fitQTL (specify the position)
+  set_params(data = diallel_example,
+             trait = "tuber_shape", 
+             q=0.05, 
+             r=0.025,
+             qtl=data.frame(marker="solcap_snp_c2_25522",dominance=2))
+             
+  # Parameters for fitQTL (specify the position) with polygenic effects
+  set_params(data = diallel_example,
+             trait = "tuber_shape", 
+             q=0.05, 
+             r=0.025,
+             qtl=data.frame(marker="solcap_snp_c2_25522",dominance=2),
+             polygenic=TRUE)
+             
+  # Parameters for fitQTL with 2 QTLs
+  set_params(data = diallel_example,
+             trait = "tuber_shape", 
+             q=0.05, 
+             r=0.025,
+             qtl=data.frame(marker=c("solcap_snp_c2_25522","solcap_snp_c2_14750"),dominance=c(2,1)))
+             
+  # Parameters for fitQTL with epistasis
+  set_params(data = diallel_example,
+             trait = "tuber_shape", 
+             q=0.05, 
+             r=0.025,
+             epistasis = data.frame(marker1="solcap_snp_c2_25522",marker2="solcap_snp_c2_14750"),
+             qtl=data.frame(marker=c("solcap_snp_c2_25522","solcap_snp_c2_14750"),dominance=c(2,1)))
 }
   
 }

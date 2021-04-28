@@ -15,18 +15,22 @@
 #' 
 #' @examples
 #' \dontrun{
-#'   par1 <- set_params(data = diallel_example,
-#'                      trait = "tuber_shape")
+#'   set_params(data = diallel_example,
+#'              trait = "tuber_shape")
 #'                       
 #'   ans1_permut <- scan1_permute(data = diallel_example,
 #'                                chrom = 10,
 #'                                trait = "tuber_shape",
-#'                                params = par1,
+#'                                params = list(burnIn=60,nIter=600),
 #'                                n.permute = 100)
+#'                                
+#'   ## computing permutation threshold for alpha=0.05                            
+#'   quantile(ans1_permut$min_deltaDIC, 0.05)
 #'                              
 #' }
 #' 
 #' @export
+#' @importFrom Matrix Matrix
 
 scan1_permute <- function(data,trait,params,n.permute=1000,chrom=NULL,dominance=1,cofactor=NULL,n.core=1) {
   LOD <- deltaDIC <- numeric(n.permute)
@@ -37,8 +41,7 @@ scan1_permute <- function(data,trait,params,n.permute=1000,chrom=NULL,dominance=
     data@pheno <- data@pheno[ix,]
     data@X <- Matrix(data@X[ix,])
     ans <- scan1(data=data,trait=trait,params=params,chrom=chrom,dominance=dominance,cofactor=cofactor,n.core=n.core)
-    LOD[i] <- max(ans$LOD,na.rm=T)
     deltaDIC[i] <- min(ans$deltaDIC,na.rm=T)
   }
-  return(data.frame(LOD=LOD,deltaDIC=deltaDIC))
+  return(data.frame(permutation=1:n.permute,min_deltaDIC=deltaDIC))
 }
