@@ -2,7 +2,8 @@
 #' 
 #' Bayesian Credible Interval for QTL position
 #' 
-#' Parameter \code{CI.prob} sets the probability for the Bayesian credible interval (e.g., 0.90, 0.95) using the profile likelihood (posterior mean).
+#' Parameter \code{CI.prob} sets the probability for the Bayesian credible interval (e.g., 0.90, 0.95) 
+#' using the profile likelihood (posterior mean).
 #' 
 #' @param scan1_data data frame output from scan1
 #' @param data variable of class \code{\link{diallel_geno_pheno}}
@@ -13,7 +14,7 @@
 #'
 #' @examples
 #' \dontrun{
-#'   BayesCI(scan1_example,diallel_example,chrom="10",CI.prob=0.9)
+#'   BayesCI(scan1_example, diallel_example, chrom="10", CI.prob=0.9)
 #'   }
 #' @export
 
@@ -24,14 +25,8 @@ BayesCI <- function(scan1_data,data,chrom,CI.prob=0.9) {
   ix <- which(scan1a$chrom == chrom)
   x <- scan1a$cM[ix]
 
-  #if(statistic=="deltaDIC"){
-#    tmp <- data.frame(pos=ix,left=c(0,diff(x)/2),right=c(diff(x)/2,0),prob=exp((scan1a$deltaDIC[ix]+4*scan1a$LOD[ix]*log(10))/2))
-  #  tmp <- data.frame(pos=ix,left=c(0,diff(x)/2),right=c(diff(x)/2,0),prob=exp(-(scan1a$deltaDIC[ix])/2))
-    
-  #}else{
   tmp <- data.frame(pos=ix,left=c(0,diff(x)/2),right=c(diff(x)/2,0),prob=exp(scan1a$LL[ix]))
-  #}
-  
+
   tmp$y <- tmp$prob*(tmp$right+tmp$left)
   tmp$area <- tmp$y/sum(tmp$y)
   n <- length(x)
@@ -43,6 +38,5 @@ BayesCI <- function(scan1_data,data,chrom,CI.prob=0.9) {
   upper <- min(upper+1,n)
   limits <- scan1a$cM[ix[c(lower,upper)]]
   out <- scan1_data[scan1_data$chrom == chrom & scan1_data$cM >= limits[1] & scan1_data$cM <= limits[2],]
-  #out$deltaDIC <- round(out$deltaDIC,1)
   return(out)
 }

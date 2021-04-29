@@ -2,7 +2,15 @@
 #' 
 #' Fit multiple QTL model
 #' 
-#' Argument \code{qtl} is a data frame with columns `marker` and `dominance` to specify the marker name and highest order effect (1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance). All effects up to the value in `dominance` are included.  Optional argument \code{epistasis} is a data frame with columns `marker1` and `marker2`, where each row specifies an additive x additive epistatic interaction. The number of burn-in and total iterations in \code{params} can be estimated using \code{\link{set_params}}. Parameter \code{CI.prob} sets the probability (e.g., 0.90, 0.95) for the Bayesian credible interval for the estimated effects (to disable plotting of the CI, use \code{CI.prob=NULL}). 
+#' Argument \code{qtl} is a data frame with columns `marker` and `dominance` 
+#' to specify the marker name and highest order effect (1 = additive, 2 = digenic dominance, 
+#' 3 = trigenic dominance, 4 = quadrigenic dominance). All effects up to the value in `dominance` 
+#' are included.  Optional argument \code{epistasis} is a data frame with columns `marker1` and 
+#' `marker2`, where each row specifies an additive x additive epistatic interaction. 
+#' The number of burn-in and total iterations in \code{params} can be estimated using 
+#' \code{\link{set_params}}. Parameter \code{CI.prob} sets the probability (e.g., 0.90, 0.95) 
+#' for the Bayesian credible interval for the estimated effects (to disable plotting of the CI, 
+#' use \code{CI.prob=NULL}). 
 #' 
 #' @param data variable of class \code{\link{diallel_geno_pheno}}
 #' @param trait name of trait
@@ -22,24 +30,52 @@
 #' }
 #' @examples
 #' \dontrun{
+#' ## getting minimum burnIn and nIter for one qtl
+#' set_params(data = diallel_example, 
+#'            trait = "tuber_shape", 
+#'            q = 0.05, 
+#'            r = 0.025, 
+#'            qtl = data.frame(marker="solcap_snp_c2_25522",dominance=2),
+#'            polygenic = TRUE)
+#'            
 #' ## additive effects
-#' params1 <- set_params( diallel_example, trait = "tuber_shape" ,q=0.05,r=0.05)
-#' 
-#' fit1 <- fitQTL( data = diallel_example, 
-#'                  trait = "tuber_shape", 
-#'                  params = params1, 
-#'                  marker = "solcap_snp_c2_25522",
-#'                  CI.prob = 0.9)
-#'                  
-#' ## additive + dominance effects
-#' params2 <- set_params( diallel_example, trait = "tuber_shape", dominance=2,q=0.05,r=0.05)
-#' 
-#' fit2 <- fitQTL( data = diallel_example, 
-#'                  trait = "tuber_shape", 
-#'                  params = params2, 
-#'                  marker = "solcap_snp_c2_25522",
-#'                  dominance = 2,
-#'                  CI.prob=0.9)
+#' fit1 <- fitQTL(data = diallel_example, 
+#'                trait = "tuber_shape", 
+#'                params = list(burnIn=100,nIter=5000), 
+#'                qtl = data.frame(marker="solcap_snp_c2_25522",dominance=1),
+#'                CI.prob = 0.9)
+#'
+#' ## additive + digenic dominance effects                            
+#' fit2 <- fitQTL(data = diallel_example, 
+#'                trait = "tuber_shape", 
+#'                params = list(burnIn=100,nIter=5000), 
+#'                qtl = data.frame(marker="solcap_snp_c2_25522",dominance=2),
+#'                CI.prob=0.9)
+#'                
+#' ## getting minimum burnIn and nIter for two qtl with epistasis
+#' set_params(data = diallel_example, 
+#'            trait = "tuber_shape", 
+#'            q = 0.05, 
+#'            r = 0.025, 
+#'            qtl = data.frame(marker=c("solcap_snp_c2_14750","solcap_snp_c2_25522"),
+#'                             dominance=c(2,2)),
+#'            epistasis = data.frame(marker1="solcap_snp_c2_25522",marker2="solcap_snp_c2_14750"),
+#'            polygenic = TRUE)
+#'            
+#' ## additive + digenic dominance effects for both QTL
+#' fit3 <- fitQTL(data = diallel_example, trait = "tuber_shape", 
+#'                params = list(burnIn=100,nIter=5000),
+#'                qtl = data.frame(marker=c("solcap_snp_c2_14750","solcap_snp_c2_25522"),
+#'                                 dominance=c(2,2)), 
+#'                polygenic = TRUE, CI.prob = 0.9)
+#'                
+#' ## additive + digenic dominance effects for both QTL + their epistatic effects
+#' fit4 <- fitQTL(data = diallel_example, trait = "tuber_shape", 
+#'                params = list(burnIn=100,nIter=5000),
+#'                qtl = data.frame(marker=c("solcap_snp_c2_14750","solcap_snp_c2_25522"),
+#'                                 dominance=c(2,2)), 
+#'                epistasis = data.frame(marker1="solcap_snp_c2_25522",marker2="solcap_snp_c2_14750"),
+#'                polygenic = TRUE, CI.prob = 0.9)
 #'                  
 #' }
 #'                  
@@ -50,7 +86,7 @@
 #' @importFrom BGLR readBinMat
 #' @importFrom rlang .data
 
-fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params,CI.prob=0.9) {
+fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(burnIn=100,nIter=5000),CI.prob=0.9) {
   #Haplotype=Mean=CI.upper=CI.lower=x=z=NULL #to avoid NOTE while doing R check
   
   stopifnot(inherits(data,"diallel_geno_pheno"))

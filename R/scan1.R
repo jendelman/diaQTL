@@ -16,19 +16,20 @@
 #' 
 #' @examples
 #' \dontrun{
-#'   par1 <- set_params(data = diallel_example,
-#'                      trait = "tuber_shape")
+#' ## getting minimum burnIn and nIter
+#'   set_params(data = diallel_example,
+#'              trait = "tuber_shape")
 #'                       
 #'   scan1_example <- scan1(data = diallel_example,
-#'                 chrom = 10,
-#'                 trait = "tuber_shape",
-#'                 params = par1)
+#'                          chrom = "10",
+#'                          trait = "tuber_shape",
+#'                          params = list(burnIn=60,nIter=600))
 #' }
 #' 
 #' @export
 #' @importFrom parallel makeCluster stopCluster parLapply clusterExport
 
-scan1 <- function(data,trait,params,dominance=1,cofactor=NULL,chrom=NULL,n.core=1) {
+scan1 <- function(data,trait,params=list(burnIn=100,nIter=1000),dominance=1,cofactor=NULL,chrom=NULL,n.core=1) {
   
   stopifnot(inherits(data,"diallel_geno_pheno"))
   stopifnot(trait %in% colnames(data@pheno))
@@ -46,7 +47,7 @@ scan1 <- function(data,trait,params,dominance=1,cofactor=NULL,chrom=NULL,n.core=
   } else {
     response <- "gaussian"
   }
-  params <- list(response=response,nIter=params$nIter,burnIn=params$burnIn)
+  params <- list(response=response,nIter=max(params$nIter),burnIn=max(params$burnIn))
   
   #no marker model
   ans0 <- runBGLR(y=y,Xfix=data@X,params=params,Xgca=data@Z %*% data@X.GCA,saveEffects=FALSE)

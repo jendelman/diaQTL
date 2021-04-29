@@ -2,7 +2,7 @@
 #' 
 #' delta DIC thresholds for scan1
 #' 
-#' delta DIC thresholds to control the genome-wide false positive rate at level `alpha` were determined via simulation for up to 20 parents and genome sizes up to 12 Morgans. A monotone decreasing concave curve was fit to these results using R package \code{scam} and is used for prediction. 
+#' delta DIC thresholds to control the genome-wide false positive rate at level `alpha` were determined via simulation for up to 20 parents. A monotone decreasing convex curve was fit to these results using R package \code{scam} and is used for prediction. 
 #' 
 #' @param genome.size Genome size in Morgans (not centiMorgans)
 #' @param num.parents Number of parents
@@ -26,10 +26,7 @@
 
 DIC_thresh <- function(genome.size,num.parents,ploidy,alpha=0.05,dominance=1){
 
-  ## Checking for input errors
-  if(!is.numeric(genome.size) | genome.size>12.5)
-    stop(deparse("genome size should be numeric (in Morgans) and lower than 12"))
-  
+  ## Checking for input errors  
   if(!is.numeric(num.parents) | (round(num.parents)!=num.parents))
     stop(deparse("number of parents should be integer and numeric"))
   
@@ -109,5 +106,5 @@ DIC_thresh <- function(genome.size,num.parents,ploidy,alpha=0.05,dominance=1){
     }
   }
   
-  return(round(-ans,2))
+  return(round(ans,2))
 }

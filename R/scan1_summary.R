@@ -18,6 +18,7 @@
 #'   scan1_summary( scan1_example )
 #'   scan1_summary( scan1_example, chrom = "10" )
 #'   scan1_summary( scan1_example, chrom = c( "10", "12" ) ) 
+#'   scan1_summary( scan1_example, chrom = "10", thresh = -20)
 #'   }
 #' @export
 #' @import ggplot2
@@ -27,11 +28,9 @@ scan1_summary <- function(scan1_data,
                           thresh=NULL,
                           chrom = NULL,
                           position = "cM",
-                          flip = TRUE) {
+                          flip = FALSE) {
 
-  statistic = "deltaDIC"
   stopifnot(position %in% colnames(scan1_data))
-  stopifnot(statistic %in% c("LOD","deltaDIC"))
   
   if(!is.null(chrom)) {
     scan1_data <- scan1_data[scan1_data$chrom %in% chrom,]
@@ -49,47 +48,32 @@ scan1_summary <- function(scan1_data,
   
   k <- integer(nchr)
   for (i in 1:nchr) {
-    y <- scan1_data[,statistic]
+    y <- scan1_data$deltaDIC
     y[scan1_data$chrom!=allchr[i]] <- NA
-    if(statistic == "deltaDIC"){
-      k[i] <- which.min(y)
-    }else{
-      k[i] <- which.max(y)
-    }
+    k[i] <- which.min(y)
   }
-  
-  #if(flip){
-  #  scan1_data[,"deltaDIC"] = -scan1_data[,"deltaDIC"]
-    #scan1_data[,"LOD"] = -scan1_data[,"LOD"]
-  #}
-  # if(statistic=="deltaDIC"){
-  #   statisticName = ifelse(flip, "-\U0394 DIC","\U0394 DIC")
-  # }else{
-  #   statisticName = ifelse(flip, "-\U0394 LOD","LOD")
-  # }
-  statisticName = "\U0394 DIC"
-  
+
   p <- NULL
   if (nchr==1) {
     plotme <- data.frame(x=x,
-                         y=scan1_data[,statistic],
+                         y=scan1_data$deltaDIC,
                          chrom=scan1_data$chrom) 
     p <- ggplot(data=plotme,aes(x=.data$x,y=.data$y)) +
         geom_line(color="#440154") +
-        ylab(statisticName) + scale_y_reverse() + 
+        ylab("\U0394 DIC") + 
         theme_bw() +
         theme(text = element_text(size=13),panel.grid = element_blank()) +
         xlab(x.label)
   } else {
     col <- ifelse(as.integer(factor(scan1_data$chrom))%%2==1,"1","0")
     x <- get_x(map=data.frame(chrom=scan1_data$chrom,position=x,stringsAsFactors = F))
-    plotme <- data.frame(x=x,y=scan1_data[,statistic],col=col)
+    plotme <- data.frame(x=x,y=scan1_data$deltaDIC,col=col)
     breaks <- (tapply(x,scan1_data$chrom,max) + tapply(x,scan1_data$chrom,min))/2
     p <- ggplot(data=plotme,aes(x=.data$x,y=.data$y,colour=.data$col)) +
-        ylab(statisticName) +
+        ylab("\U0394 DIC") +
         theme_bw() +
         scale_x_continuous(name="Chromosome",breaks=breaks,labels=allchr) +
-        scale_colour_manual(values=c("#21908c","#440154")) + scale_y_reverse() + 
+        scale_colour_manual(values=c("#21908c","#440154")) + 
         theme(text = element_text(size=13),panel.grid = element_blank(),legend.position = "none")
     
     for (i in allchr){
@@ -97,18 +81,14 @@ scan1_summary <- function(scan1_data,
       p <- p + geom_line(data=plotme[ix,])
     }
   }
-    
+  
+  
   if (!is.null(thresh)) {
-    if(flip)
-      thresh=-thresh
     p <- p + geom_hline(yintercept = thresh,linetype="dashed",colour="#B89600")
   }
-
-  #peaks <- scan1_data[k,]
-  #peaks$LOD <- round(peaks$LOD,1)
-  #if(flip){
-  #  peaks$LOD=-peaks$LOD
-  #  peaks$deltaDIC=-peaks$deltaDIC
-  #}
+  
+  if(!flip){
+    p <- p + scale_y_reverse()
+  }
   return(list(peaks=scan1_data[k,],plot=p))
 }

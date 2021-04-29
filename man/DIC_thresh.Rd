@@ -24,7 +24,7 @@ deltaDIC threshold
 delta DIC thresholds for scan1
 }
 \details{
-delta DIC thresholds to control the genome-wide false positive rate at level \code{alpha} were determined via simulation for up to 20 parents and genome sizes up to 12 Morgans. A monotone decreasing concave curve was fit to these results using R package \code{scam} and is used for prediction.
+delta DIC thresholds to control the genome-wide false positive rate at level \code{alpha} were determined via simulation for up to 20 parents. A monotone decreasing convex curve was fit to these results using R package \code{scam} and is used for prediction.
 }
 \examples{
 \dontrun{

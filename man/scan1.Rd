@@ -7,7 +7,7 @@
 scan1(
   data,
   trait,
-  params,
+  params = list(burnIn = 100, nIter = 1000),
   dominance = 1,
   cofactor = NULL,
   chrom = NULL,
@@ -40,13 +40,14 @@ Parameter \code{dominance} has possible values of 1 = additive, 2 = digenic domi
 }
 \examples{
 \dontrun{
-  par1 <- set_params(data = diallel_example,
-                     trait = "tuber_shape")
+## getting minimum burnIn and nIter
+  set_params(data = diallel_example,
+             trait = "tuber_shape")
                       
   scan1_example <- scan1(data = diallel_example,
-                chrom = 10,
-                trait = "tuber_shape",
-                params = par1)
+                         chrom = "10",
+                         trait = "tuber_shape",
+                         params = list(burnIn=60,nIter=600))
 }
 
 }

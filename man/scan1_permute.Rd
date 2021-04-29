@@ -40,14 +40,17 @@ Permutation test for scan1
 }
 \examples{
 \dontrun{
-  par1 <- set_params(data = diallel_example,
-                     trait = "tuber_shape")
+  set_params(data = diallel_example,
+             trait = "tuber_shape")
                       
   ans1_permut <- scan1_permute(data = diallel_example,
                                chrom = 10,
                                trait = "tuber_shape",
-                               params = par1,
+                               params = list(burnIn=60,nIter=600),
                                n.permute = 100)
+                               
+  ## computing permutation threshold for alpha=0.05                            
+  quantile(ans1_permut$min_deltaDIC, 0.05)
                              
 }
 

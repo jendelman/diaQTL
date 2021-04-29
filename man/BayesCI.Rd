@@ -22,10 +22,11 @@ subset of scan1_data with markers in the CI
 Bayesian Credible Interval for QTL position
 }
 \details{
-Parameter \code{CI.prob} sets the probability for the Bayesian credible interval (e.g., 0.90, 0.95) using the profile likelihood (posterior mean).
+Parameter \code{CI.prob} sets the probability for the Bayesian credible interval (e.g., 0.90, 0.95)
+using the profile likelihood (posterior mean).
 }
 \examples{
 \dontrun{
-  BayesCI(scan1_example,diallel_example,chrom="10",CI.prob=0.9)
+  BayesCI(scan1_example, diallel_example, chrom="10", CI.prob=0.9)
   }
 }

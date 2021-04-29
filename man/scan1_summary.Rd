@@ -9,7 +9,7 @@ scan1_summary(
   thresh = NULL,
   chrom = NULL,
   position = "cM",
-  flip = TRUE
+  flip = FALSE
 )
 }
 \arguments{
@@ -38,5 +38,6 @@ Summary of scan1 result
   scan1_summary( scan1_example )
   scan1_summary( scan1_example, chrom = "10" )
   scan1_summary( scan1_example, chrom = c( "10", "12" ) ) 
+  scan1_summary( scan1_example, chrom = "10", thresh = -20)
   }
 }
