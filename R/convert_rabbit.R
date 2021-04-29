@@ -10,7 +10,7 @@
 #' @export
 #' @importFrom utils write.csv
 
-read_rabbit <- function(rabbit.outfile,ped.file,outstem) {
+convert_rabbit <- function(rabbit.outfile,ped.file,outstem) {
   con <- file(ped.file,"r",)
   suppressWarnings(temp <- readLines(con))
   close(con)

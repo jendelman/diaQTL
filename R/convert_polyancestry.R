@@ -14,7 +14,7 @@
 #' @export
 #' @importFrom utils read.csv write.csv
 
-read_polyancestry <- function(filename,mapfile=NULL,remove.outliers=TRUE,outstem="") {
+convert_polyancestry <- function(filename,mapfile=NULL,remove.outliers=TRUE,outstem="") {
   
   if (!is.null(mapfile)) {
     map <- read.csv(mapfile,as.is=T)[,1:3]
