@@ -173,7 +173,7 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,
   
   stopCluster(cl)
 
-  data <- new(Class="diallel_geno",ploidy=as.integer(ploidy),polyorigin=data[bin.ix,],Xa=genoX[[1]],
+  data <- new(Class="diallel_geno",ploidy=as.integer(ploidy),input=data[bin.ix,],Xa=genoX[[1]],
               dominance=as.integer(dominance),X.GCA=X.GCA,map=map,geno=geno,A=A)
   rownames(data@input) <- bin.names
   
