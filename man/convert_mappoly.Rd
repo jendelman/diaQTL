@@ -4,29 +4,28 @@
 \alias{convert_mappoly}
 \title{Generate diaQTL input files from MAPpoly}
 \usage{
-convert_mappoly(data, digits = 4, conv.bp = 10^6, outstem = "")
+convert_mappoly(data, digits = 4, ploidy = 4, outstem = "")
 }
 \arguments{
 \item{data}{list of mappoly.genoprob object class (one for each linkage group)}
 
-\item{conv.bp}{value to multiply cM of the map position to have in base pairs}
+\item{digits}{how many rounding digits for the probabilities output (default=4)}
+
+\item{ploidy}{Either 2 or 4 (default=4)}
 
 \item{outstem}{prefix for the pedigree and genotype files for diaQTL}
 }
-\value{
-NULL
-
-#' @examples
+\description{
+Generate diaQTL input files from a list of 'mappoly.genoprob' object class of
+MAPpoly R package (version >0.2.3). It only works for autotetraploid data.
+}
+\examples{
 \dontrun{
     # see MAPpoly tutorial for details on its functions
     MAP <- list(lg1, lg2, lg3) #your map with your linkage groups
     genoprob <- vector("list", 3) #if 3 linkage groups
     for(i in 1:length(genoprob))
         genoprob[[i]] <- mappoly::calc_genoprob_error(input.map = MAP[[i]], error = 0.05)
-    convert_mappoly(genoprob)
+    convert_mappoly(genoprob, ploidy=4)
 }
-}
-\description{
-Generate diaQTL input files from a list of 'mappoly.genoprob' object class of
-MAPpoly R package (version >0.2.3). It only works for autotetraploid data.
 }

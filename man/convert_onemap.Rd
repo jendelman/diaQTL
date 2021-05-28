@@ -4,19 +4,19 @@
 \alias{convert_onemap}
 \title{Generate diaQTL input files from OneMap}
 \usage{
-convert_onemap(data, digits = 4, conv.bp = 10^6, outstem = "")
+convert_onemap(data, digits = 4, outstem = "")
 }
 \arguments{
-\item{conv.bp}{value to multiply cM of the map position to have in base pairs}
+\item{data}{onemap_progeny_haplotypes object class}
+
+\item{digits}{how many rounding digits for the probabilities output (default=4)}
 
 \item{outstem}{prefix for the pedigree and genotype files for diaQTL}
-
-\item{onemap.object}{onemap_progeny_haplotypes object class}
 }
-\value{
-NULL
-
-#' @examples
+\description{
+Generate diaQTL input files from 'onemap_progeny_haplotypes' object class of OneMap R package (version >2.2.0)
+}
+\examples{
 \dontrun{
     map <- list(LG1_final, LG2_final)
     progeny_haplot <- onemap::progeny_haplotypes(map,
@@ -24,7 +24,4 @@ NULL
                                                  ind = "all")
     convert_onemap(progeny_haplot)
 }
-}
-\description{
-Generate diaQTL input files from 'onemap_progeny_haplotypes' object class of OneMap R package (version >2.2.0)
 }
