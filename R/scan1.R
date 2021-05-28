@@ -50,7 +50,7 @@ scan1 <- function(data,trait,params=list(burnIn=100,nIter=1000),dominance=1,cofa
   params <- list(response=response,nIter=max(params$nIter),burnIn=max(params$burnIn))
   
   #no marker model
-  ans0 <- runBGLR(y=y,Xfix=data@X,params=params,Xgca=data@Z %*% data@X.GCA,saveEffects=FALSE)
+  ans0 <- runBGLR(params=params,y=y,Xfix=data@X,Z=data@Z,Xgca=data@X.GCA,saveEffects=FALSE)
   
   #with marker
   map <- data@map[data@map$chrom %in% chrom,]

@@ -13,7 +13,7 @@ S4 class with genotype and phenotype data
 \describe{
 \item{\code{ploidy}}{Either 2 or 4}
 
-\item{\code{polyorigin}}{matrix of character strings from the genotype input file}
+\item{\code{input}}{matrix of character strings from the genotype input file}
 
 \item{\code{Xa}}{list of matrices with the expected haplotype dosage (rows) for each parental origin genotype (columns)}
 

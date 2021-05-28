@@ -3,7 +3,7 @@
 #' Generate diaQTL input files from a list of 'mappoly.genoprob' object class of 
 #' MAPpoly R package (version >0.2.3). It only works for autotetraploid data.
 #' 
-#' @param MAPpoly.object list of mappoly.genoprob object class (one for each linkage group)
+#' @param data list of mappoly.genoprob object class (one for each linkage group)
 #' @param outstem prefix for the pedigree and genotype files for diaQTL
 #' @param conv.bp value to multiply cM of the map position to have in base pairs
 #' 

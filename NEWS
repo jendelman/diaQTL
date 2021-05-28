@@ -1,7 +1,13 @@
+Changes in 0.99
+* Changed function name to convert_polyorigin
+* Renamed polyorigin slot as "input"
+* Proportion of variance computed based on clone rather than plot average
+
+
 Changes in 0.98
 * Updated documentation
 * Fixed scan1_summary plot's flip and threshold arguments
-* Fixed set_params output. The helps does not save it in a par1 object anymore
+* Fixed set_params output. The help does not save it in a par1 object anymore
 
 Changes in 0.97
 * Added read_rabbit function for diploids

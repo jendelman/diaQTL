@@ -15,9 +15,9 @@ faa <- function(j,k,data) {
   # j is position of first marker
   # k is position of second marker
   
-  tmp1 <- unlist(lapply(data@polyorigin[j,],strsplit,split="=>",fixed=T),recursive = F)
+  tmp1 <- unlist(lapply(data@input[j,],strsplit,split="=>",fixed=T),recursive = F)
   tmp1 <- lapply(tmp1,strsplit,split="|",fixed=T)
-  tmp2 <- unlist(lapply(data@polyorigin[k,],strsplit,split="=>",fixed=T),recursive = F)
+  tmp2 <- unlist(lapply(data@input[k,],strsplit,split="=>",fixed=T),recursive = F)
   tmp2 <- lapply(tmp2,strsplit,split="|",fixed=T)
   
   states1 <- lapply(tmp1,function(x){as.integer(x[[1]])})

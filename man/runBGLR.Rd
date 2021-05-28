@@ -8,6 +8,7 @@ runBGLR(
   params,
   y,
   Xfix,
+  Z,
   Xgca = NULL,
   Xqtl = NULL,
   Xaa = NULL,

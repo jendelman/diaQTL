@@ -7,11 +7,11 @@
 convert_mappoly(data, digits = 4, conv.bp = 10^6, outstem = "")
 }
 \arguments{
+\item{data}{list of mappoly.genoprob object class (one for each linkage group)}
+
 \item{conv.bp}{value to multiply cM of the map position to have in base pairs}
 
 \item{outstem}{prefix for the pedigree and genotype files for diaQTL}
-
-\item{MAPpoly.object}{list of mappoly.genoprob object class (one for each linkage group)}
 }
 \value{
 NULL

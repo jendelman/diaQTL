@@ -1,7 +1,7 @@
 #' S4 class with genotype and phenotype data
 #' 
 #' @slot ploidy Either 2 or 4
-#' @slot polyorigin matrix of character strings from the genotype input file
+#' @slot input matrix of character strings from the genotype input file
 #' @slot Xa list of matrices with the expected haplotype dosage (rows) for each parental origin genotype (columns)
 #' @slot dominance Maximum dosage stored in slot \code{geno}. Integer 1-4 indicating 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. 
 #' @slot X.GCA Incidence matrix for GCA effects
