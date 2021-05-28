@@ -83,7 +83,7 @@ set_params(data = diallel_example,
            q = 0.05, 
            r = 0.025, 
            qtl = data.frame(marker=c("solcap_snp_c2_14750","solcap_snp_c2_25522"),
-                            dominance=c(2,2)),
+                            dominance=c(2,1)),
            epistasis = data.frame(marker1="solcap_snp_c2_25522",marker2="solcap_snp_c2_14750"),
            polygenic = TRUE)
            

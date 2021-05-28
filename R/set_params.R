@@ -95,12 +95,14 @@ set_params <- function(data,trait,qtl=NULL,epistasis=NULL,polygenic=FALSE,q=0.5,
   params <- list(response=response,nIter=nIter,burnIn=-1)  
 
   raftans <- NULL
+  
   for (i in 1:n.fit) {
     if (is.null(qtl)) {
-      
-      qtl <- data.frame(marker=markers[i],dominance=1)
+      qtl1 <- data.frame(marker=markers[i],dominance=1)
+    } else {
+      qtl1 <- qtl
     }
-    ans <- fitQTL(data=data,trait=trait,qtl=qtl,epistasis=epistasis,polygenic=polygenic,
+    ans <- fitQTL(data=data,trait=trait,qtl=qtl1,epistasis=epistasis,polygenic=polygenic,
                   params=params,CI.prob=NULL)
     tmp2 <- raftery.diag(mcmc(ans),q=q,r=r)$resmatrix
     if (inherits(tmp2,"character")) {
@@ -111,6 +113,9 @@ set_params <- function(data,trait,qtl=NULL,epistasis=NULL,polygenic=FALSE,q=0.5,
     rownames(tmp2) <- colnames(ans)
     if (is.null(raftans) || max(raftans[,2]) < max(tmp2[,2])) {
       raftans <- tmp2
+      if (is.null(qtl)) {
+        rownames(raftans) <- gsub(" ","",gsub(markers[i],"",rownames(raftans),fixed=T),fixed=T)
+      }
     }
   }
   return(raftans)

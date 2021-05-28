@@ -9,22 +9,22 @@ DIC_thresh(genome.size, num.parents, ploidy, alpha = 0.05, dominance = 1)
 \arguments{
 \item{genome.size}{Genome size in Morgans (not centiMorgans)}
 
-\item{num.parents}{Number of parents}
+\item{num.parents}{Number of parents (2 to 10)}
 
 \item{ploidy}{2 or 4}
 
-\item{alpha}{false positive rate: 0.01, 0.05, 0.10, or 0.20}
+\item{alpha}{significance level (0.01, 0.05, 0.10, or 0.20)}
 
 \item{dominance}{1 (additive) or 2 (digenic dominance)}
 }
 \value{
-deltaDIC threshold
+-deltaDIC threshold
 }
 \description{
 delta DIC thresholds for scan1
 }
 \details{
-delta DIC thresholds to control the genome-wide false positive rate at level \code{alpha} were determined via simulation for up to 20 parents. A monotone decreasing convex curve was fit to these results using R package \code{scam} and is used for prediction.
+Thresholds to control the genome-wide false positive rate at \code{alpha} were determined for half-diallel mating designs with up to 10 parents.
 }
 \examples{
 \dontrun{

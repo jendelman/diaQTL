@@ -58,7 +58,7 @@
 #'            q = 0.05, 
 #'            r = 0.025, 
 #'            qtl = data.frame(marker=c("solcap_snp_c2_14750","solcap_snp_c2_25522"),
-#'                             dominance=c(2,2)),
+#'                             dominance=c(2,1)),
 #'            epistasis = data.frame(marker1="solcap_snp_c2_25522",marker2="solcap_snp_c2_14750"),
 #'            polygenic = TRUE)
 #'            
@@ -87,7 +87,6 @@
 #' @importFrom rlang .data
 
 fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(burnIn=100,nIter=5000),CI.prob=0.9) {
-  #Haplotype=Mean=CI.upper=CI.lower=x=z=NULL #to avoid NOTE while doing R check
   
   stopifnot(inherits(data,"diallel_geno_pheno"))
   stopifnot(trait %in% colnames(data@pheno))
@@ -103,7 +102,7 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(bur
     dominance <- qtl$dominance[i]
     Xqtl[[i]] <- vector("list",dominance)
     for (j in 1:dominance) {
-      Xqtl[[i]][[j]] <- data@Z %*% data@geno[[markers[i]]][[j]]
+      Xqtl[[i]][[j]] <- data@geno[[markers[i]]][[j]]  #data@Z %*% 
     }
   }
   
@@ -116,7 +115,7 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(bur
     n.epi <- nrow(epistasis)
     Xaa <- vector("list",n.epi)
     for (i in 1:n.epi) {
-      Xaa[[i]] <- data@Z %*% faa(j=marker1[i],k=marker2[i],data=data)
+      Xaa[[i]] <- faa(j=marker1[i],k=marker2[i],data=data)  #data@Z %*% 
     }
   } else {
     n.epi <- 0
@@ -129,7 +128,7 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(bur
     if (length(chroms)==0) {
       stop("There are no chromosomes remaining for the polygenic effect.")
     }
-    polyG <- data@Z %*% IBDmat(data=data,dominance=1,chrom=chroms) %*% t(data@Z)
+    polyG <- IBDmat(data=data,dominance=1,chrom=chroms) 
   } else {
     polyG <- NULL
   }
@@ -152,13 +151,13 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(bur
 
   if (!is.null(CI.prob) && CI.prob < 0) {
     #undocumented option, used by scan1
-    ans1 <- runBGLR(y=y,Xfix=data@X,params=params,Xqtl=Xqtl,Xaa=Xaa,saveEffects=FALSE)
+    ans1 <- runBGLR(params=params,y=y,Xfix=data@X,Z=data@Z,Xqtl=Xqtl,Xaa=Xaa,saveEffects=FALSE)
     return(ans1)
   } else {
     #null hypothesis
-    ans0 <- runBGLR(y=y,Xfix=data@X,params=params,Xgca=data@Z %*% data@X.GCA,saveEffects=FALSE)
+    ans0 <- runBGLR(params=params,y=y,Xfix=data@X,Z=data@Z,Xgca=data@X.GCA,saveEffects=FALSE)
     #alternate hypothesis
-    ans1 <- runBGLR(y=y,Xfix=data@X,params=params,Xqtl=Xqtl,Xaa=Xaa,polyG=polyG,saveEffects=TRUE)
+    ans1 <- runBGLR(params=params,y=y,Xfix=data@X,Z=data@Z,Xqtl=Xqtl,Xaa=Xaa,polyG=polyG,saveEffects=TRUE)
   }
   deltaDIC <- ans1$DIC - ans0$DIC
   

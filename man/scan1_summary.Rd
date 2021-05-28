@@ -4,40 +4,35 @@
 \alias{scan1_summary}
 \title{Summary of scan1 result}
 \usage{
-scan1_summary(
-  scan1_data,
-  thresh = NULL,
-  chrom = NULL,
-  position = "cM",
-  flip = FALSE
-)
+scan1_summary(scan1_data, thresh = NULL, chrom = NULL, position = "cM")
 }
 \arguments{
 \item{scan1_data}{output from scan1}
 
-\item{thresh}{optional, threshold for plotting}
+\item{thresh}{optional -deltaDIC threshold for plotting}
 
 \item{chrom}{optional, subset of chromosomes to plot}
 
 \item{position}{Either "cM" (default) or "bp"}
-
-\item{flip}{should QTL be plotted as peaks (TRUE) or valleys (FALSE)}
 }
 \value{
 List containing
 \describe{
-\item{peaks}{data frame of markers with the lowest DIC on each chromosome}
+\item{peaks}{data frame of markers with the highest score on each chromosome}
 \item{plot}{ggplot object}
 }
 }
 \description{
 Summary of scan1 result
 }
+\details{
+Plots the "score" (-deltaDIC) for each marker vs. genome position. The \code{thresh} argument should be a positive number.
+}
 \examples{
 \dontrun{
   scan1_summary( scan1_example )
   scan1_summary( scan1_example, chrom = "10" )
   scan1_summary( scan1_example, chrom = c( "10", "12" ) ) 
-  scan1_summary( scan1_example, chrom = "10", thresh = -20)
+  scan1_summary( scan1_example, chrom = "10", thresh = 20)
   }
 }

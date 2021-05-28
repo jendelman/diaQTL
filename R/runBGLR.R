@@ -2,11 +2,11 @@
 #'
 #' @importFrom BGLR BGLR
 #' @keywords internal
-runBGLR <- function(params,y,Xfix,Xgca=NULL,Xqtl=NULL,Xaa=NULL,polyG=NULL,saveEffects) {
+runBGLR <- function(params,y,Xfix,Z,Xgca=NULL,Xqtl=NULL,Xaa=NULL,polyG=NULL,saveEffects) {
   model <- "BGLR(y=y,verbose=F,response_type=params$response,burnIn=params$burnIn,nIter=params$nIter,thin=1,ETA=list(fix=list(X=Xfix,model='FIXED')"
   
   if (!is.null(Xgca)) {
-    model <- paste(model,"GCA=list(X=Xgca,model='BRR',saveEffects=FALSE)",sep=",")
+    model <- paste(model,"GCA=list(X=Z %*% Xgca,model='BRR',saveEffects=FALSE)",sep=",")
   }
   
   if (!is.null(Xqtl)) {
@@ -14,18 +14,18 @@ runBGLR <- function(params,y,Xfix,Xgca=NULL,Xqtl=NULL,Xaa=NULL,polyG=NULL,saveEf
     for (i in 1:n.qtl) {
       dominance <- length(Xqtl[[i]])
       for (j in 1:dominance) {
-        model <- paste(model,gsub("j",j,gsub("Q",i,"qtlQ_j=list(X=Xqtl[[Q]][[j]],model='BayesC',saveEffects=saveEffects)")),sep=",")
+        model <- paste(model,gsub("j",j,gsub("Q",i,"qtlQ_j=list(X=Z %*% Xqtl[[Q]][[j]],model='BayesC',saveEffects=saveEffects)")),sep=",")
       }
     }
   }
   if (!is.null(Xaa)) {
     n.aa <- length(Xaa)
     for (i in 1:n.aa) {
-      model <- paste(model,gsub("Q",i,"aaQ=list(X=Xaa[[Q]],model='BayesC',saveEffects=saveEffects)"),sep=",")
+      model <- paste(model,gsub("Q",i,"aaQ=list(X=Z %*% Xaa[[Q]],model='BayesC',saveEffects=saveEffects)"),sep=",")
     }
   }
   if (!is.null(polyG)) {
-    model <- paste(model,"poly=list(K=polyG,model='RKHS')",sep=",")
+    model <- paste(model,"poly=list(K=Z %*% polyG %*% t(Z),model='RKHS')",sep=",")
   }
   
   model <- paste(model,"))",sep="")
@@ -48,12 +48,7 @@ runBGLR <- function(params,y,Xfix,Xgca=NULL,Xqtl=NULL,Xaa=NULL,polyG=NULL,saveEf
     resid <- y2 - ans$yHat
     yhat <- ans$yHat[ix]
   }
-  # if (sd(yhat)>0) {
-  #   r2 <- cor(yhat,y2[ix])^2
-  # } else {
-  #   r2 <- 0
-  # }
-  
+
   result <- list(LL=ans$fit$postMeanLogLik,DIC=ans$fit$DIC,resid=resid)
   return(result)
 }
