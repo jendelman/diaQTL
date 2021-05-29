@@ -82,26 +82,41 @@ set_params(data = diallel_example,
            trait = "tuber_shape", 
            q = 0.05, 
            r = 0.025, 
-           qtl = data.frame(marker=c("solcap_snp_c2_14750","solcap_snp_c2_25522"),
+           qtl = data.frame(marker=c("PotVar0099535","solcap_snp_c2_25522"),
                             dominance=c(2,1)),
-           epistasis = data.frame(marker1="solcap_snp_c2_25522",marker2="solcap_snp_c2_14750"),
+           epistasis = data.frame(marker1="solcap_snp_c2_25522",marker2="PotVar0099535"),
            polygenic = TRUE)
            
 ## additive + digenic dominance effects for both QTL
 fit3 <- fitQTL(data = diallel_example, trait = "tuber_shape", 
                params = list(burnIn=100,nIter=5000),
-               qtl = data.frame(marker=c("solcap_snp_c2_14750","solcap_snp_c2_25522"),
+               qtl = data.frame(marker=c("PotVar0099535","solcap_snp_c2_25522"),
                                 dominance=c(2,2)), 
                polygenic = TRUE, CI.prob = 0.9)
                
 ## additive + digenic dominance effects for both QTL + their epistatic effects
 fit4 <- fitQTL(data = diallel_example, trait = "tuber_shape", 
                params = list(burnIn=100,nIter=5000),
-               qtl = data.frame(marker=c("solcap_snp_c2_14750","solcap_snp_c2_25522"),
+               qtl = data.frame(marker=c("PotVar0099535","solcap_snp_c2_25522"),
                                 dominance=c(2,2)), 
-               epistasis = data.frame(marker1="solcap_snp_c2_25522",marker2="solcap_snp_c2_14750"),
+               epistasis = data.frame(marker1="solcap_snp_c2_25522",marker2="PotVar0099535"),
                polygenic = TRUE, CI.prob = 0.9)
-                 
+               
+## additive + digenic dominance effects for three QTL + all their epistatic effects
+fit5 <- fitQTL(data = diallel_example, trait = "tuber_shape", 
+               params = list(burnIn=100,nIter=5000),
+               qtl = data.frame(marker=c("PotVar0099535",
+                                         "solcap_snp_c1_6427",
+                                         "solcap_snp_c2_25522"),
+                                dominance=c(2,2,2)), 
+               epistasis = data.frame(marker1=c("solcap_snp_c2_25522",
+                                                "solcap_snp_c2_25522",
+                                                "PotVar0099535"),
+                                      marker2=c("PotVar0099535",
+                                                "solcap_snp_c1_6427",
+                                                "solcap_snp_c1_6427")),
+               polygenic = TRUE, CI.prob = 0.9)
+
 }
                  
 }

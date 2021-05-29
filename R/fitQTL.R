@@ -57,26 +57,41 @@
 #'            trait = "tuber_shape", 
 #'            q = 0.05, 
 #'            r = 0.025, 
-#'            qtl = data.frame(marker=c("solcap_snp_c2_14750","solcap_snp_c2_25522"),
+#'            qtl = data.frame(marker=c("PotVar0099535","solcap_snp_c2_25522"),
 #'                             dominance=c(2,1)),
-#'            epistasis = data.frame(marker1="solcap_snp_c2_25522",marker2="solcap_snp_c2_14750"),
+#'            epistasis = data.frame(marker1="solcap_snp_c2_25522",marker2="PotVar0099535"),
 #'            polygenic = TRUE)
 #'            
 #' ## additive + digenic dominance effects for both QTL
 #' fit3 <- fitQTL(data = diallel_example, trait = "tuber_shape", 
 #'                params = list(burnIn=100,nIter=5000),
-#'                qtl = data.frame(marker=c("solcap_snp_c2_14750","solcap_snp_c2_25522"),
+#'                qtl = data.frame(marker=c("PotVar0099535","solcap_snp_c2_25522"),
 #'                                 dominance=c(2,2)), 
 #'                polygenic = TRUE, CI.prob = 0.9)
 #'                
 #' ## additive + digenic dominance effects for both QTL + their epistatic effects
 #' fit4 <- fitQTL(data = diallel_example, trait = "tuber_shape", 
 #'                params = list(burnIn=100,nIter=5000),
-#'                qtl = data.frame(marker=c("solcap_snp_c2_14750","solcap_snp_c2_25522"),
+#'                qtl = data.frame(marker=c("PotVar0099535","solcap_snp_c2_25522"),
 #'                                 dominance=c(2,2)), 
-#'                epistasis = data.frame(marker1="solcap_snp_c2_25522",marker2="solcap_snp_c2_14750"),
+#'                epistasis = data.frame(marker1="solcap_snp_c2_25522",marker2="PotVar0099535"),
 #'                polygenic = TRUE, CI.prob = 0.9)
-#'                  
+#'                
+#' ## additive + digenic dominance effects for three QTL + all their epistatic effects
+#' fit5 <- fitQTL(data = diallel_example, trait = "tuber_shape", 
+#'                params = list(burnIn=100,nIter=5000),
+#'                qtl = data.frame(marker=c("PotVar0099535",
+#'                                          "solcap_snp_c1_6427",
+#'                                          "solcap_snp_c2_25522"),
+#'                                 dominance=c(2,2,2)), 
+#'                epistasis = data.frame(marker1=c("solcap_snp_c2_25522",
+#'                                                 "solcap_snp_c2_25522",
+#'                                                 "PotVar0099535"),
+#'                                       marker2=c("PotVar0099535",
+#'                                                 "solcap_snp_c1_6427",
+#'                                                 "solcap_snp_c1_6427")),
+#'                polygenic = TRUE, CI.prob = 0.9)
+#'
 #' }
 #'                  
 #' @export
@@ -214,9 +229,15 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(bur
     n.epi <- nrow(epistasis)
     tmp <- matrix(0,nrow=trace.length,ncol=n.epi)
     colnames(tmp) <- paste(paste(epistasis$marker1,epistasis$marker2,sep="+"),"epistasis")
+    epistasis.effects <- matrix(NA,nrow=ncol(ans$epi[[1]]),ncol=n.epi)
     for (i in 1:n.epi) {
       tmp[,i] <- apply(tcrossprod(Xaa[[i]],ans$epi[[i]]),2,var)
+      epistasis.effects[,i] <- apply(ans$epi[[i]],2,mean)
     }
+    colnames(epistasis.effects) = paste(paste(epistasis$marker1,epistasis$marker2,sep="+"))
+    rownames(epistasis.effects) = apply(expand.grid(attr(data@geno,"haplotypes"),
+                                                    attr(data@geno,"haplotypes"))[,2:1],1,
+                                        paste0,collapse="+")
     variances <- cbind(variances,tmp)
   } 
   
@@ -283,6 +304,24 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(bur
     effects <- list(additive=t(additive.effects),digenic=t(digenic.effects))
   } else {
     effects <- list(additive=t(additive.effects))
+  }
+  
+  if(!is.null(epistasis)){
+    effects[['epistasis']] = epistasis.effects
+    for(i in 1:n.epi){
+      n.hap = length(attr(data@geno,"haplotypes"))
+      plot.data <- data.frame(x=rep(attr(data@geno,"haplotypes"),each=n.hap),
+                              y=rep(attr(data@geno,"haplotypes"),n.hap),
+                              z=c(effects$epistasis[,i]))
+      plots$epistasis[[i]] <- ggplot(data=plot.data,aes(x=.data$x,y=.data$y,fill=.data$z)) + 
+        geom_tile() + scale_fill_gradient2(name="") + 
+        labs(title = paste("Trait:", trait),
+             subtitle = "Epistasis") +
+        theme_bw() + xlab(epistasis[i,1]) + ylab(epistasis[i,2]) +
+        theme(text = element_text(size=13),axis.text.x = element_text(angle = 90,vjust=0.5,hjust=1)) +
+        coord_fixed(ratio=1)
+    }
+    names(plots$epistasis) = colnames(effects$epistasis)
   }
   return(list(deltaDIC=deltaDIC,resid=ans1$resid,
               var=return.var,effects=effects,plots=plots))
