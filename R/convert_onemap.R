@@ -2,13 +2,13 @@
 #' 
 #' Generate diaQTL input files from 'onemap_progeny_haplotypes' object class of OneMap R package (version >2.2.0)
 #' 
-#' @param onemap.object onemap_progeny_haplotypes object class
+#' @param data onemap_progeny_haplotypes object class
+#' @param digits how many rounding digits for the probabilities output (default=4)
 #' @param outstem prefix for the pedigree and genotype files for diaQTL
-#' @param conv.bp value to multiply cM of the map position to have in base pairs
 #' 
 #' @return NULL
 #' 
-#' #' @examples
+#' @examples
 #' \dontrun{
 #'     map <- list(LG1_final, LG2_final)
 #'     progeny_haplot <- onemap::progeny_haplotypes(map,
@@ -22,7 +22,6 @@
 
 convert_onemap <- function(data,
                            digits=4,
-                           conv.bp=10^6,
                            outstem=""){
   
   if(!("onemap_progeny_haplotypes" %in% class(data)))
@@ -48,13 +47,12 @@ convert_onemap <- function(data,
                     marker=data$marker,
                     chrom=data$grp,
                     cM=round(data$pos,digits),
-                    bp=round(data$pos,digits)*conv.bp,
                     prob=data$prob)
-  data = dcast(data, marker + chrom + cM + bp ~ ind, value.var="prob")
+  data = dcast(data, marker + chrom + cM ~ ind, value.var="prob")
   data = data[order(data$chrom,data$cM),]
   write.csv(data,file=paste0(outstem,"diaQTL_geno.csv"),row.names=F)
   
-  ped = data.frame(id=colnames(data)[-c(1:4)],
+  ped = data.frame(id=colnames(data)[-c(1:3)],
                    parent1="P1",
                    parent2="P2")
   write.csv(ped,file=paste0(outstem,"diaQTL_ped.csv"),row.names=F)
