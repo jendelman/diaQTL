@@ -1,3 +1,7 @@
+Changes in 1.00
+* Added epistasis to IBDmat
+* Renamed cofactor argument to covariate for scan1
+
 Changes in 0.99
 * Changed function name to convert_polyorigin
 * Renamed polyorigin slot as "input"

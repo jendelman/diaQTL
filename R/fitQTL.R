@@ -143,7 +143,7 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(bur
     if (length(chroms)==0) {
       stop("There are no chromosomes remaining for the polygenic effect.")
     }
-    polyG <- IBDmat(data=data,dominance=1,chrom=chroms) 
+    polyG <- IBDmat(data=data,dominance=0,chrom=chroms) 
   } else {
     polyG <- NULL
   }

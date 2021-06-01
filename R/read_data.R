@@ -141,22 +141,12 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,
     }
     return(geno)
   }
-  f2 <- function(ix,geno,ploidy) {
-    id <- attr(geno,"id")
-    n <- length(id)
-    K <- matrix(0,nrow=n,ncol=n)
-    dimnames(K) <- list(id,id)
-    m <- length(ix)
-    for (i in ix) {
-      K <- K + as.matrix(tcrossprod(geno[[i]][[1]]))
-    }
-    return(K/m/ploidy)
-  }
-  
+
   cl <- makeCluster(n.core)
   clusterExport(cl=cl,varlist=NULL)
-  
   geno <- parLapply(cl, bin.ix, f1, data=data,genoX=genoX,ploidy=ploidy,dominance=dominance)
+  stopCluster(cl)
+  
   #geno <- lapply(bin.ix,f1, data=data,genoX=genoX,ploidy=ploidy,dominance=dominance)
   names(geno) <- bin.names
   attr(geno,"id") <- id
@@ -165,17 +155,16 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,
     attr(geno,"diplotypes") <- attr(genoX,"diplotypes")
   }
   
-  ### additive relationship matrix for polygenic effects
-  map2 <- map[map$marker %in% bin.names,]
-  markers <- split(map2$marker,f=map2$chrom)
-  A <- parLapply(cl,markers,f2,geno=geno,ploidy=ploidy)
-  names(A) <- chroms
-  
-  stopCluster(cl)
-
   data <- new(Class="diallel_geno",ploidy=as.integer(ploidy),input=data[bin.ix,],Xa=genoX[[1]],
-              dominance=as.integer(dominance),X.GCA=X.GCA,map=map,geno=geno,A=A)
+              dominance=as.integer(dominance),X.GCA=X.GCA,map=map,geno=geno,A=vector("list",length=n.chrom))
   rownames(data@input) <- bin.names
+  names(data@A) <- chroms
+  
+  ## additive relationship matrix for polygenic effects
+  cat("Preparing for polygenic effects...\n")
+  for (i in 1:n.chrom) {
+    data@A[[i]] <- IBDmat(data=data,chrom=chroms[i],n.core=n.core,dominance=1)
+  }
   
   if (is.null(phenofile)) {
     return(data)

@@ -8,7 +8,7 @@
 #' @param n.permute Number of permutations
 #' @param chrom Names of chromosomes to scan (default is all)
 #' @param dominance Dominance degree (1-4)
-#' @param cofactor Optional name of marker to include as cofactor in the scan
+#' @param covariate optional, to include markers as covariates. See Details.
 #' @param n.core Number of cores for parallel execution
 #' 
 #' @return Data frame with maximum LOD and minimum deltaDIC for each iteration
@@ -32,7 +32,7 @@
 #' @export
 #' @importFrom Matrix Matrix
 
-scan1_permute <- function(data,trait,params,n.permute=1000,chrom=NULL,dominance=1,cofactor=NULL,n.core=1) {
+scan1_permute <- function(data,trait,params,n.permute=1000,chrom=NULL,dominance=1,covariate=NULL,n.core=1) {
   LOD <- deltaDIC <- numeric(n.permute)
   n <- nrow(data@pheno)
   for (i in 1:n.permute) {
@@ -40,7 +40,7 @@ scan1_permute <- function(data,trait,params,n.permute=1000,chrom=NULL,dominance=
     ix <- sample(1:n)
     data@pheno <- data@pheno[ix,]
     data@X <- Matrix(data@X[ix,])
-    ans <- scan1(data=data,trait=trait,params=params,chrom=chrom,dominance=dominance,cofactor=cofactor,n.core=n.core)
+    ans <- scan1(data=data,trait=trait,params=params,chrom=chrom,dominance=dominance,covariate=covariate,n.core=n.core)
     deltaDIC[i] <- min(ans$deltaDIC,na.rm=T)
   }
   return(data.frame(permutation=1:n.permute,min_deltaDIC=deltaDIC))

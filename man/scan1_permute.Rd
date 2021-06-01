@@ -11,7 +11,7 @@ scan1_permute(
   n.permute = 1000,
   chrom = NULL,
   dominance = 1,
-  cofactor = NULL,
+  covariate = NULL,
   n.core = 1
 )
 }
@@ -28,7 +28,7 @@ scan1_permute(
 
 \item{dominance}{Dominance degree (1-4)}
 
-\item{cofactor}{Optional name of marker to include as cofactor in the scan}
+\item{covariate}{optional, to include markers as covariates. See Details.}
 
 \item{n.core}{Number of cores for parallel execution}
 }

@@ -9,7 +9,7 @@ scan1(
   trait,
   params = list(burnIn = 100, nIter = 1000),
   dominance = 1,
-  cofactor = NULL,
+  covariate = NULL,
   chrom = NULL,
   n.core = 1
 )
@@ -23,7 +23,7 @@ scan1(
 
 \item{dominance}{maximum dominance for the scan, see Details}
 
-\item{cofactor}{optional data frame, see Details}
+\item{covariate}{optional, to include markers as covariates. See Details}
 
 \item{chrom}{names of chromosomes to scan (default is all)}
 
@@ -36,7 +36,7 @@ Data frame containing the map, LL, and deltaDIC.
 Performs a linear regression for each position in the map.
 }
 \details{
-Parameter \code{dominance} has possible values of 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. MCMC \code{params} can be estimated using \code{\link{set_params}}. Optional argument \code{cofactor} is used to include other markers in the model during the scan, which can improve statistical power with multiple QTL. It is a data frame with three columns: marker = name of the marker, dominance = 1 to 4, and epistasis = TRUE/FALSE. Function returns deltaDIC = DIC for the QTL model relative to null model with only GCA effects for the parents, as well as LL = posterior mean of the log-likelihood, which is used by \code{\link{BayesCI}}.
+Parameter \code{dominance} has possible values of 1 = additive, 2 = digenic dominance, 3 = trigenic dominance, 4 = quadrigenic dominance. MCMC \code{params} can be estimated using \code{\link{set_params}}. Optional argument \code{covariate} is used to include other markers in the model during the scan, which can improve statistical power with multiple QTL. It is a data frame with three columns: marker = name of the marker, dominance = 1 to 4, and epistasis = TRUE/FALSE. Function returns deltaDIC = DIC for the QTL model relative to null model with only GCA effects for the parents, as well as LL = posterior mean of the log-likelihood, which is used by \code{\link{BayesCI}}.
 }
 \examples{
 \dontrun{
