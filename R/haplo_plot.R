@@ -2,10 +2,10 @@
 #' 
 #' Plot parental haplotype dosages across the chromosome for one individual
 #' 
-#' For "cM" plotting, only one marker per bin is displayed. For "bp" plotting, all markers are included. If multiple individuals are included in \code{id}, then the plot shows the probability that a haplotype is present in all individuals. 
+#' For "cM" plotting, only one marker per bin is displayed. For "bp" plotting, all markers are included.
 #' 
 #' @param data Variable inheriting from class \code{\link{diallel_geno}}
-#' @param id Name of individual(s)
+#' @param id Name of individual
 #' @param chrom Name of chromosome
 #' @param position Either "cM" (default) or "bp"
 #' @param markers Optional, markers to indicate with dashed line
@@ -28,7 +28,7 @@
 #' @importFrom rlang .data
 
 haplo_plot <- function(data,id,chrom,position="cM",markers=NULL) {
-  #y=haplo=z=ymin=ymax=NULL #to avoid NOTE while doing R check
+  
   stopifnot(inherits(data,"diallel_geno"))
   stopifnot(position %in% colnames(data@map))
   stopifnot(chrom %in% data@map$chrom)
@@ -51,22 +51,13 @@ haplo_plot <- function(data,id,chrom,position="cM",markers=NULL) {
   haplotypes <- attr(data@geno,"haplotypes")
   tmp <- strsplit(split=".",x=haplotypes,fixed=T)
   founders <- sapply(tmp,function(x){x[1]})
-  parents <- lapply(id,function(id){unique(colnames(data@X.GCA)[data@X.GCA[id,] > 0])})
-  stopifnot(sapply(parents,function(z){all(z==parents[[1]])}))  #parents must be the same
-  
-  parents <- parents[[1]]
+  parents <- unique(colnames(data@X.GCA)[data@X.GCA[id,] > 0])
   n.par <- length(parents)
+  
   iq <- which(founders %in% parents[1])
   y1 <- 0:(data@ploidy-1)
   
-  geno <- haplo_get(data,id=id[1])
-  n <- length(id)
-  if (n > 1) {
-    for (k in 2:n) {
-      geno <- geno*haplo_get(data,id=id[k])
-    }
-  }
-  geno <- geno[marks,]
+  geno <- haplo_get(data,id=id)[marks,]
   plotme <- data.frame(z=as.vector(geno[,iq]),xmin=xmin,xmax=xmax,ymin=rep(y1,each=m),ymax=rep(y1+1,each=m))
   
   if (n.par==2) {
@@ -77,7 +68,7 @@ haplo_plot <- function(data,id,chrom,position="cM",markers=NULL) {
   }
   
   p <- ggplot(data=plotme) + geom_rect(aes(fill=.data$z,xmin=.data$xmin,xmax=.data$xmax,ymin=.data$ymin,ymax=.data$ymax)) + theme_bw() + scale_fill_distiller(name="Dosage",palette="Blues",direction=1) + scale_y_continuous(name="",labels=haplotypes[which(founders %in% parents)],breaks=(1:(data@ploidy*n.par))-0.5) + xlab(x.label) + geom_hline(yintercept=0:(data@ploidy*n.par),color="gray30")
-  id <- paste(id,collapse=" ")
+  
   if (!is.null(features)) {
     p <- p + labs(title = id,subtitle = paste(c("Markers:",features),collapse=" "))
     for (q in 1:length(features)) {
