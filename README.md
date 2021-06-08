@@ -15,7 +15,7 @@ illustrate the workflow using a sample potato dataset, and more detailed
 information is available in the [reference
 manual](https://jendelman.github.io/diaQTL/diaQTL_manual.pdf).
 
-Please cite our manuscript if you use the package. Financial support for this 
+Please [cite our manuscript](https://www.biorxiv.org/content/10.1101/2020.12.18.423479) if you use the package. Financial support for this 
 research comes from USDA NIFA Award No. 2019-67013-29166
 
 To install and load the package:
