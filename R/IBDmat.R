@@ -22,6 +22,7 @@
 #' 
 #' 
 #' @export
+#' @importFrom parallel makeCluster clusterExport stopCluster parLapply
 
 IBDmat <- function(data,dominance=1,epistasis=FALSE,
                    spacing=1,chrom=NULL,n.core=1) {
