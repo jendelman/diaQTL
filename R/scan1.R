@@ -70,8 +70,16 @@ scan1 <- function(data,trait,params=list(burnIn=100,nIter=1000),dominance=1,cova
       qtl <- data.frame(marker=marker,dominance=dominance)
       epistasis <- NULL
     }
+    folder <- paste0("tmp",marker)
+    ans <- try(setwd(folder),silent=T)
+    if(inherits(ans,"try-error")){
+      dir.create(folder)
+      setwd(folder)
+    }
     ans <- fitQTL(data=data,trait=trait,qtl=qtl,epistasis=epistasis,
                   polygenic=FALSE,params=params,CI.prob=-1)
+    setwd("..")
+    unlink(folder, recursive=TRUE)
     return(ans)
   }
   
