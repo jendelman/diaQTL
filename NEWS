@@ -1,3 +1,6 @@
+Changes in 1.01
+* Separate tmp directories used in scan1 to prevent problems with parallel execution on some machines
+
 Changes in 1.00
 * Added epistasis to IBDmat
 * Renamed cofactor argument to covariate for scan1
