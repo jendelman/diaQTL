@@ -142,12 +142,14 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,
     return(geno)
   }
 
-  cl <- makeCluster(n.core)
-  clusterExport(cl=cl,varlist=NULL)
-  geno <- parLapply(cl, bin.ix, f1, data=data,genoX=genoX,ploidy=ploidy,dominance=dominance)
-  stopCluster(cl)
-  
-  #geno <- lapply(bin.ix,f1, data=data,genoX=genoX,ploidy=ploidy,dominance=dominance)
+  if (n.core > 1) {
+    cl <- makeCluster(n.core)
+    clusterExport(cl=cl,varlist=NULL)
+    geno <- parLapply(cl, bin.ix, f1, data=data,genoX=genoX,ploidy=ploidy,dominance=dominance)
+    stopCluster(cl)
+  } else {
+    geno <- lapply(bin.ix,f1, data=data,genoX=genoX,ploidy=ploidy,dominance=dominance)
+  }
   names(geno) <- bin.names
   attr(geno,"id") <- id
   attr(geno,"haplotypes") <- attr(genoX,"haplotypes")
