@@ -3,8 +3,9 @@ citHeader("To cite the diaQTL package in publications, please use")
 citEntry(entry="Article",
 	title="QTL Mapping in Outbred Tetraploid (and Diploid) Diallel Populations",
 	author=personList(as.person("R. R. Amadeu"),as.person("P. R. Munoz"),as.person("C. Zheng"),as.person("J. B. Endelman")),
-	year=2020,
-	journal="bioRxiv",
-    pages="doi:10.1101/2020.12.18.423479",	
-    textVersion="Amadeu RR, Munoz PR, Zheng C, Endelman JB (2020) QTL Mapping in Outbred Tetraploid (and Diploid) Diallel Populations. bioRxiv, doi:10.1101/2020.12.18.423479"
+	year=2021,
+	journal="Genetics",
+	volume="219",
+    pages="doi:10.1093/genetics/iyab124",	
+    textVersion="Amadeu RR, Munoz PR, Zheng C, Endelman JB (2021) QTL Mapping in Outbred Tetraploid (and Diploid) Diallel Populations. Genetics 219(3), https://doi.org/10.1093/genetics/iyab124"
 )
