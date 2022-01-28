@@ -170,7 +170,7 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(bur
     return(ans1)
   } else {
     #null hypothesis
-    ans0 <- runBGLR(params=params,y=y,Xfix=data@X,Z=data@Z,Xgca=as.matrix(data@X.GCA),saveEffects=FALSE)
+    ans0 <- runBGLR(params=params,y=y,Xfix=data@X,Z=data@Z,Xgca=data@X.GCA,saveEffects=FALSE)
     #alternate hypothesis
     ans1 <- runBGLR(params=params,y=y,Xfix=data@X,Z=data@Z,Xqtl=Xqtl,Xaa=Xaa,polyG=polyG,saveEffects=TRUE)
   }
