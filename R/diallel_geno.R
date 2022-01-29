@@ -10,4 +10,4 @@
 #' @slot A list with the additive relationship matrix for each chromosome
 #' 
 #' @export
-diallel_geno <- setClass("diallel_geno",slots=c(ploidy="integer",input="Matrix",Xa="list",dominance="integer",X.GCA="Matrix",map="data.frame",geno="list",A="list"))
+diallel_geno <- setClass("diallel_geno",slots=c(ploidy="integer",input="matrix",Xa="list",dominance="integer",X.GCA="Matrix",map="data.frame",geno="list",A="list"))
