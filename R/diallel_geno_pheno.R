@@ -13,4 +13,4 @@
 #' @slot Z incidence matrix for individuals
 #' 
 #' @export
-diallel_geno_pheno <- setClass("diallel_geno_pheno",slots=c(pheno="data.frame",X="matrix",Z="matrix"),contains="diallel_geno")
+diallel_geno_pheno <- setClass("diallel_geno_pheno",slots=c(pheno="data.frame",X="Matrix",Z="Matrix"),contains="diallel_geno")
