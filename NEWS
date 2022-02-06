@@ -1,3 +1,7 @@
+Changes in 1.02
+* Matrix objects cast to base matrix class to prevent error with BGLR
+* Fixed error with dominance=1 in fitQTL
+
 Changes in 1.01
 * Separate tmp directories used in scan1 to prevent problems with parallel execution on some machines
 

@@ -186,11 +186,13 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(bur
   rownames(additive.effects) <- qtl$marker
   CI.lower <- CI.upper <- additive.effects
   
-  diplotypes <- attr(data@geno,"diplotypes")
-  n.diplo <- length(diplotypes)
-  digenic.effects <- matrix(as.numeric(NA),nrow=n.qtl,ncol=n.diplo)
-  colnames(digenic.effects) <- diplotypes
-  rownames(digenic.effects) <- qtl$marker
+  if (dominance > 1) {
+    diplotypes <- attr(data@geno,"diplotypes")
+    n.diplo <- length(diplotypes)
+    digenic.effects <- matrix(as.numeric(NA),nrow=n.qtl,ncol=n.diplo)
+    colnames(digenic.effects) <- diplotypes
+    rownames(digenic.effects) <- qtl$marker
+  }
     
   for (i in 1:n.qtl) {
     dominance <- qtl$dominance[i]
@@ -212,18 +214,21 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(bur
       digenic.effects[i,] <- apply(ans$qtl[[i]][[2]],2,mean)
     }
   }
-  diplo2 <- strsplit(diplotypes,split="+",fixed=T)
-  diplo2 <- data.frame(hap1=sapply(diplo2,function(x){x[1]}),hap2=sapply(diplo2,function(x){x[2]}))
   
-  #remove digenic effects between copies of the same haplotype unless that parent was selfed
-  max.dosage <- apply(data@X.GCA,2,max)
-  selfed <- setdiff(names(max.dosage),names(which(max.dosage==1)))
-  parent1 <- sapply(strsplit(diplo2[,1],split=".",fixed=T),"[",1)
-  keep <- which(diplo2[,1]!=diplo2[,2] | parent1 %in% selfed)
-  digenic.effects <- matrix(digenic.effects[,keep],nrow=n.qtl)
-  colnames(digenic.effects) <- diplotypes[keep]
-  rownames(digenic.effects) <- qtl$marker
-  diplo2 <- diplo2[keep,]
+  if (dominance > 1) {
+    diplo2 <- strsplit(diplotypes,split="+",fixed=T)
+    diplo2 <- data.frame(hap1=sapply(diplo2,function(x){x[1]}),hap2=sapply(diplo2,function(x){x[2]}))
+    
+    #remove digenic effects between copies of the same haplotype unless that parent was selfed
+    max.dosage <- apply(data@X.GCA,2,max)
+    selfed <- setdiff(names(max.dosage),names(which(max.dosage==1)))
+    parent1 <- sapply(strsplit(diplo2[,1],split=".",fixed=T),"[",1)
+    keep <- which(diplo2[,1]!=diplo2[,2] | parent1 %in% selfed)
+    digenic.effects <- matrix(digenic.effects[,keep],nrow=n.qtl)
+    colnames(digenic.effects) <- diplotypes[keep]
+    rownames(digenic.effects) <- qtl$marker
+    diplo2 <- diplo2[keep,]
+  }
   
   if (!is.null(epistasis)) {
     n.epi <- nrow(epistasis)
