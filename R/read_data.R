@@ -49,6 +49,9 @@ read_data <- function(genofile,ploidy=4,pedfile,phenofile=NULL,
   if ((dominance > 2) & (ploidy==2)) {
     stop("Only digenic dominance exists for diploids.")
   }
+  if(dominance==1){
+    dominance <- 2  
+  }
 
   data <- read.csv(genofile,as.is=T,check.names=F)
   cM <- grep("cM",colnames(data),fixed=T)
