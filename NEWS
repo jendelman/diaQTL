@@ -1,3 +1,6 @@
+Changes in 1.03
+* No longer assumes first column in phenotype file is named "id"
+
 Changes in 1.02
 * Matrix objects cast to base matrix class to prevent error with BGLR
 * Fixed error with dominance=1 in fitQTL
