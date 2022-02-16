@@ -186,7 +186,7 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(bur
   rownames(additive.effects) <- qtl$marker
   CI.lower <- CI.upper <- additive.effects
   
-  if (dominance > 1) {
+  if (data@dominance > 1) {
     diplotypes <- attr(data@geno,"diplotypes")
     n.diplo <- length(diplotypes)
     digenic.effects <- matrix(as.numeric(NA),nrow=n.qtl,ncol=n.diplo)
@@ -215,7 +215,7 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(bur
     }
   }
   
-  if (dominance > 1) {
+  if (data@dominance > 1) {
     diplo2 <- strsplit(diplotypes,split="+",fixed=T)
     diplo2 <- data.frame(hap1=sapply(diplo2,function(x){x[1]}),hap2=sapply(diplo2,function(x){x[2]}))
     

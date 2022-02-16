@@ -1,3 +1,6 @@
+Changes in 1.04
+* Fixed error introduced in 1.02 for fitQTL
+
 Changes in 1.03
 * No longer assumes first column in phenotype file is named "id"
 
