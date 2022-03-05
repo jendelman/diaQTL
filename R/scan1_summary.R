@@ -46,10 +46,19 @@ scan1_summary <- function(scan1_data,
   
   allchr <- unique(scan1_data$chrom)
   nchr <- length(allchr)
+  #if (statistic=="DIC") {
+    y.col <- "deltaDIC"
+    y.label <- "-\U0394 DIC"
+    y.sign <- -1
+  #} else {
+  #  y.col <- "LL"
+  #  y.label <- "LL"
+  #  y.sign <- 1
+  #}
   
   k <- integer(nchr)
   for (i in 1:nchr) {
-    y <- -scan1_data$deltaDIC
+    y <- y.sign * scan1_data[,y.col]
     y[scan1_data$chrom!=allchr[i]] <- NA
     k[i] <- which.max(y)
   }
@@ -57,21 +66,21 @@ scan1_summary <- function(scan1_data,
   p <- NULL
   if (nchr==1) {
     plotme <- data.frame(x=x,
-                         y=-scan1_data$deltaDIC,
+                         y=y.sign*scan1_data[,y.col],
                          chrom=scan1_data$chrom) 
     p <- ggplot(data=plotme,aes(x=.data$x,y=.data$y)) +
         geom_line(color="#440154") +
-        ylab("-\U0394 DIC") + 
+        ylab(y.label) + 
         theme_bw() +
         theme(text = element_text(size=13),panel.grid = element_blank()) +
         xlab(x.label)
   } else {
     col <- ifelse(as.integer(factor(scan1_data$chrom))%%2==1,"1","0")
     x <- get_x(map=data.frame(chrom=scan1_data$chrom,position=x,stringsAsFactors = F))
-    plotme <- data.frame(x=x,y=-scan1_data$deltaDIC,col=col)
+    plotme <- data.frame(x=x,y=y.sign*scan1_data[,y.col],col=col)
     breaks <- (tapply(x,scan1_data$chrom,max) + tapply(x,scan1_data$chrom,min))/2
     p <- ggplot(data=plotme,aes(x=.data$x,y=.data$y,colour=.data$col)) +
-        ylab("-\U0394 DIC") +
+        ylab(y.label) +
         theme_bw() +
         scale_x_continuous(name="Chromosome",breaks=breaks,labels=allchr) +
         scale_colour_manual(values=c("#21908c","#440154")) + 

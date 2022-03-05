@@ -83,10 +83,14 @@ scan1 <- function(data,trait,params=list(burnIn=100,nIter=1000),dominance=1,cova
     return(ans)
   }
   
-  cl <- makeCluster(n.core)
-  clusterExport(cl=cl,varlist=NULL)
-  ans1 <- parLapply(cl, unique(bins),f1,data=data,dominance=dominance,covariate=covariate,trait=trait,params=params)
-  stopCluster(cl)
+  if (n.core > 1) {
+    cl <- makeCluster(n.core)
+    clusterExport(cl=cl,varlist=NULL)
+    ans1 <- parLapply(cl, unique(bins),f1,data=data,dominance=dominance,covariate=covariate,trait=trait,params=params)
+    stopCluster(cl)
+  } else {
+    ans1 <- lapply(unique(bins),f1,data=data,dominance=dominance,covariate=covariate,trait=trait,params=params)
+  }
   
   fit <- data.frame(LL=as.numeric(sapply(ans1,function(x){x$LL})),deltaDIC=as.numeric(sapply(ans1,function(x){x$DIC})-ans0$DIC))
   return(data.frame(map[,1:(ncol(map)-1)],fit[match(bins,unique(bins)),],stringsAsFactors = F))

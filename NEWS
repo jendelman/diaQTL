@@ -1,3 +1,6 @@
+Changes in 1.05
+* Removed NA before running BGLR to avoid NA for DIC
+
 Changes in 1.04
 * Fixed error introduced in 1.02 for fitQTL
 
