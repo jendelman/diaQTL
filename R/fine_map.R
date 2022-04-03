@@ -61,7 +61,7 @@ fine_map <- function(data,haplotype,interval,trait=NULL,marker=NULL) {
   for (j in 1:n) {
     y <- haplo_get(data=data,id=id[j])
     y <- y[map$marker,haplotype]
-    if (min(y)==0 & max(y) >= 1) {
+    if (min(y)==0 & max(y) >= 0.95) {
       i <- i + 1
       hapans[i,] <- y
       id.ans <- append(id.ans,j)

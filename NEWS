@@ -1,3 +1,6 @@
+Changes in 1.06
+* null model for scan1 did not include the covariate; fixed now
+
 Changes in 1.05
 * Removed NA before running BGLR to avoid NA for DIC
 

@@ -50,7 +50,11 @@ scan1 <- function(data,trait,params=list(burnIn=100,nIter=1000),dominance=1,cova
   params <- list(response=response,nIter=max(params$nIter),burnIn=max(params$burnIn))
   
   #no marker model
-  ans0 <- runBGLR(params=params,y=y,Xfix=data@X,Z=data@Z,Xgca=data@X.GCA,saveEffects=FALSE)
+  if (!is.null(covariate)) {
+    ans0 <- fitQTL(data=data,trait=trait,qtl=covariate,polygenic=FALSE,params=params,CI.prob=-1)
+  } else {
+    ans0 <- runBGLR(params=params,y=y,Xfix=data@X,Z=data@Z,Xgca=data@X.GCA,saveEffects=FALSE)  
+  }
   
   #with marker
   map <- data@map[data@map$chrom %in% chrom,]
