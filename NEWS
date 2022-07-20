@@ -1,3 +1,6 @@
+Changes in 1.08
+* fixed error in convert_rabbit regarding parental haplotype naming
+
 Changes in 1.07
 * new function haplo_match to match up haplotypes between two phased parent files
 

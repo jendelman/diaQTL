@@ -46,9 +46,11 @@ convert_rabbit <- function(rabbit.outfile,ped.file,outstem) {
   tmp2 <- strsplit(tmp2,split=",",fixed=T)
   haplotypes <- sapply(tmp2,"[",1)
   parents <- unique(gsub("_Paternal","",gsub("_Maternal","",haplotypes)))
+  haplotypes <- gsub("Paternal","p",gsub("Maternal","m",haplotypes))
+
   ped$parent1 <- parents[ped$parent1]
   ped$parent2 <- parents[ped$parent2]
-  write.csv(ped,file=paste0(outstem,"diaQTL_ped.csv"),row.names=F)
+  write.csv(ped,file=paste(outstem,"diaQTL_ped.csv",sep="_"),row.names=F)
   
   #genotype file
   k <- min(grep("genotype",temp[ix],ignore.case=F))
@@ -61,22 +63,25 @@ convert_rabbit <- function(rabbit.outfile,ped.file,outstem) {
   #for each population, construct mapping from geno.code to diaQTL codes
   genotypes <- vector("list",n.pop)
   names(genotypes) <- uni.pop
+  i=1
+  F1code <- expand.grid(3:4,1:2)[,c(2,1)]
+  S1code <- rbind(c(1,1),c(1,2),c(2,2))
+    
   for (i in 1:n.pop) {
     j <- match(uni.pop[i],pop)
-    tmp2 <- c(parent1[j],parent2[j])
-    p1 <- max(tmp2)
-    p2 <- setdiff(tmp2,p1)
-    p1.1 <- 2*(p1-1)+1
-    p1.2 <- p1.1 + 1
-    if (length(p2)>0) {
-      p2.1 <- 2*(p2-1)+1
-      p2.2 <- p2.1 + 1
-      tmp2 <- c(paste(p1.1,p2.1,sep="|"),paste(p1.1,p2.2,sep="|"),
-                paste(p1.2,p2.1,sep="|"),paste(p1.2,p2.2,sep="|"))
+    p1 <- parents[parent1[j]]
+    p2 <- parents[parent2[j]]
+    
+    if (p1!=p2) {
+      q <- match(c(paste(p1,c("m","p"),sep="_"),paste(p2,c("m","p"),sep="_")),
+                 haplotypes)
+      tmp2 <- cbind(q[F1code[,1]],q[F1code[,2]])
     } else {
-      tmp2 <- c(paste(p1.1,p1.1,sep="|"),paste(p1.1,p1.2,sep="|"),paste(p1.2,p1.2,sep="|"))
+      q <- match(paste(p1,c("m","p"),sep="_"),haplotypes)
+      tmp2 <- cbind(q[S1code[,1]],q[S1code[,2]])
     }
-    genotypes[[i]] <- match(geno.code,tmp2)
+    tmp3 <- apply(tmp2,1,function(z){paste(sort(z,decreasing=T),collapse="|")})
+    genotypes[[i]] <- match(geno.code,tmp3)
   }
 
   k <- grep("genoprob",temp[ix],ignore.case=F)
@@ -97,5 +102,5 @@ convert_rabbit <- function(rabbit.outfile,ped.file,outstem) {
                          paste(z[[j]][ix],collapse="|"),sep="=>")
     }
   }
-  write.csv(cbind(map,out1),file=paste0(outstem,"diaQTL_geno.csv"),row.names=F)
+  write.csv(cbind(map,out1),file=paste(outstem,"diaQTL_geno.csv",sep="_"),row.names=F)
 }
