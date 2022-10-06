@@ -70,7 +70,7 @@ phased_parents <- function(filename,interval,markers,parents) {
   tmp2 <- NULL
   haplotypes <- NULL
   for (i in 1:n.parents) {
-    tmp <- pivot_longer(data.frame(y=map2$y3,ans[[i]]),cols=2:5,names_to="haplotype")
+    tmp <- pivot_longer(data.frame(y=map2$y3,ans[[i]]),cols=2:(ploidy+1),names_to="haplotype")
     tmp$x <- (as.integer(factor(tmp$haplotype))-1)/2 + 5.2 + (i-1)*ploidy/2
     tmp2 <- rbind(tmp2,tmp)
     haplotypes <- c(haplotypes,paste(parents[i],1:ploidy,sep="."))

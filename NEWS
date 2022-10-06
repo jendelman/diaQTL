@@ -1,3 +1,6 @@
+Changes in 1.09
+* fixed bug in phased_parents for diploids
+
 Changes in 1.08
 * fixed error in convert_rabbit regarding parental haplotype naming
 
