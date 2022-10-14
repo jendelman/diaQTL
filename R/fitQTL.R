@@ -251,14 +251,18 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(bur
   }  
   if (params$response=="gaussian") {
     variances <- cbind(variances,residual=ans$resid)
+    h2 <- variances/apply(variances,1,sum)
+  } else {
+    y2 <- as.integer(y)-1
+    R2 <- 1 - sum(ans1$resid^2,na.rm=T)/sum((y2-mean(y2,na.rm=T))^2,na.rm=T)
+    h2 <- variances/apply(variances,1,sum)*R2
   }
   
   if (set.params) {
     return(variances)
   }
   
-  h2 <- variances/apply(variances,1,sum)
-  if (!is.null(CI.prob)) {
+  if (!is.null(CI.prob) & response=="gaussian") {
     tmp <- apply(h2,2,quantile,p=c(0.5-CI.prob/2,0.5+CI.prob/2))
     return.var <- cbind(Mean=round(apply(h2,2,mean),2),CI.lower=round(tmp[1,],2),CI.upper=round(tmp[2,],2))
   } else {

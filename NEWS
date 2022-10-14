@@ -1,3 +1,6 @@
+Changes in 1.10
+* Fixed h2 output for binary traits
+
 Changes in 1.09
 * fixed bug in phased_parents for diploids
 
