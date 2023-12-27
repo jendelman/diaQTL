@@ -27,7 +27,7 @@ convert_onemap <- function(data,
   if(!("onemap_progeny_haplotypes" %in% class(data)))
     stop("data should be from 'onemap_progeny_haplotypes' class. Use 'progeny_haplotypes' function to create such object (OneMap > v2.2.0)")
   
-  data$haplotypes = paste0(data$parents,data$homologs)
+  data$haplotypes = paste0(data$parents,data$parents.homologs)
   data = dcast(data, ind + marker + grp + pos ~ haplotypes, value.var="prob")
   data$G1 = round(data$P1H1*data$P2H1,digits)
   data$G2 = round(data$P1H1*data$P2H2,digits)
@@ -36,7 +36,8 @@ convert_onemap <- function(data,
   
   ## removing the 0s at the end
   check = data$G1+data$G2+data$G3+data$G4
-  data = data[-which(check==0),]
+  if(length(which(check==0)) > 0)
+    data = data[-which(check==0),]
   
   data$prob = paste0("1|2|3|4=>",
                      format(data$G1,scientific=FALSE),"|",
