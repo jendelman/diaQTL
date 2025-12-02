@@ -1,3 +1,6 @@
+Changes in 1.11
+* Fixed numerical underflow error in BayesCI, and now only first/last marker returned
+
 Changes in 1.10
 * Fixed h2 output for binary traits
 

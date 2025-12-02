@@ -16,7 +16,7 @@ BayesCI(scan1_data, data, chrom, CI.prob = 0.9)
 \item{CI.prob}{probability for the credible interval}
 }
 \value{
-subset of scan1_data with markers in the CI
+first and last marker in the CI
 }
 \description{
 Bayesian Credible Interval for QTL position
