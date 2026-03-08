@@ -1,3 +1,6 @@
+Changes in 1.12
+* Updated convert_polyorigin to handle PolyOrigin version 2
+
 Changes in 1.11
 * Fixed numerical underflow error in BayesCI, and now only first/last marker returned
 
