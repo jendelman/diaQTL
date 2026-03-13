@@ -35,7 +35,7 @@ List containing
 \item{deltaDIC}{DIC relative to model with GCA but no QTL effects}
 \item{resid}{residuals}
 \item{var}{matrix with proportion of variance for the effects}
-\item{effects}{list with two matrices, \code{additive} and \code{digenic}, with markers on the rows and effects on the columns}
+\item{effects}{list with two 3D arrays, \code{additive} and \code{digenic}, with Mean,CI.lower,CI.upper}
 \item{plots}{list of ggplot objects, one for each marker, containing elements \code{additive} and \code{digenic}. The digenic plot has digenic effects above the diagonal and the sum of additive and digenic effects below the diagonal.}
 }
 }

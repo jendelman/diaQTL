@@ -1,3 +1,6 @@
+Changes in 1.13
+* fitQTL now returns CI for the additive and digenic effects
+
 Changes in 1.12
 * Updated convert_polyorigin to handle PolyOrigin version 2
 

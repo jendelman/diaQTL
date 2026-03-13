@@ -25,7 +25,7 @@
 #' \item{deltaDIC}{DIC relative to model with GCA but no QTL effects}
 #' \item{resid}{residuals}
 #' \item{var}{matrix with proportion of variance for the effects}
-#' \item{effects}{list with two matrices, `additive` and `digenic`, with markers on the rows and effects on the columns}
+#' \item{effects}{list with two 3D arrays, `additive` and `digenic`, with Mean,CI.lower,CI.upper}
 #' \item{plots}{list of ggplot objects, one for each marker, containing elements `additive` and `digenic`. The digenic plot has digenic effects above the diagonal and the sum of additive and digenic effects below the diagonal.}
 #' }
 #' @examples
@@ -101,7 +101,8 @@
 #' @importFrom BGLR readBinMat
 #' @importFrom rlang .data
 
-fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(burnIn=100,nIter=5000),CI.prob=0.9) {
+fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,
+                   params=list(burnIn=100,nIter=5000),CI.prob=0.9) {
   
   stopifnot(inherits(data,"diallel_geno_pheno"))
   stopifnot(trait %in% colnames(data@pheno))
@@ -181,17 +182,22 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(bur
   variances <- NULL
   haplotypes <- attr(data@geno,"haplotypes")
   n.hap <- length(haplotypes)
-  additive.effects <- matrix(as.numeric(NA),nrow=n.qtl,ncol=n.hap)
-  colnames(additive.effects) <- haplotypes
-  rownames(additive.effects) <- qtl$marker
-  CI.lower <- CI.upper <- additive.effects
+  #additive.effects <- matrix(as.numeric(NA), nrow=n.qtl, ncol=n.hap)
+  additive.effects <- array(as.numeric(NA), 
+                            dim=c(n.qtl,n.hap,3),
+                            dimnames=list(qtl$marker,haplotypes,c("Mean","Lower.CI","Upper.CI")))
+  #colnames(additive.effects) <- haplotypes
+  #rownames(additive.effects) <- qtl$marker
+  #CI.lower <- CI.upper <- additive.effects
   
   if (data@dominance > 1) {
     diplotypes <- attr(data@geno,"diplotypes")
     n.diplo <- length(diplotypes)
-    digenic.effects <- matrix(as.numeric(NA),nrow=n.qtl,ncol=n.diplo)
-    colnames(digenic.effects) <- diplotypes
-    rownames(digenic.effects) <- qtl$marker
+    #digenic.effects <- matrix(as.numeric(NA),nrow=n.qtl,ncol=n.diplo)
+    #colnames(digenic.effects) <- diplotypes
+    #rownames(digenic.effects) <- qtl$marker
+    digenic.effects <- array(as.numeric(NA),dim=c(n.qtl,n.diplo,3),
+                             dimnames=list(qtl$marker,diplotypes,c("Mean","Lower.CI","Upper.CI")))
   }
     
   for (i in 1:n.qtl) {
@@ -204,14 +210,22 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(bur
     variances <- cbind(variances,tmp)
     
     ## additive and digenic effects
-    additive.effects[i,] <- apply(ans$qtl[[i]][[1]],2,mean)
+    additive.effects[i,,1] <- apply(ans$qtl[[i]][[1]],2,mean)
+    if (dominance > 1) {
+      digenic.effects[i,,1] <- apply(ans$qtl[[i]][[2]],2,mean)
+    }
+    
     if (!is.null(CI.prob)) {
       tmp2 <- apply(ans$qtl[[i]][[1]],2,quantile,p=c(0.5-CI.prob/2,0.5+CI.prob/2))
-      CI.lower[i,] <- tmp2[1,]
-      CI.upper[i,] <- tmp2[2,]
-    }
-    if (dominance > 1) {
-      digenic.effects[i,] <- apply(ans$qtl[[i]][[2]],2,mean)
+      additive.effects[i,,2] <- tmp2[1,]
+      additive.effects[i,,3] <- tmp2[2,]
+      #CI.lower[i,] <- tmp2[1,]
+      #CI.upper[i,] <- tmp2[2,]
+      if (dominance > 1) {
+        tmp2 <- apply(ans$qtl[[i]][[2]],2,quantile,p=c(0.5-CI.prob/2,0.5+CI.prob/2))
+        digenic.effects[i,,2] <- tmp2[1,]
+        digenic.effects[i,,3] <- tmp2[2,]
+      }
     }
   }
   
@@ -224,9 +238,10 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(bur
     selfed <- setdiff(names(max.dosage),names(which(max.dosage==1)))
     parent1 <- sapply(strsplit(diplo2[,1],split=".",fixed=T),"[",1)
     keep <- which(diplo2[,1]!=diplo2[,2] | parent1 %in% selfed)
-    digenic.effects <- matrix(digenic.effects[,keep],nrow=n.qtl)
-    colnames(digenic.effects) <- diplotypes[keep]
-    rownames(digenic.effects) <- qtl$marker
+    #digenic.effects <- matrix(digenic.effects[,keep],nrow=n.qtl)
+    #colnames(digenic.effects) <- diplotypes[keep]
+    #rownames(digenic.effects) <- qtl$marker
+    digenic.effects <- digenic.effects[,keep,,drop=FALSE]
     diplo2 <- diplo2[keep,]
   }
   
@@ -264,7 +279,9 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(bur
   
   if (!is.null(CI.prob) & response=="gaussian") {
     tmp <- apply(h2,2,quantile,p=c(0.5-CI.prob/2,0.5+CI.prob/2))
-    return.var <- cbind(Mean=round(apply(h2,2,mean),2),CI.lower=round(tmp[1,],2),CI.upper=round(tmp[2,],2))
+    return.var <- cbind(Mean=round(apply(h2,2,mean),2),
+                        CI.lower=round(tmp[1,],2),
+                        CI.upper=round(tmp[2,],2))
   } else {
     return.var <- cbind(Mean=round(apply(h2,2,mean),2))
   }
@@ -281,8 +298,9 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(bur
     parents <- sapply(tmp,"[",1)
     hap.num <- as.integer(sapply(tmp,"[",2))
     plot.data <- data.frame(parent=factor(parents),x=hap.num,
-                            mean=additive.effects[i,],
-                            CI.lower=CI.lower[i,],CI.upper=CI.upper[i,])
+                            mean=additive.effects[i,,1],
+                            CI.lower=additive.effects[i,,2],
+                            CI.upper=additive.effects[i,,3])
     plots[[i]]$additive <- ggplot(data=plot.data,aes(x=.data$x,y=.data$mean)) + 
       labs(title = paste("Trait:", trait),subtitle = paste("Marker:", qtl$marker[i])) + 
       theme_bw() + 
@@ -296,8 +314,9 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(bur
     }
     
     if (dominance > 1) {
-      plot.data <- data.frame(x=c(diplo2$hap1,diplo2$hap2),y=c(diplo2$hap2,diplo2$hap1),
-                              z=c(digenic.effects[i,],digenic.effects[i,]+additive.effects[i,diplo2$hap1]+additive.effects[i,diplo2$hap2]))
+      plot.data <- data.frame(x=c(diplo2$hap1,diplo2$hap2),
+                              y=c(diplo2$hap2,diplo2$hap1),
+                              z=c(digenic.effects[i,,1],digenic.effects[i,,1]+additive.effects[i,diplo2$hap1,1]+additive.effects[i,diplo2$hap2,1]))
       plot.data <- plot.data[!duplicated(plot.data[,1:2]),]
       plots[[i]]$digenic <- ggplot(data=plot.data,aes(x=.data$x,y=.data$y,fill=.data$z)) + 
         geom_tile() + scale_fill_gradient2(name="") + 
@@ -310,9 +329,9 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(bur
   }
   
   if (max(qtl$dominance)>1) {
-    effects <- list(additive=t(additive.effects),digenic=t(digenic.effects))
+    effects <- list(additive=additive.effects, digenic=digenic.effects)
   } else {
-    effects <- list(additive=t(additive.effects))
+    effects <- list(additive=additive.effects)
   }
   
   if(!is.null(epistasis)){
@@ -332,7 +351,7 @@ fitQTL <- function(data,trait,qtl,epistasis=NULL,polygenic=FALSE,params=list(bur
     }
     names(plots$epistasis) = colnames(effects$epistasis)
   }
-  return(list(deltaDIC=deltaDIC,resid=ans1$resid,
-              var=return.var,effects=effects,plots=plots))
+  return(list(deltaDIC=deltaDIC, resid=ans1$resid,
+              var=return.var, effects=effects, plots=plots))
 }
 
